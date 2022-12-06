@@ -72,3 +72,8 @@
 .imgContainer {
   float: left;
 }
+
+
+.title{
+    display: none;
+}
