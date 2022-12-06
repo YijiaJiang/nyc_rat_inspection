@@ -2,10 +2,9 @@ name: "Website Setting"
 output_dir: "."
 navbar:
   title: "NYC Rat Inspection"
-  type: inverse
   right:
-    - text: "Proposal"
-      href: proposal.html
+    - text: "Report"
+      href: report.html
     - text: "Exploratory Data Analysis"
       href: exploratory_data_analysis.html
     - text: "Statistical Analysis"

@@ -5,13 +5,14 @@ output:
     toc_float: true
 ---
 
-```{r, include = FALSE}
+```{r,include=FALSE}
 library(tidyverse)
 ```
 
+
 &nbsp;
 
-### The Group Members (Names and UNIs) 
+### The Group Members 
 - Jia Ji (jj3205)
 - Yijia Jiang (yj2687)
 - Gonghao Liu (gl2716)
@@ -53,6 +54,7 @@ We intend to mainly use three datasets: <br>
 &nbsp;
  
 ### Planned Analysis / Visualizations / Coding challenges
+
 #### Planned Analysis
   - Analyze climatic and geographical characteristics, and results of rat inspection
   - Compare the number of rat inspection cases across years
@@ -60,6 +62,8 @@ We intend to mainly use three datasets: <br>
   - Evaluate the efficiency in handling rat related complaints among different agencies 
   - Conduct hypothesis test to compare the rat density in different boroughs and time
   - Construct a linear model that predicts the rate of observing a rat from various potential covariates, including climatic and geographical factors
+
+&nbsp;
 
 #### Visualizations
   - Visualize rat activities 
@@ -72,6 +76,8 @@ We intend to mainly use three datasets: <br>
   - Construct interactive maps for rat inspection cases
   - Compare the performance among different agencies in dealing with rat issues (boxplot)
   - Make correlation matrix, PCA plot to check colinearity and to simplify the complexity in high-dimensional data in modeling section
+
+&nbsp;
 
 #### Coding challenges 
   -  Dealing with latitude and longitude variables
@@ -95,3 +101,5 @@ tibble(
         ) %>% 
         knitr::kable()
 ```
+
+&nbsp;
