@@ -1,14 +1,12 @@
 name: "Website Setting"
 output_dir: "."
 navbar:
-  title: "Home"
+  title: "NYC Rat Inspection"
   type: inverse
-    right:
-    - text: "About"
-      href: about.html
-    - text: "Report"
-      href: report.html
-    - text: "Exploratorty Data Analysis"
+  right:
+    - text: "Proposal"
+      href: proposal.html
+    - text: "Exploratory Data Analysis"
       href: exploratory_data_analysis.html
     - text: "Statistical Analysis"
       href: statistical_analysis.html
@@ -17,13 +15,12 @@ navbar:
     - text: "Dashboard"
       href: dashboard.html
     - text: "Shiny App"
-      href: dashboard.html
-    - icon: fa-envelope fa-lg
-      href: mailto:<yj2684@cumc.columbia.edu>
+      href: index.html
     - icon: fa-play-circle fa-lg
-      href: https://www.youtube.com/
+      href: https://youtube.com
     - icon: fa-github fa-lg
-      href: https://github.com/YijiaJiang
+      href: https://github.com/YijiaJiang/nyc_rat_inspection
+
 output:
   html_document:
     theme: 

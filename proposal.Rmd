@@ -1,13 +1,15 @@
 ---
-title: "Proposal"
 output: 
   html_document:
-    toc: false
+    toc: true
+    toc_float: true
 ---
 
 ```{r, include = FALSE}
 library(tidyverse)
 ```
+
+&nbsp;
 
 ### The Group Members (Names and UNIs) 
 - Jia Ji (jj3205)

@@ -1,10 +1,6 @@
 ---
-title: "NYC Rat Inspection"
 output: 
   html_document:
     toc: false
 ---
 
-&nbsp;
-
-<img src="images/photo.jpeg" style="width:50%; margin: 0px 20px 0px 0px" align="left">

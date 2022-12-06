@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>proposal.knit</title>
+
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<link href="site_libs/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-5.2.2/bootstrap.bundle.min.js"></script>
+<script src="site_libs/bs3compat-0.4.0.9900/transition.js"></script>
+<script src="site_libs/bs3compat-0.4.0.9900/tabs.js"></script>
+<script src="site_libs/bs3compat-0.4.0.9900/bs3compat.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">NYC Rat Inspection</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="proposal.html">Proposal</a>
+</li>
+<li>
+  <a href="exploratory_data_analysis.html">Exploratory Data Analysis</a>
+</li>
+<li>
+  <a href="statistical_analysis.html">Statistical Analysis</a>
+</li>
+<li>
+  <a href="regression_analysis.html">Regression Analysis</a>
+</li>
+<li>
+  <a href="dashboard.html">Dashboard</a>
+</li>
+<li>
+  <a href="index.html">Shiny App</a>
+</li>
+<li>
+  <a href="https://youtube.com">
+    <span class="fa fa-play-circle fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://github.com/YijiaJiang/nyc_rat_inspection">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+
+</div>
+
+
+<p> </p>
+<div id="the-group-members-names-and-unis" class="section level3">
+<h3>The Group Members (Names and UNIs)</h3>
+<ul>
+<li>Jia Ji (jj3205)</li>
+<li>Yijia Jiang (yj2687)</li>
+<li>Gonghao Liu (gl2716)</li>
+<li>Yifei Xu (yx2638)</li>
+<li>Ziyan Xu (zx2373)</li>
+</ul>
+<p> </p>
+</div>
+<div id="the-tentative-project-title" class="section level3">
+<h3>The Tentative Project Title</h3>
+<p>Have You Ever Seen Rats in NYC?</p>
+<p> </p>
+</div>
+<div id="motivation" class="section level3">
+<h3>Motivation</h3>
+<p>One of our team members and her friends were finishing an outdoor
+dinner in Chelsea recently when, from the corner of her eye, she saw
+something move near the edge of their table: A rat had been on the
+table. Rats are among New York’s permanent features and across the city,
+one hears the same thing: they are running amok like never before. Rats
+in NYC are almost everywhere, in the park, on your block and even at
+your table.</p>
+<p>Our dataset contains some information on rat inspection, which is
+provided by the Rat Information Portal (RIP) to do research on evidence
+of rat activities. Gaining deeper sights into the pattern of rat
+inspections in both the temporal and spatial dimensions will help those
+in fear of rats minimize exposure as much as possible. Broadly, it is
+beneficial to identify potential risks of disease-spread and then build
+a clean and pleasant living environment, which is what we as public
+health students should be working towards.</p>
+<p> </p>
+</div>
+<div id="anticipated-data-sources" class="section level3">
+<h3>Anticipated Data Sources</h3>
+<p>We intend to mainly use three datasets: <br></p>
+<ul>
+<li>Rodent inspection data from <a
+href="https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj">NYC
+Open Data</a> <br></li>
+<li>Rat related complaint data from 311 Service Requests via <a
+href="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9">NYC
+Open Data</a> <br></li>
+<li>NYC daily weather data from <a
+href="https://www.weather.gov/wrh/climate?wfo=okx">National Weather
+Service</a></li>
+</ul>
+<p> </p>
+</div>
+<div id="intended-final-product" class="section level3">
+<h3>Intended Final Product</h3>
+<ul>
+<li>A website containing many pages, which will deliver rat sighting
+analysis in NYC and give recommendations on locations to avoid
+encountering rats</li>
+<li>A report summarizing the spatial analysis, temporal changes, and
+potential relation to other factors of the distribution of rats in
+NYC</li>
+<li>A Shiny App predicting rat sighting in specific locations and times
+within NYC</li>
+</ul>
+<p> </p>
+</div>
+<div id="planned-analysis-visualizations-coding-challenges"
+class="section level3">
+<h3>Planned Analysis / Visualizations / Coding challenges</h3>
+<div id="planned-analysis" class="section level4">
+<h4>Planned Analysis</h4>
+<ul>
+<li>Analyze climatic and geographical characteristics, and results of
+rat inspection</li>
+<li>Compare the number of rat inspection cases across years</li>
+<li>Explore the trend in the number of rat inspections throughout the
+years</li>
+<li>Evaluate the efficiency in handling rat related complaints among
+different agencies</li>
+<li>Conduct hypothesis test to compare the rat density in different
+boroughs and time</li>
+<li>Construct a linear model that predicts the rate of observing a rat
+from various potential covariates, including climatic and geographical
+factors</li>
+</ul>
+</div>
+<div id="visualizations" class="section level4">
+<h4>Visualizations</h4>
+<ul>
+<li>Visualize rat activities
+<ul>
+<li>at different times in a day (line chart)</li>
+<li>in different seasons (bar chart)</li>
+<li>in different locations (boxplot)</li>
+<li>in terms of temperatures (heatmap)</li>
+</ul></li>
+<li>Visualize the results of rat inspection (pie chart)</li>
+<li>Visualize the trend of rat inspection over years (line chart)</li>
+<li>Construct interactive maps for rat inspection cases</li>
+<li>Compare the performance among different agencies in dealing with rat
+issues (boxplot)</li>
+<li>Make correlation matrix, PCA plot to check colinearity and to
+simplify the complexity in high-dimensional data in modeling
+section</li>
+</ul>
+</div>
+<div id="coding-challenges" class="section level4">
+<h4>Coding challenges</h4>
+<ul>
+<li>Dealing with latitude and longitude variables</li>
+<li>Many missing values in certain variables</li>
+<li>Interactive maps for overall rat inspection cases</li>
+<li>Need to carefully quantify the value to evaluate the efficiency of
+handling rat related complaints</li>
+<li>Multiple hypotheses or multiple comparisons when hypothesis
+testing</li>
+<li>Need to preprocess the data for each year and location before
+modeling</li>
+<li>Need to specify inspection type when constructing the linear
+model</li>
+<li>Shiny App to predict rat sightings in specific locations and times
+(according to the user’s choice)</li>
+</ul>
+<p> </p>
+</div>
+</div>
+<div id="planned-timeline" class="section level3">
+<h3>Planned Timeline</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Time</th>
+<th align="left">Task</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Nov 13 - Nov 18</td>
+<td align="left">Project review meeting</td>
+</tr>
+<tr class="even">
+<td align="left">Nov 19 - Nov 22</td>
+<td align="left">Data preprocessing</td>
+</tr>
+<tr class="odd">
+<td align="left">Nov 23 - Nov 27</td>
+<td align="left">Exploratory data analysis</td>
+</tr>
+<tr class="even">
+<td align="left">Nov 28 - Dec 2</td>
+<td align="left">Statistical analysis (hypothesis test and
+modeling)</td>
+</tr>
+<tr class="odd">
+<td align="left">Dec 3 - Dec 10</td>
+<td align="left">Work on report, webpage and screencast</td>
+</tr>
+<tr class="even">
+<td align="left">Dec 15</td>
+<td align="left">In-class discussion of projects</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
