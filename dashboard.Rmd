@@ -73,7 +73,7 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
 
 ```
 
-Column {data-width=500}
+Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### Chart A: Time Series of NYC Rat Inspections
@@ -94,16 +94,17 @@ hchart(time_series, name = "Rat Sightings") %>%
 
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
-  mutate(borough = as.factor(borough)) %>% 
-  group_by(inspection_year, borough) %>%
+  mutate(borough = as.factor(borough)) %>%
+  rename(Year = inspection_year) %>%
+  group_by(Year, borough) %>%
   summarise(n_obs = n()) %>%
-  plot_ly(x = ~borough, y = ~n_obs, color = ~borough, frame = ~inspection_year, type = "bar", alpha = 0.7) %>%
+  plot_ly(x = ~borough, y = ~n_obs, color = ~borough, frame = ~Year, type = "bar", alpha = 0.7) %>%
   layout(xaxis = list(title = "Borough"), 
          yaxis = list(title = "Number of Inspections")) %>%
   hide_legend()
 ```
 
-Column {data-width=500}
+Column {data-width=400}
 -----------------------------------------------------------------------
 
 ### Chart C: Distribution of Rat Inspection Type
