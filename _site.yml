@@ -7,7 +7,7 @@ navbar:
     - text: "Proposal"
       href: proposal.html
     - text: "Exploratory Data Analysis"
-      href: exploratory_data_anaysis.html
+      href: exploratory_data_analysis.html
     - text: "Statistical Analysis"
       href: statistical_analysis.html
     - text: "Regression Analysis"
