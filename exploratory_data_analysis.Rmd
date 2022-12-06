@@ -6,8 +6,286 @@ output:
     toc_float: 
       toc_collapsed: true
     toc_depth: 5
-    code_folding: hide
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(plotly)
+library(highcharter)
+library(xts)
+library(rgdal)
+library(leaflet)
+library(leaflet.extras)
+```
+
+
+First, read in the dataset
+```{r, message=FALSE}
+url_2012 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv"
+rat_2012 = read_csv(url(url_2012)) 
+
+url_2013 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2013.csv"
+rat_2013 = read_csv(url(url_2013)) 
+
+url_2014 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2014.csv"
+rat_2014 = read_csv(url(url_2014)) 
+
+url_2015 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2015.csv"
+rat_2015 = read_csv(url(url_2015)) 
+
+url_2016 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2016.csv"
+rat_2016 = read_csv(url(url_2016)) 
+
+url_2017 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2017.csv"
+rat_2017 = read_csv(url(url_2017)) 
+
+url_2018 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv"
+rat_2018 = read_csv(url(url_2018)) 
+
+url_2019 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv"
+rat_2019 = read_csv(url(url_2019)) 
+
+url_2020 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv"
+rat_2020 = read_csv(url(url_2020)) 
+
+url_2021 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv"
+rat_2021 = read_csv(url(url_2021)) 
+
+rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
+  select(-...1) %>%
+   mutate(inspection_month_n = recode(inspection_month, 
+                                   "Jan" = 1,
+                                   "Feb" = 2,
+                                   "Mar" = 3,
+                                   "Apr" = 4,
+                                   "May" = 5,
+                                   "Jun" = 6,
+                                   "Jul" = 7,
+                                   "Aug" = 8,
+                                   "Sep" = 9,
+                                   "Oct" = 10,
+                                   "Nov" = 11,
+                                   "Dec" = 12)) %>%
+  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
+  mutate(date = as.Date(date,format = "%Y-%m-%d"))
+
+```
+
+Time series
+
+```{r}
+by_date = rat %>% 
+  group_by(date) %>% 
+  summarise(Total = n())
+
+time_series = xts(by_date$Total , order.by= by_date$date)
+
+hchart(time_series, name = "Rat Sightings") %>% 
+  #hc_add_theme(hc_theme_sandsignika()) %>%
+  hc_credits(enabled = TRUE, text = "Sources: City of New York", style = list(fontSize = "12px")) %>%
+  hc_title(text = "Time Series of NYC Rat Sightings") %>%
+  hc_legend(enabled = TRUE)
+```
+
+Plot 1: Number of Rat Inspections by year
+
+```{r}
+rat %>%
+  mutate(inspection_year = as.factor(inspection_year)) %>%
+  group_by(inspection_year) %>%
+  summarise(n_obs = n()) %>%
+  plot_ly(x = ~inspection_year, y = ~n_obs, type = "scatter", mode = "lines+markers") %>%
+  layout(xaxis = list(title = "Inspection Year"), 
+         yaxis = list(title = "Number of Inspections"),
+         title = "Number of Rat Inspections by Year") 
+```
+
+Plot 2: Number of Rat Inspections by Month
+
+```{r}
+rat %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_obs = n()) %>%
+  plot_ly(x = ~inspection_month, y = ~n_obs, type = "box",
+          color = ~inspection_month) %>%
+  layout(xaxis = list(title = "Inspection Month"), 
+         yaxis = list(title = "Number of Inspections"),
+         title = "Number of Rat Inspections by Month") %>%
+  hide_legend()
+```
+
+Plot 3: Number of Rat Inspections Throughout a Day in 2021
+
+```{r, warning=FALSE}
+rat_2021 %>%
+    mutate(inspection_day = as.factor(inspection_day)) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  separate(inspection_time, into = c("hour", "minute", "second")) %>%
+  group_by(inspection_month, inspection_day, hour) %>%
+  summarise(n_obs = n()) %>%
+  plot_ly(x = ~hour, y = ~n_obs, type = "scatter",
+          color = ~inspection_day,
+          frame = ~inspection_month) %>%
+  layout(xaxis = list(title = "Time", range = list(0,24), dtick = 3, 
+                      tickvals = c(0, 3, 6, 9, 12, 15, 18, 21, 24),
+                      ticktext = c("12am", "3am", "6am", "9am", "12pm", "3pm", "6pm", "9pm", "12am")),
+         yaxis = list(title = "Number of Inspections"),
+         title = "Number of Rat Inspections Throughout a Day in 2021") %>%
+  hide_legend()
+
+```
+
+
+Plot 4: Number of Rat Inspections by borough
+
+```{r}
+rat %>%
+  mutate(borough = as.factor(borough)) %>% 
+  group_by(inspection_year, borough) %>%
+  summarise(n_obs = n()) %>%
+  plot_ly(x = ~borough, y = ~n_obs, color = ~borough, frame = ~inspection_year, type = "bar") %>%
+  layout(xaxis = list(title = "Borough"), 
+         yaxis = list(title = "Number of Inspections"),
+         title = "Number of Rat Inspections by Borough") %>%
+  hide_legend()
+```
+
+
+Plot 5: inspection type
+
+```{r}
+colors = c("#38C5A3", "#F09968", "#D2959B", "#B499CB", "#EE90BA", "#A8D14F", "#E5D800", "#FCCD4C", "#E2BF96", "#B3B3B3")
+
+rat %>%
+  mutate(inspection_type = case_when(inspection_type == "Initial" ~ "Initial Inspection",
+                                     inspection_type == "BAIT" ~ "Baiting", 
+                                     inspection_type == "Compliance"~ "Compliance Inspection", 
+                                     inspection_type == "STOPPAGE" ~ "Stoppage", 
+                                     inspection_type == "CLEAN_UPS" ~ "Clean Up")) %>%
+  group_by(inspection_type) %>%
+  summarise(n_obs = n(),
+            prop = n_obs/nrow(rat)) %>%
+  arrange(-prop) %>% 
+  mutate(inspection_type = fct_reorder(inspection_type, -prop)) %>%
+  plot_ly(labels = ~inspection_type, values = ~prop, type = "pie",
+          insidetextfont = list(color = "#FFFFFF"),
+          marker = list(colors = colors,
+                      line = list(color = '#FFFFFF', width = 1))
+          ) %>%
+  layout(title = "Distribution of Inspection Type",
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+
+```
+
+
+Plot 6: inspection results
+
+```{r}
+colors = c("#38C5A3", "#F09968", "#D2959B", "#B499CB", "#EE90BA", "#A8D14F", "#E5D800", "#FCCD4C", "#E2BF96", "#B3B3B3")
+
+rat %>%
+  drop_na() %>%
+  group_by(result) %>%
+  summarise(n_obs = n(),
+            prop = n_obs/nrow(rat)) %>%
+  arrange(-prop) %>% 
+  mutate(result = fct_reorder(result, -prop)) %>%
+  plot_ly(labels = ~result, values = ~prop, type = "pie",
+          insidetextfont = list(color = "#FFFFFF"),
+          marker = list(colors = colors,
+                      line = list(color = '#FFFFFF', width = 1))
+          ) %>%
+  layout(title = "Distribution of Inspection Results",
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+```
+
+Plot 7: Association with Weather
+```{r}
+rat_n = rat %>%
+  group_by(inspection_year, inspection_month, inspection_day) %>%
+  summarise(n_obs = n())
+
+t = rat %>%
+  mutate(t_avg = (tmin+tmax)/2) %>%
+  distinct(inspection_year, inspection_month, inspection_day, t_avg, tmax, tmin)
+
+rat_t = left_join(rat_n, t, by = c("inspection_year", "inspection_month", "inspection_day")) %>%
+  as.data.frame()
+
+rat_t %>%
+  plot_ly(x = ~tmin, y = ~tmax, z = ~n_obs, type = "heatmap") %>%
+  layout(xaxis = list(title = "Minimum Temperature"),
+         yaxis = list(title = "Maximum Temperature"),
+         title = "Association Between Number of Rat Inspections and Weather") %>%
+  hide_legend()
+
+```
+
+Plot 8: Association with Covid-19
+
+```{r}
+rat %>%
+  filter(inspection_year %in% c(2019, 2020)) %>%
+  mutate(inspection_year = as.factor(inspection_year)) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_obs = n()) %>%
+  plot_ly(x = ~inspection_month, y = ~n_obs, type = "scatter", mode = "lines",
+          color = ~inspection_year) %>%
+  layout(xaxis = list(title = "Inspection Month"), 
+         yaxis = list(title = "Number of Inspections"),
+         title = "Number of Rat Inspections Before and After COVID-19") 
+```
+
+
+Plot 9: map
+
+```{r}
+nyc = rat_2021 %>%
+  mutate(bbl = paste(boro_code, block, lot)) 
+
+center_lon = median(nyc$longitude,na.rm = TRUE)
+center_lat = median(nyc$latitude,na.rm = TRUE)
+
+count = rat_2021 %>%
+  mutate(bbl = paste(boro_code, block, lot)) %>%
+  group_by(bbl) %>%
+  count()
+
+nyc = merge(nyc, count, by = "bbl")
+
+factpal = colorFactor("blue", nyc$n)
+
+nyc %>%
+leaflet() %>% 
+  addProviderTiles("CartoDB.Positron") %>%
+  addHeatmap(lng = ~longitude, lat = ~latitude, intensity = ~(nyc$n), blur = 25, max = 0.05, radius = 15) %>%
+  setView(lng=center_lon, lat=center_lat,zoom = 10) 
+
+```
+
+
+
+
+
+
+
+
 
 
 
