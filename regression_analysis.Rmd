@@ -5,4 +5,5 @@ output:
     toc_float: 
       toc_collapsed: true
     toc_depth: 5
+    code_folding: hide
 ---
