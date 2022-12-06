@@ -2,15 +2,16 @@
 output: 
   html_document:
     toc: true
-    toc_float: true
+    toc_float: 
+      toc_collapsed: true
+    toc_depth: 5
 ---
 
 ```{r,include=FALSE}
 library(tidyverse)
 ```
 
-
-&nbsp;
+&NewLine;
 
 ### The Group Members 
 - Jia Ji (jj3205)
@@ -101,5 +102,3 @@ tibble(
         ) %>% 
         knitr::kable()
 ```
-
-&nbsp;

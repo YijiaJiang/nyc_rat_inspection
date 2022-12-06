@@ -1,6 +1,14 @@
 ---
+title: "Dashboard for NYC Rat Inspection"
 output: 
-  html_document:
-    toc: true
-    toc_float: true
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    navbar:
+      - { icon: fa-home, href: index.html, align: right }
+      - { icon: fa-play-circle, href: https://youtube.com, align: right }
+      - { icon: fa-github, href: https://github.com/YijiaJiang/nyc_rat_inspection, align: right }
+    source_code: embed
+    theme: flatly
 ---
+
