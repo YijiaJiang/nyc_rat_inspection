@@ -256,18 +256,8 @@ rat %>%
 Plot 9: map
 
 ```{r}
-top = 40.917577 # north lat
-left = -74.259090 # west long
-right = -73.700272 # east long
-bottom =  40.477399 # south lat
-
-
 nyc = rat_2021 %>%
-  mutate(bbl = paste(boro_code, block, lot)) %>%
-  filter(latitude >= bottom) %>%
-  filter (latitude <= top) %>%
-  filter(longitude >= left ) %>%
-  filter(longitude <= right)
+  mutate(bbl = paste(boro_code, block, lot)) 
 
 center_lon = median(nyc$longitude,na.rm = TRUE)
 center_lat = median(nyc$latitude,na.rm = TRUE)
@@ -284,7 +274,7 @@ factpal = colorFactor("blue", nyc$n)
 nyc %>%
 leaflet() %>% 
   addProviderTiles("CartoDB.Positron") %>%
-  addHeatmap(lng = ~longitude, lat = ~latitude, intensity = ~(nyc$n), blur = 20, max = 0.05, radius = 15) %>%
+  addHeatmap(lng = ~longitude, lat = ~latitude, intensity = ~(nyc$n), blur = 25, max = 0.05, radius = 15) %>%
   setView(lng=center_lon, lat=center_lat,zoom = 10) 
 
 ```
