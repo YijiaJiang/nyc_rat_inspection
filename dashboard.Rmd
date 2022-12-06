@@ -10,5 +10,7 @@ output:
       - { icon: fa-github, href: https://github.com/YijiaJiang/nyc_rat_inspection, align: right }
     source_code: embed
     theme: flatly
+    includes:
+      in_header: icon.html
 ---
 
