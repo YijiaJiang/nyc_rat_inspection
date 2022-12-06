@@ -1,5 +1,4 @@
 ---
-title: "Proposal"
 output: 
   html_document:
     toc: false
@@ -9,7 +8,7 @@ output:
 library(tidyverse)
 ```
 
-### The Group Members (Names and UNIs) 
+### The Group Members 
 - Jia Ji (jj3205)
 - Yijia Jiang (yj2687)
 - Gonghao Liu (gl2716)
