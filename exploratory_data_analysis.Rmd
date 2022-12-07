@@ -262,14 +262,14 @@ As for the rat density in terms of population, it turned out that Manhattan that
 
 ```{r}
 boro = c(1, 2, 3, 4, 5)
-rat = c(26116, 38256, 32044, 6733, 2480)
+rat_obs = c(26116, 38256, 32044, 6733, 2480)
 pop = c(1424948, 2641052, 1576876, 2331143, 493494)
 area = c(42.2, 69.4, 22.7, 108.7, 57.5)
-df = tibble(boro, rat, pop, area)
+df = tibble(boro, rat_obs, pop, area)
 
 df = df %>%
-  mutate(density_p = rat/pop,
-         density_a = rat/area) 
+  mutate(density_p = rat_obs /pop,
+         density_a = rat_obs /area) 
 
 p_density_p = df %>%
   ggplot(aes(x = boro, y = density_p)) +
@@ -300,7 +300,7 @@ p_density_p + p_density_a
 
 ### Rat Inspections by Month in Each Borough {.tabset}
 
-
+In order to obtain more demographic information, we analyzed the rat inspections stratified by borough and month. Generally, for all five boroughs, more rats were inspected in late spring and summer in 2021, especially in July and August.  
 
 #### Bronx
 ```{r, message=FALSE, warning=FALSE}
