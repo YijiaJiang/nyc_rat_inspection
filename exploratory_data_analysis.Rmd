@@ -142,7 +142,7 @@ rat_2021 %>%
 
 # Borough Visualizations
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # Overall
 rat %>%
  mutate(borough = as.factor(borough)) %>%
@@ -157,7 +157,7 @@ rat %>%
 ```
 
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # rat vs. population
 p_rat = rat %>%
   filter(inspection_year == 2021) %>%
@@ -187,7 +187,7 @@ p_pop = rat %>%
 p_rat + p_pop 
 ```
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # Overall top 15 streets
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -204,7 +204,7 @@ rat %>%
   hide_legend()
 ```
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
   mutate(street_name = str_to_title(street_name)) %>%
@@ -224,7 +224,7 @@ rat %>%
 ```
 
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # inspection type
 colors = c("#38C5A3", "#F09968", "#D2959B", "#B499CB", "#EE90BA", "#A8D14F", "#E5D800", "#FCCD4C", "#E2BF96", "#B3B3B3")
 
@@ -252,7 +252,7 @@ rat %>%
 ```
 
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # inspection results
 colors = c("#38C5A3", "#F09968", "#D2959B", "#B499CB", "#EE90BA", "#A8D14F", "#E5D800", "#FCCD4C", "#E2BF96", "#B3B3B3")
 
@@ -276,7 +276,7 @@ rat %>%
 
 # Weather and COVID-19
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # association with temperature
 rat_n = rat %>%
   group_by(inspection_year, inspection_month, inspection_day) %>%
@@ -300,7 +300,7 @@ rat_t %>%
 
 ```
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # association with Covid-19
 rat %>%
   filter(inspection_year %in% c(2019, 2020)) %>%
@@ -318,7 +318,7 @@ rat %>%
 ```
 
 
-```{r}
+```{r, message=FALSE, include=FALSE}
 # heatmap
 nyc = rat_2021 %>%
   mutate(bbl = paste(boro_code, block, lot)) 
