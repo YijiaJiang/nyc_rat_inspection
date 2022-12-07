@@ -12,7 +12,7 @@ navbar:
     - text: "Dashboard"
       href: dashboard.html
     - text: "Shiny App"
-      href: report.html
+      href: https://lghtnpl.shinyapps.io/rat_app/
     - text: "Report"
       href: report.html
     - icon: fa-play-circle fa-lg
