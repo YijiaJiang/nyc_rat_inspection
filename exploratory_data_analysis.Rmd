@@ -185,7 +185,7 @@ rat_2021 %>%
 
 # Borough Visualizations
 
-In this section, we will explore the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not. 
+In this section, we explored the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not. 
 
 ### Overall Rat Inspections by Borough
 
@@ -206,6 +206,10 @@ rat %>%
 ```
 
 ### Rat Inspections VS. Population
+
+It's not sufficient and solid to only go through the number of rat inspections in each borough without considering their populations and land area. Therefore, we combined these factors in certain borough to evaluate the rat density.  
+
+In 2021, Brooklyn had 26,116 rat inspections, which was the most, followed by Manhattan, Bronx, Queens and Staten Island. 
 
 ```{r, message=FALSE, warning=FALSE}
 # rat vs. population
@@ -236,10 +240,67 @@ p_pop = rat %>%
        titles = "Number of Populations in 2021") +
   theme(plot.title = element_text(size = 12))
 
-p_rat + p_pop 
+p_area = rat %>%
+  filter(inspection_year == 2021) %>%
+  mutate(borough = as.factor(borough)) %>%
+  group_by(borough) %>%
+  summarise(rat_obs = n()) %>%
+  mutate(area = c(42.2, 69.4, 22.7, 108.7, 57.5)) %>%
+  ggplot(aes(x = area, y = borough, fill = borough)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(values = c("#38C5A3", "#F09968", "#8DA0CB", "#EE90BA", "#A8D14F")) +
+  labs(x = "Land area (square miles)",
+       y = "Borough",
+       titles = "Land Area") +
+  theme(plot.title = element_text(size = 12))
+
+
+p_rat / (p_pop + p_area)
+```
+
+As for the rat density in terms of population, it turned out that Manhattan that ranked the first with 0.020321 inspections per person. Similarly, when it comes to the density regarding land area, Manhattan, with 1411.6 inspections per square mile far higher than other four boroughs, won again. Undoubtfully, Manhattan was the most "rattiest" borough in New York City. Moreover, Queens and Staten Island were still the boroughs with least rat inspections.
+
+```{r}
+boro = c(1, 2, 3, 4, 5)
+rat = c(26116, 38256, 32044, 6733, 2480)
+pop = c(1424948, 2641052, 1576876, 2331143, 493494)
+area = c(42.2, 69.4, 22.7, 108.7, 57.5)
+df = tibble(boro, rat, pop, area)
+
+df = df %>%
+  mutate(density_p = rat/pop,
+         density_a = rat/area) 
+
+p_density_p = df %>%
+  ggplot(aes(x = boro, y = density_p)) +
+  geom_point(color = "#38C5A3") +
+  geom_line(color = "#38C5A3") +
+  labs(x = "Borough",
+       y = "Count per person",
+       title = "Rat Density - Population") +
+  scale_x_continuous(
+                labels = c("Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island")) +
+  theme(axis.text = element_text(size = 7))
+
+
+p_density_a = df %>%
+  ggplot(aes(x = boro, y = density_a)) +
+  geom_point(color = "#F09968") +
+  geom_line(color = "#F09968") +
+  labs(x = "Borough",
+       y = "Count per square mile",
+       title = "Rat Density - Land Area") +
+  scale_x_continuous(
+                labels = c("Bronx", "Brooklyn", "Manhattan", "Queens", "Staten Island")) +
+  theme(axis.text = element_text(size = 7))
+  
+
+p_density_p + p_density_a
 ```
 
 ### Rat Inspections by Month in Each Borough {.tabset}
+
+
 
 #### Bronx
 ```{r, message=FALSE, warning=FALSE}
@@ -527,7 +588,6 @@ rat %>%
   layout(title = "Distribution of Inspection Results",
          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-
 ```
 
 # Weather and COVID-19
