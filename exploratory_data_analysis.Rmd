@@ -252,7 +252,7 @@ rat %>%
 ```
 
 
-```{r, message=FALSE, warning}
+```{r, message=FALSE, warning=FALSE}
 # inspection results
 colors = c("#38C5A3", "#F09968", "#D2959B", "#B499CB", "#EE90BA", "#A8D14F", "#E5D800", "#FCCD4C", "#E2BF96", "#B3B3B3")
 
