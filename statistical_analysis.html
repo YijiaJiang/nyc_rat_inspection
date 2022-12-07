@@ -13,7 +13,7 @@
 
 <title>Statistical Analysis</title>
 
-<script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -186,8 +186,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -195,9 +195,16 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "\e258";
-  font-family: 'Glyphicons Halflings';
+  content: "&#xe258;";
   border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -404,53 +411,65 @@ options(
 
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d</code></pre>
-<div id="two-sample-paired-t-test" class="section level2">
-<h2>Two-Sample Paired T-test</h2>
-<p>Firstly, for the rodent inspection across time, we compared mean
-difference between inspection density in two years before covid
-(2018-2019) and inspection density in two years after covid
-(2020-2021).</p>
-<p>Null hypothesis (H0): The mean difference between the annual
-inspection before covid and after covid is equal to zero. Alternative
-hypothesis (H1): The mean difference between the annual inspection
-before covid and after covid is not equal to zero.</p>
-<pre class="r"><code>rats_2018 =
-  read.csv(&quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv&quot;) 
-rats_2019 =
-  read.csv(&quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv&quot;)
-rats_before = rbind(rats_2018, rats_2019)
-
-rats_2020 =
-  read.csv(&quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv&quot;) 
-rats_2021 =
-  read.csv(&quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv&quot;)
-rats_after = rbind(rats_2020, rats_2021)</code></pre>
-<p>There are a total of 500979 inspections in 2018-2019, which have
-253728 inspections in 2018, and 247251 inspections in 2019.</p>
-<p>After covid, there are a total of 177399 inspections in 2020-2021,
-which have 71770 inspections in 2020, and 105629 inspections in
-2021.</p>
-</div>
+<div id="over-time" class="section level2">
+<h2>Over time</h2>
 <div id="chi-square-testing-homogenity-among-boroughs-in-recent-years"
-class="section level2">
-<h2>Chi-square testing homogenity among boroughs in recent years</h2>
+class="section level3">
+<h3>Chi-square testing homogenity among boroughs in recent years</h3>
+<pre class="r"><code>url_2012 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv&quot;
+rat_2012 = read_csv(url(url_2012)) 
+url_2013 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2013.csv&quot;
+rat_2013 = read_csv(url(url_2013)) 
+url_2014 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2014.csv&quot;
+rat_2014 = read_csv(url(url_2014)) 
+url_2015 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2015.csv&quot;
+rat_2015 = read_csv(url(url_2015)) 
+url_2016 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2016.csv&quot;
+rat_2016 = read_csv(url(url_2016)) 
+url_2017 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2017.csv&quot;
+rat_2017 = read_csv(url(url_2017)) 
+url_2018 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv&quot;
+rat_2018 = read_csv(url(url_2018)) 
+url_2019 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv&quot;
+rat_2019 = read_csv(url(url_2019)) 
+url_2020 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv&quot;
+rat_2020 = read_csv(url(url_2020)) 
+url_2021 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv&quot;
+rat_2021 = read_csv(url(url_2021)) 
+rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %&gt;%
+  select(-...1) %&gt;%
+   mutate(inspection_month_n = recode(inspection_month, 
+                                   &quot;Jan&quot; = 1,
+                                   &quot;Feb&quot; = 2,
+                                   &quot;Mar&quot; = 3,
+                                   &quot;Apr&quot; = 4,
+                                   &quot;May&quot; = 5,
+                                   &quot;Jun&quot; = 6,
+                                   &quot;Jul&quot; = 7,
+                                   &quot;Aug&quot; = 8,
+                                   &quot;Sep&quot; = 9,
+                                   &quot;Oct&quot; = 10,
+                                   &quot;Nov&quot; = 11,
+                                   &quot;Dec&quot; = 12)) %&gt;%
+  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = &quot;-&quot;))%&gt;%
+  mutate(date = as.Date(date,format = &quot;%Y-%m-%d&quot;))</code></pre>
+</div>
+</div>
+<div id="boroughs" class="section level2">
+<h2>Boroughs</h2>
+<div id="chi-square-testing-homogenity-among-boroughs-in-recent-years-1"
+class="section level3">
+<h3>Chi-square testing homogenity among boroughs in recent years</h3>
 <p>We decide to look at the nearest three years to figure out the
 distribution of inspections varies in different boroughs from year to
 year</p>
 <p><span class="math inline">\(H_0\)</span> : The distribution of
-inspections among boroughs are same across the three years. <span
-class="math inline">\(H_1\)</span> : The distribution of inspections
-among boroughs aren’t all the same across the three years.</p>
-<pre class="r"><code># import the data
-rats_2019 =
-  read.csv(&quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv&quot;)
-rats_2020 =
-  read.csv(&quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv&quot;)
-rats_2021 =
-  read.csv(&quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv&quot;)
-
-# create a data frame
-rats_years = rbind(rats_2019, rats_2020, rats_2021) %&gt;% 
+inspections among boroughs are same across the three years.</p>
+<p><span class="math inline">\(H_1\)</span> : The distribution of
+inspections among boroughs aren’t all the same across the three
+years.</p>
+<pre class="r"><code># create a data frame
+rat_years = rbind(rat_2019, rat_2020, rat_2021) %&gt;% 
   janitor::clean_names() %&gt;% 
   dplyr::select(inspection_year, boro_code, borough) %&gt;% 
   group_by(borough, inspection_year) %&gt;%
@@ -458,10 +477,10 @@ rats_years = rbind(rats_2019, rats_2020, rats_2021) %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
   pivot_wider(names_from = &quot;inspection_year&quot;, values_from = &quot;frequency&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override
-## using the `.groups` argument.</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override using the
+## `.groups` argument.</code></pre>
 <pre class="r"><code>#print the table
-rats_years %&gt;% t() %&gt;% 
+rat_years %&gt;% t() %&gt;% 
 knitr::kable(caption = &quot;Distribution of inspections across the years&quot;)</code></pre>
 <table>
 <caption>Distribution of inspections across the years</caption>
@@ -501,7 +520,7 @@ knitr::kable(caption = &quot;Distribution of inspections across the years&quot;)
 </tbody>
 </table>
 <pre class="r"><code>#Chi-square test
-chisq.test(rats_years[,-1]) %&gt;% 
+chisq.test(rat_years[,-1]) %&gt;% 
    broom::tidy()</code></pre>
 <pre><code>## # A tibble: 1 × 4
 ##   statistic   p.value parameter method                    
@@ -509,20 +528,21 @@ chisq.test(rats_years[,-1]) %&gt;%
 ## 1     1361. 1.78e-288         8 Pearson&#39;s Chi-squared test</code></pre>
 <p>We can see from the Chi-square test above, we reject the null
 hypothesis at 99% significant level. This means that the inspections
-among boroughs have a different distribution across the three years.</p>
+among boroughs have a different distribution across the recent three
+years.</p>
 </div>
 <div id="chi-square-testing-homogenity-among-boroughs-in-2021"
-class="section level2">
-<h2>Chi-square testing homogenity among boroughs in 2021</h2>
+class="section level3">
+<h3>Chi-square testing homogenity among boroughs in 2021</h3>
 <p>Given that the distribution of inspections varies in different
 boroughs from year to year, we decide to look at inspections among
 different boroughs in 2021.</p>
 <p><span class="math inline">\(H_0\)</span> : The distribution of
-inspections among boroughs are same in 2021. <span
-class="math inline">\(H_1\)</span> : The distribution of inspections
-among boroughs aren’t all the same in 2021.</p>
+inspections among boroughs are same in 2021.</p>
+<p><span class="math inline">\(H_1\)</span> : The distribution of
+inspections among boroughs aren’t all the same in 2021.</p>
 <pre class="r"><code># import the data
-rats_boro = rats_2021 %&gt;% 
+rat_boro = rat_2021 %&gt;% 
   janitor::clean_names() %&gt;% 
   dplyr::select(inspection_year, boro_code, borough) %&gt;% 
   group_by(borough, inspection_year) %&gt;% 
@@ -530,10 +550,10 @@ rats_boro = rats_2021 %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
   dplyr::select(borough, frequency)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override
-## using the `.groups` argument.</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override using the
+## `.groups` argument.</code></pre>
 <pre class="r"><code># print the table
-knitr::kable(rats_boro, caption = &quot;Distribution of inspections in 2021&quot;)</code></pre>
+knitr::kable(rat_boro, caption = &quot;Distribution of inspections in 2021&quot;)</code></pre>
 <table>
 <caption>Distribution of inspections in 2021</caption>
 <thead>
@@ -566,7 +586,7 @@ knitr::kable(rats_boro, caption = &quot;Distribution of inspections in 2021&quot
 </tbody>
 </table>
 <pre class="r"><code># chi-square test
-chisq.test(rats_boro[,-1]) %&gt;% 
+chisq.test(rat_boro[,-1]) %&gt;% 
   broom::tidy()</code></pre>
 <pre><code>## # A tibble: 1 × 4
 ##   statistic p.value parameter method                                  
@@ -575,7 +595,83 @@ chisq.test(rats_boro[,-1]) %&gt;%
 <p>We can see from the chi-square test result we should reject the null
 hypothesis, the inspections are not equally distributed among boroughs
 in 2021.</p>
-<p>v</p>
+</div>
+</div>
+<div id="weather-and-covid-19" class="section level2">
+<h2>Weather and covid-19</h2>
+<div
+id="wilcoxon-rank-sum-testing-changes-of-inspection-density-caused-by-covid-19"
+class="section level3">
+<h3>Wilcoxon Rank-sum testing changes of inspection density caused by
+covid-19</h3>
+<p>Firstly, for the rodent inspection across time, we compared mean
+difference between inspection density in 2019 before covid and
+inspection density in 2020 after covid.</p>
+<p><span class="math inline">\(H_0\)</span> : The distribution of annual
+inspection before covid and after covid is same.</p>
+<p><span class="math inline">\(H_1\)</span> : The distribution of annual
+inspection before covid and after covid is different.</p>
+<pre class="r"><code># import the data
+rat_covid = rbind(rat_2019, rat_2020) %&gt;% 
+  janitor::clean_names() %&gt;% 
+  dplyr::select(inspection_year, inspection_month) %&gt;% 
+  mutate(inspection_year = as.factor(inspection_year),
+         inspection_month = as.factor(inspection_month)) %&gt;%
+  mutate(inspection_month = inspection_month %&gt;% 
+                       fct_relevel(&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;)) %&gt;%
+  group_by(inspection_year,inspection_month) %&gt;%
+  summarize(frequency = n())</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;inspection_year&#39;. You can override using
+## the `.groups` argument.</code></pre>
+<pre class="r"><code># print the table
+knitr::kable(rat_boro, caption = &quot;Number of rat inspections before and after covid&quot;)</code></pre>
+<table>
+<caption>Number of rat inspections before and after covid</caption>
+<thead>
+<tr class="header">
+<th align="left">borough</th>
+<th align="right">frequency</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Bronx</td>
+<td align="right">26116</td>
+</tr>
+<tr class="even">
+<td align="left">Brooklyn</td>
+<td align="right">38256</td>
+</tr>
+<tr class="odd">
+<td align="left">Manhattan</td>
+<td align="right">32044</td>
+</tr>
+<tr class="even">
+<td align="left">Queens</td>
+<td align="right">6733</td>
+</tr>
+<tr class="odd">
+<td align="left">Staten Island</td>
+<td align="right">2480</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Wilcoxon Rank-sum testing
+wilcox.test(frequency ~ inspection_year, data = rat_covid,
+                   exact = FALSE)</code></pre>
+<pre><code>## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  frequency by inspection_year
+## W = 144, p-value = 3.658e-05
+## alternative hypothesis: true location shift is not equal to 0</code></pre>
+<p>We can see from the Wilcoxon Rank-sum test result that the true
+location shift is not equal to 0, which means that the medians of two
+populations differ. Therefore, we have the evidence to reject the null
+hypothesis and conclude that there is a difference between inspection
+density in 2019 before covid and inspection density in 2020 after
+covid</p>
+</div>
 </div>
 
 
