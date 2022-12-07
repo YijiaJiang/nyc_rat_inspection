@@ -187,9 +187,9 @@ rat_2021 %>%
 
 In this section, we will explore the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not. 
 
-&nbsp;
+### Overall Rat Inspections by Borough
 
-First, let’s look at the overall rat inspections in each borough across years. Brooklyn, Bronx and Manhattan always ranked top 3 most rat inspections while Queens and Staten Island had quite fewer inspections.
+First, let’s look at the overall rat inspections in each borough across years. Brooklyn, Bronx and Manhattan always ranked top 3 most rat inspections while Queens and Staten Island had quite fewer inspections. 
 
 ```{r, message=FALSE, warning=FALSE}
 # Overall
@@ -205,6 +205,7 @@ rat %>%
   hide_legend()
 ```
 
+### Rat Inspections VS. Population
 
 ```{r, message=FALSE, warning=FALSE}
 # rat vs. population
@@ -238,6 +239,138 @@ p_pop = rat %>%
 p_rat + p_pop 
 ```
 
+### Rat Inspections by Month in Each Borough {.tabset}
+
+#### Bronx
+```{r, message=FALSE, warning=FALSE}
+avg_2021 = rat %>%
+  filter(inspection_year == 2021) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_avg = n()/5)
+
+rat %>%
+  filter(borough == "Bronx") %>%
+  filter(inspection_year == 2021) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_obs = n()) %>%
+  mutate(avg_2021_n = c(822.2, 534.8, 1178.0, 1575.2, 2053.2, 2420.8, 3132.2, 3677.6, 1136.0, 701.4, 1969.0, 1925.4)) %>%
+  plot_ly(x = ~inspection_month, y = ~n_obs, type = "bar",
+          color = "#8DA0CB", alpha = 0.7,
+          name = "Bronx") %>%
+  add_trace(x = ~inspection_month, 
+            y = ~avg_2021_n, 
+            type = "scatter", mode = "lines+markers",
+            color = "#F09968",
+            name = "Borough Average") %>%
+  layout(xaxis = list(title = "Month"), 
+         yaxis = list(title = "Count"),
+         title = "Number of Rat Inspections in Bronx in 2021") 
+```
+
+#### Brooklyn
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(borough == "Brooklyn") %>%
+  filter(inspection_year == 2021) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_obs = n()) %>%
+  mutate(avg_2021_n = c(822.2, 534.8, 1178.0, 1575.2, 2053.2, 2420.8, 3132.2, 3677.6, 1136.0, 701.4, 1969.0, 1925.4)) %>%
+  plot_ly(x = ~inspection_month, y = ~n_obs, type = "bar",
+          color = "#8DA0CB", alpha = 0.7,
+          name = "Brooklyn") %>%
+  add_trace(x = ~inspection_month, 
+            y = ~avg_2021_n, 
+            type = "scatter", mode = "lines+markers",
+            color = "#F09968",
+            name = "Borough Average") %>%
+  layout(xaxis = list(title = "Month"), 
+         yaxis = list(title = "Count"),
+         title = "Number of Rat Inspections in Brooklyn in 2021") 
+```
+
+#### Manhattan
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(borough == "Manhattan") %>%
+  filter(inspection_year == 2021) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_obs = n()) %>%
+  mutate(avg_2021_n = c(822.2, 534.8, 1178.0, 1575.2, 2053.2, 2420.8, 3132.2, 3677.6, 1136.0, 701.4, 1969.0, 1925.4)) %>%
+  plot_ly(x = ~inspection_month, y = ~n_obs, type = "bar",
+          color = "#8DA0CB", alpha = 0.7,
+          name = "Manhattan") %>%
+  add_trace(x = ~inspection_month, 
+            y = ~avg_2021_n, 
+            type = "scatter", mode = "lines+markers",
+            color = "#F09968",
+            name = "Borough Average") %>%
+  layout(xaxis = list(title = "Month"), 
+         yaxis = list(title = "Count"),
+         title = "Number of Rat Inspections in Manhattan in 2021") 
+```
+
+#### Queens
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(borough == "Queens") %>%
+  filter(inspection_year == 2021) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_obs = n()) %>%
+  mutate(avg_2021_n = c(822.2, 534.8, 1178.0, 1575.2, 2053.2, 2420.8, 3132.2, 3677.6, 1136.0, 701.4, 1969.0, 1925.4)) %>%
+  plot_ly(x = ~inspection_month, y = ~n_obs, type = "bar",
+          color = "#8DA0CB", alpha = 0.7,
+          name = "Queens") %>%
+  add_trace(x = ~inspection_month, 
+            y = ~avg_2021_n, 
+            type = "scatter", mode = "lines+markers",
+            color = "#F09968",
+            name = "Borough Average") %>%
+  layout(xaxis = list(title = "Month"), 
+         yaxis = list(title = "Count"),
+         title = "Number of Rat Inspections in Queens in 2021") %>%
+  hide_legend()
+```
+
+#### Staten Island
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(borough == "Staten Island") %>%
+  filter(inspection_year == 2021) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(inspection_year, inspection_month) %>%
+  summarise(n_obs = n()) %>%
+  mutate(avg_2021_n = c(822.2, 534.8, 1178.0, 1575.2, 2053.2, 2420.8, 3132.2, 3677.6, 1136.0, 701.4, 1969.0, 1925.4)) %>%
+  plot_ly(x = ~inspection_month, y = ~n_obs, type = "bar",
+          color = "#8DA0CB", alpha = 0.7,
+          name = "Staten Island") %>%
+  add_trace(x = ~inspection_month, 
+            y = ~avg_2021_n, 
+            type = "scatter", mode = "lines+markers",
+            color = "#F09968",
+            name = "Borough Average") %>%
+  layout(xaxis = list(title = "Month"), 
+         yaxis = list(title = "Count"),
+         title = "Number of Rat Inspections in Staten Island in 2021") 
+```
+
+
 ```{r, message=FALSE, warning=FALSE}
 # Overall top 15 streets
 rat %>%
@@ -254,9 +387,10 @@ rat %>%
          title = "Top 15 Rat Popular Streets in 2021") %>%
   hide_legend()
 ```
-## Top 5 Rat Popular Street{.tabset}
 
-### Bronx
+### Top 5 Rat Popular Street{.tabset}
+
+#### Bronx
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -274,7 +408,7 @@ rat %>%
   hide_legend()
 ```
 
-### Brooklyn
+#### Brooklyn
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -292,7 +426,7 @@ rat %>%
   hide_legend()
 ```
 
-### Manhattan
+#### Manhattan
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -310,7 +444,7 @@ rat %>%
   hide_legend()
 ```
 
-### Queens
+#### Queens
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -328,7 +462,7 @@ rat %>%
   hide_legend()
 ```
 
-### Staten Island
+#### Staten Island
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
