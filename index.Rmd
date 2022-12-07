@@ -22,6 +22,12 @@ Gaining deeper sights into the pattern of rat inspections in both the temporal a
 
 &nbsp;
 
+### Project Outline
+
+<img src="pic/outline.jpg">
+
+&nbsp;
+
 ### Datasets
 - Rodent inspection data from [NYC Open Data](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj)  
 - NYC daily weather data from [NOAA National Climatic Data Center](https://www.noaa.gov/) 
@@ -30,6 +36,11 @@ Gaining deeper sights into the pattern of rat inspections in both the temporal a
 
 &nbsp;
 
+### Expected Delivery
+
+<img src="pic/Delivery.jpg">
+
+&nbsp;
 
 ### Screencast
 <left>
