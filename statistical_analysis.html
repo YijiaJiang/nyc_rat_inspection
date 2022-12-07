@@ -471,14 +471,8 @@ rat_years = rbind(rat_2019, rat_2020, rat_2021) %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
   pivot_wider(names_from = &quot;inspection_year&quot;, values_from = &quot;frequency&quot;)</code></pre>
-<<<<<<< HEAD
 <pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override
 ## using the `.groups` argument.</code></pre>
-=======
-<pre><code>## `summarise()` has grouped output by
-## &#39;borough&#39;. You can override using the
-## `.groups` argument.</code></pre>
->>>>>>> 6381d5990ae0662914d66fad4d57715f73d52dbe
 <pre class="r"><code>#print the table
 rat_years %&gt;% t() %&gt;% 
 knitr::kable(caption = &quot;Distribution of inspections across the years&quot;)</code></pre>
@@ -551,14 +545,8 @@ rat_boro = rat_2021 %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
   dplyr::select(borough, frequency)</code></pre>
-<<<<<<< HEAD
 <pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override
 ## using the `.groups` argument.</code></pre>
-=======
-<pre><code>## `summarise()` has grouped output by
-## &#39;borough&#39;. You can override using the
-## `.groups` argument.</code></pre>
->>>>>>> 6381d5990ae0662914d66fad4d57715f73d52dbe
 <pre class="r"><code># print the table
 knitr::kable(rat_boro, caption = &quot;Distribution of inspections in 2021&quot;)</code></pre>
 <table>
@@ -630,14 +618,8 @@ rat_covid = rbind(rat_2019, rat_2020) %&gt;%
                        fct_relevel(&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;)) %&gt;%
   group_by(Inspection_year,Inspection_month) %&gt;%
   summarize(Frequency = n())</code></pre>
-<<<<<<< HEAD
 <pre><code>## `summarise()` has grouped output by &#39;Inspection_year&#39;. You can
 ## override using the `.groups` argument.</code></pre>
-=======
-<pre><code>## `summarise()` has grouped output by
-## &#39;Inspection_year&#39;. You can override using
-## the `.groups` argument.</code></pre>
->>>>>>> 6381d5990ae0662914d66fad4d57715f73d52dbe
 <pre class="r"><code># print the table
 rat_covid2 = rat_covid %&gt;%   
   pivot_wider(names_from = &quot;Inspection_year&quot;, values_from = &quot;Frequency&quot;)

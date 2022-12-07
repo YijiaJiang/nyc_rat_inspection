@@ -185,8 +185,11 @@ rat_2021 %>%
 
 # Borough Visualizations
 
-In this section, we will explore the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not.
+In this section, we will explore the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not. 
 
+&nbsp;
+
+First, let’s look at the overall rat inspections in each borough across years. Brooklyn, Bronx and Manhattan always ranked top 3 most rat inspections while Queens and Staten Island had quite fewer inspections.
 
 ```{r, message=FALSE, warning=FALSE}
 # Overall
