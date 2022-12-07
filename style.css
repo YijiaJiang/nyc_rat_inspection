@@ -5,9 +5,9 @@
     margin-top:-75px;
     height: 850px;
     background-size: cover;
+    display: flex;
     background-color: #141c25f2;
     background-position: center center;
-    display: flex;
     justify-content: center;
     align-items: center;
     opacity: 1.0;
@@ -36,6 +36,18 @@
   font-weight: bold;
 }
 
+/* Makes TOC sticky */
+
+.row-fluid{
+  display: flex;
+}
+
+.tocify {
+  position: -webkit-sticky;
+  position: sticky; 
+  width: 100% !important;
+}
+
 
 /*---------Links--------*/
 
@@ -49,21 +61,4 @@
     display: none;
 }
 
-.mx-auto {
-  margin-right: auto !important;
-  margin-left: auto !important;
-}
 
-
-.rounded-circle {
-  border-radius: 50% !important;
-}
-
-.iframe {
-        display: block;
-        background: #000;
-        border: none;
-        height: 100vh !important;
-        width: 100vw !important;
-        position:fixed;
-    }
