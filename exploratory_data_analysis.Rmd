@@ -99,6 +99,12 @@ rat_covid = rat_covid %>%
 
 # Time Visualizations
 
+In order to obtain in-depth sights of the rat inspections across time, we used four different levels to analyze. 
+
+### Overall Rat Inspections Across Time 
+
+First, a time series plot was used to illustrate data points at successive intervals of time. From 2012, the number of rat inspections continually presented a increasing trend and reached its peak in 2018. After 2020, it appeared a sharp decrease as the outbreak of COVID-19.
+
 ```{r, message=FALSE, warning=FALSE}
 by_date = rat %>% 
   group_by(date) %>% 
@@ -112,6 +118,9 @@ hchart(time_series, name = "Rat Inspections") %>%
   hc_legend(enabled = TRUE)
 ```
 
+### Rat Inspections by Year
+
+To be more specific, we compared the rat inspections year by year. The number was roughly around 150,000 in 2012-2016. There was a surge of rat inspections in 2017 which had 247,985 cases. After staying at the peak in 2018-2019, the number of inspections rapidly dropped to 71,770 in 2020. Whether this drop was associated with COVID-19 will be analyzed in the following section.
 
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
@@ -123,6 +132,10 @@ rat %>%
          yaxis = list(title = "Count"),
          title = "Number of Rat Inspections by Year") 
 ```
+
+### Rat Inspections by Month
+
+The average number of rat inspections was 13,997. We plotted the number of inspections every months across years and found that rats were more likely to be inspected in spring compared to winter. This might be due to the nicer weather in spring, suitable for rats to wander outside.
 
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
@@ -138,6 +151,13 @@ rat %>%
          title = "Number of Rat Inspections by Month") %>%
   hide_legend()
 ```
+
+### Rat Inspections Througout a Day
+
+Most rat inspections happened at daytime regardless of the month, concentrated at 9am-12pm. Contradicted with the common sense that rats prefer nightlife, this finding would be corresponding to inspectors' daily schedule. Additionally, there are a few explanations for rat sightings during daylight hours:  
+
+*  The infestation is large  
+*  The older/sub-dominant rats cannot compete with dominant rats for food during the safer night time period
 
 ```{r, message=FALSE, warning=FALSE}
 rat_2021 %>%
@@ -161,7 +181,12 @@ rat_2021 %>%
 
 ```
 
+&nbsp;
+
 # Borough Visualizations
+
+In this section, we will explore the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not.
+
 
 ```{r, message=FALSE, warning=FALSE}
 # Overall

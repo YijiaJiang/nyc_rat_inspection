@@ -13,7 +13,7 @@
 
 <title>Statistical Analysis</title>
 
-<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -186,8 +186,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -195,16 +195,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -478,8 +471,8 @@ rat_years = rbind(rat_2019, rat_2020, rat_2021) %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
   pivot_wider(names_from = &quot;inspection_year&quot;, values_from = &quot;frequency&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override using the
-## `.groups` argument.</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override
+## using the `.groups` argument.</code></pre>
 <pre class="r"><code>#print the table
 rat_years %&gt;% t() %&gt;% 
 knitr::kable(caption = &quot;Distribution of inspections across the years&quot;)</code></pre>
@@ -552,8 +545,8 @@ rat_boro = rat_2021 %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
   dplyr::select(borough, frequency)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override using the
-## `.groups` argument.</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override
+## using the `.groups` argument.</code></pre>
 <pre class="r"><code># print the table
 knitr::kable(rat_boro, caption = &quot;Distribution of inspections in 2021&quot;)</code></pre>
 <table>
@@ -625,8 +618,8 @@ rat_covid = rbind(rat_2019, rat_2020) %&gt;%
                        fct_relevel(&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;)) %&gt;%
   group_by(Inspection_year,Inspection_month) %&gt;%
   summarize(Frequency = n())</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;Inspection_year&#39;. You can override using
-## the `.groups` argument.</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;Inspection_year&#39;. You can
+## override using the `.groups` argument.</code></pre>
 <pre class="r"><code># print the table
 rat_covid2 = rat_covid %&gt;%   
   pivot_wider(names_from = &quot;Inspection_year&quot;, values_from = &quot;Frequency&quot;)
