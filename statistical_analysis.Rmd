@@ -8,3 +8,128 @@ output:
     toc_depth: 5
     code_folding: hide
 ---
+
+```{r message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+library(patchwork)
+library(plotly)
+library(leaflet)
+library(ggplot2)
+library(lubridate)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%")
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Two-Sample Paired T-test
+
+Firstly, for the rodent inspection across time, we compared mean difference between inspection density in two years before covid (2018-2019) and inspection density in two years after covid (2020-2021).
+
+Null hypothesis (H0): The mean difference between the annual inspection before covid and after covid is equal to zero.
+Alternative hypothesis (H1): The mean difference between the annual inspection before covid and after covid is not equal to zero.
+
+### Import data 
+
+```{r}
+rats_2018 =
+  read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv") 
+rats_2019 =
+  read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv")
+rats_before = rbind(rats_2018, rats_2019)
+
+rats_2020 =
+  read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv") 
+rats_2021 =
+  read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv")
+rats_after = rbind(rats_2020, rats_2021)
+```
+
+There are a total of `r nrow(rats_before)` inspections in 2018-2019, which have `r nrow(rats_2018)` inspections in 2018, and `r nrow(rats_2019)` inspections in 2019.
+
+After covid, there are a total of `r nrow(rats_after)` inspections in 2020-2021, which have `r nrow(rats_2020)` inspections in 2020, and `r nrow(rats_2021)` inspections in 2021.
+
+
+
+
+## Chi-square testing homogenity among boroughs in recent years
+
+We decide to look at the nearest three years to figure out the distribution of inspections varies in different boroughs from year to year
+
+$H_0$ : The distribution of inspections among boroughs are same across the three years.
+$H_1$ : The distribution of inspections among boroughs aren’t all the same across the three years.
+
+```{r}
+# import the data
+rats_2019 =
+  read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv")
+rats_2020 =
+  read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv")
+rats_2021 =
+  read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv")
+
+# create a data frame
+rats_years = rbind(rats_2019, rats_2020, rats_2021) %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(inspection_year, boro_code, borough) %>% 
+  group_by(borough, inspection_year) %>%
+  summarize(frequency = n()) %>%
+  mutate(borough = as.factor(borough),
+    borough = fct_reorder(borough, frequency, .desc = TRUE)) %>% 
+  pivot_wider(names_from = "inspection_year", values_from = "frequency")
+
+#print the table
+rats_years %>% t() %>% 
+knitr::kable(caption = "Distribution of inspections across the years")
+
+#Chi-square test
+chisq.test(rats_years[,-1]) %>% 
+   broom::tidy()
+```
+
+We can see from the Chi-square test above, we reject the null hypothesis at 99% significant level. This means that the inspections among boroughs have a different distribution across the three years.
+
+## Chi-square testing homogenity among boroughs in 2021
+
+Given that the distribution of inspections varies in different boroughs from year to year, we decide to look at inspections among different boroughs in 2021. 
+
+$H_0$ : The distribution of inspections among boroughs are same in 2021.
+$H_1$ : The distribution of inspections among boroughs aren’t all the same in 2021.
+
+```{r}
+# import the data
+rats_boro = rats_2021 %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(inspection_year, boro_code, borough) %>% 
+  group_by(borough, inspection_year) %>% 
+  summarize(frequency = n()) %>%
+  mutate(borough = as.factor(borough),
+    borough = fct_reorder(borough, frequency, .desc = TRUE)) %>% 
+  dplyr::select(borough, frequency)
+
+# print the table
+knitr::kable(rats_boro, caption = "Distribution of inspections in 2021")
+
+# chi-square test
+chisq.test(rats_boro[,-1]) %>% 
+  broom::tidy()
+```
+
+We can see from the chi-square test result we should reject the null hypothesis, the inspections are not equally distributed among boroughs in 2021.
+
+
+
+v
