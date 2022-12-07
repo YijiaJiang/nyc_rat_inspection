@@ -35,9 +35,6 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-## Over time
-
-### Chi-square testing homogenity among boroughs in recent years
 
 ```{r message = FALSE, warning = FALSE}
 url_2012 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv"
@@ -79,11 +76,15 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   mutate(date = as.Date(date,format = "%Y-%m-%d"))
 ```
 
+## Over time
 
+### Chi-square testing homogenity
 
-
+&nbsp;
 
 ## Boroughs
+
+&nbsp;
 
 ### Chi-square testing homogenity among boroughs in recent years
 
@@ -97,7 +98,7 @@ $H_1$ : The distribution of inspections among boroughs aren’t all the same acr
 # create a data frame
 rat_years = rbind(rat_2019, rat_2020, rat_2021) %>% 
   janitor::clean_names() %>% 
-  dplyr::select(inspection_year, boro_code, borough) %>% 
+  dplyr::select(inspection_year, borough) %>% 
   group_by(borough, inspection_year) %>%
   summarize(frequency = n()) %>%
   mutate(borough = as.factor(borough),
@@ -115,6 +116,8 @@ chisq.test(rat_years[,-1]) %>%
 
 We can see from the Chi-square test above, we reject the null hypothesis at 99% significant level. This means that the inspections among boroughs have a different distribution across the recent three years.
 
+&nbsp;
+
 ### Chi-square testing homogenity among boroughs in 2021
 
 Given that the distribution of inspections varies in different boroughs from year to year, we decide to look at inspections among different boroughs in 2021. 
@@ -127,7 +130,7 @@ $H_1$ : The distribution of inspections among boroughs aren’t all the same in 
 # import the data
 rat_boro = rat_2021 %>% 
   janitor::clean_names() %>% 
-  dplyr::select(inspection_year, boro_code, borough) %>% 
+  dplyr::select(inspection_year, borough) %>% 
   group_by(borough, inspection_year) %>% 
   summarize(frequency = n()) %>%
   mutate(borough = as.factor(borough),
@@ -144,11 +147,11 @@ chisq.test(rat_boro[,-1]) %>%
 
 We can see from the chi-square test result we should reject the null hypothesis, the inspections are not equally distributed among boroughs in 2021.
 
-
+&nbsp;
 
 ## Weather and covid-19
 
-
+&nbsp;
 
 ### Wilcoxon Rank-sum testing changes of inspection density caused by covid-19
 
@@ -163,21 +166,23 @@ $H_1$ : The distribution of annual inspection before covid and after covid is di
 rat_covid = rbind(rat_2019, rat_2020) %>% 
   janitor::clean_names() %>% 
   dplyr::select(inspection_year, inspection_month) %>% 
-  mutate(inspection_year = as.factor(inspection_year),
-         inspection_month = as.factor(inspection_month)) %>%
-  mutate(inspection_month = inspection_month %>% 
+  mutate(Inspection_year = as.factor(inspection_year),
+         Inspection_month = as.factor(inspection_month)) %>%
+  mutate(Inspection_month = inspection_month %>% 
                        fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
-  group_by(inspection_year,inspection_month) %>%
-  summarize(frequency = n())
+  group_by(Inspection_year,Inspection_month) %>%
+  summarize(Frequency = n())
 
 # print the table
-knitr::kable(rat_boro, caption = "Number of rat inspections before and after covid")
+rat_covid2 = rat_covid %>%   
+  pivot_wider(names_from = "Inspection_year", values_from = "Frequency")
+knitr::kable(rat_covid2, caption = "Number of rat inspections before and after covid")
 
 # Wilcoxon Rank-sum testing
-wilcox.test(frequency ~ inspection_year, data = rat_covid,
+wilcox.test(Frequency ~ Inspection_year, data = rat_covid,
                    exact = FALSE)
 ```
 
-We can see from the Wilcoxon Rank-sum test result that the true location shift is not equal to 0, which means that the medians of two populations differ. Therefore, we have the evidence to reject the null hypothesis and conclude that there is a difference between inspection density in 2019 before covid and inspection density in 2020 after covid
+We can see from the Wilcoxon Rank-sum test result that the true location shift is not equal to 0, which means that the medians of two populations differ. Therefore, we have the evidence to reject the null hypothesis and conclude that there is a difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
 
-
+&nbsp;
