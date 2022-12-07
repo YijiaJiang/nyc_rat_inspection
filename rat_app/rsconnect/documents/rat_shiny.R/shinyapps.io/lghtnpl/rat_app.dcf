@@ -1,0 +1,13 @@
+name: rat_app
+title: rat_app
+username:
+account: lghtnpl
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7831815
+bundleId: 6602947
+url: https://lghtnpl.shinyapps.io/rat_app/
+when: 1670392156.95296
+lastSyncTime: 1670392156.95297
+asMultiple: FALSE
+asStatic: FALSE

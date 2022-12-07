@@ -43,10 +43,13 @@ Gaining deeper sights into the pattern of rat inspections in both the temporal a
 &nbsp;
 
 ### Screencast
-<left>
-<iframe width="840" height="472" src="https://www.youtube.com/watch?v=6rNvxML07CU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</left>
+<center><iframe width="910px" height = "512px" src="https://www.youtube.com/embed/6rNvxML07CU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen ></iframe></center>
+
+
+
+&nbsp;
+
 
 ### Group Members 
 
-<img src="pic/members1.jpg">
+<center><img width="910px" src="pic/members1.jpg"></center>

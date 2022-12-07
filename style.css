@@ -5,9 +5,9 @@
     margin-top:-75px;
     height: 850px;
     background-size: cover;
+    display: flex;
     background-color: #141c25f2;
     background-position: center center;
-    display: flex;
     justify-content: center;
     align-items: center;
     opacity: 1.0;
@@ -45,26 +45,9 @@
 .tocify {
   position: -webkit-sticky;
   position: sticky; 
-  top: 0px;
   width: 100% !important;
 }
 
-/* No TOC on mobile */
-
-@media screen and (max-width: 767px) {
-  
-  .col-xs-12.col-sm-4.col-md-3 {
-    display: none;
-  }
-
-  .top-text {
-    font-size: 25px;
-  }
-  
-  .bottom-text {
-    font-size: 40px;
-  }
-}
 
 /*---------Links--------*/
 
@@ -78,12 +61,4 @@
     display: none;
 }
 
-.mx-auto {
-  margin-right: auto !important;
-  margin-left: auto !important;
-}
 
-
-.rounded-circle {
-  border-radius: 50% !important;
-}
