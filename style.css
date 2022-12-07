@@ -77,3 +77,13 @@
 .title{
     display: none;
 }
+
+.mx-auto {
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+
+.rounded-circle {
+  border-radius: 50% !important;
+}
