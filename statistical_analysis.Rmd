@@ -42,8 +42,6 @@ Firstly, for the rodent inspection across time, we compared mean difference betw
 Null hypothesis (H0): The mean difference between the annual inspection before covid and after covid is equal to zero.
 Alternative hypothesis (H1): The mean difference between the annual inspection before covid and after covid is not equal to zero.
 
-### Import data 
-
 ```{r}
 rats_2018 =
   read.csv("https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv") 
