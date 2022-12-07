@@ -57,9 +57,29 @@ rat_2020 = read_csv(url_2020)
 url_2021 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv"
 rat_2021 = read_csv(url_2021)
 
+url_covid = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_weather_covid.csv"
+rat_covid = read_csv(url_covid)
+
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
    mutate(inspection_month_n = recode(inspection_month, 
+                                   "Jan" = 1,
+                                   "Feb" = 2,
+                                   "Mar" = 3,
+                                   "Apr" = 4,
+                                   "May" = 5,
+                                   "Jun" = 6,
+                                   "Jul" = 7,
+                                   "Aug" = 8,
+                                   "Sep" = 9,
+                                   "Oct" = 10,
+                                   "Nov" = 11,
+                                   "Dec" = 12)) %>%
+  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
+  mutate(date = as.Date(date,format = "%Y-%m-%d"))
+
+rat_covid = rat_covid %>%
+  mutate(inspection_month_n = recode(inspection_month, 
                                    "Jan" = 1,
                                    "Feb" = 2,
                                    "Mar" = 3,
@@ -121,16 +141,17 @@ rat %>%
 
 ```{r, message=FALSE, warning=FALSE}
 rat_2021 %>%
-    mutate(inspection_day = as.factor(inspection_day)) %>%
+  mutate(inspection_day = as.factor(inspection_day)) %>%
   mutate(inspection_month = as.factor(inspection_month)) %>%
   mutate(inspection_month = inspection_month %>% 
                        fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
   separate(inspection_time, into = c("hour", "minute", "second")) %>%
-  group_by(inspection_month, inspection_day, hour) %>%
+  rename(Month = inspection_month) %>%
+  group_by(Month, inspection_day, hour) %>%
   summarise(n_obs = n()) %>%
   plot_ly(x = ~hour, y = ~n_obs, type = "scatter",
           color = ~inspection_day,
-          frame = ~inspection_month) %>%
+          frame = ~Month) %>%
   layout(xaxis = list(title = "Time", range = list(0,24), dtick = 3, 
                       tickvals = c(0, 3, 6, 9, 12, 15, 18, 21, 24),
                       ticktext = c("12am", "3am", "6am", "9am", "12pm", "3pm", "6pm", "9pm", "12am")),
@@ -169,7 +190,8 @@ p_rat = rat %>%
   scale_fill_manual(values = c("#38C5A3", "#F09968", "#8DA0CB", "#EE90BA", "#A8D14F")) +
   labs(x = "Count",
        y = "Borough",
-      titles = "Number of Rat Inspections in 2021")
+      titles = "Number of Rat Inspections in 2021") +
+  theme(plot.title = element_text(size = 12)) 
 
 p_pop = rat %>%
   filter(inspection_year == 2021) %>%
@@ -182,7 +204,8 @@ p_pop = rat %>%
   scale_fill_manual(values = c("#38C5A3", "#F09968", "#8DA0CB", "#EE90BA", "#A8D14F")) +
   labs(x = "Count",
        y = "Borough",
-       titles = "Number of Populations in 2021")
+       titles = "Number of Populations in 2021") +
+  theme(plot.title = element_text(size = 12))
 
 p_rat + p_pop 
 ```
@@ -203,26 +226,97 @@ rat %>%
          title = "Top 15 Rat Popular Streets in 2021") %>%
   hide_legend()
 ```
+## Top 5 Rat Popular Street{.tabset}
 
+### Bronx
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
+  filter(borough == "Bronx") %>%
   mutate(street_name = str_to_title(street_name)) %>%
-  group_by(borough, street_name) %>%
+  group_by(street_name) %>%
   summarise(rat_obs = n()) %>%
   arrange(-rat_obs) %>% 
   top_n(5) %>%
   mutate(street_name = fct_reorder(street_name, rat_obs)) %>%
-  plot_ly(x = ~rat_obs, y = ~borough, color = ~street_name, type = "bar") %>%
-  add_text(text=~street_name, hoverinfo='none', textposition = 'auto',
-           textfont=list(size=5, color="black")) %>%
+  plot_ly(x = ~rat_obs, y = ~street_name, color = ~street_name, type = "bar") %>%
   layout(xaxis = list(title = "Count"), 
-         yaxis = list(title = "Borough"),
-         title = "Top 5 Rat Popular Street in Each Borough in 2021",
-         height = 8, autosize=T) %>%
+         yaxis = list(title = "Street"),
+         title = "Top 5 Rat Popular Streets in Bronx in 2021") %>%
   hide_legend()
 ```
 
+### Brooklyn
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(inspection_year == 2021) %>%
+  filter(borough == "Brooklyn") %>%
+  mutate(street_name = str_to_title(street_name)) %>%
+  group_by(street_name) %>%
+  summarise(rat_obs = n()) %>%
+  arrange(-rat_obs) %>% 
+  top_n(5) %>%
+  mutate(street_name = fct_reorder(street_name, rat_obs)) %>%
+  plot_ly(x = ~rat_obs, y = ~street_name, color = ~street_name, type = "bar") %>%
+  layout(xaxis = list(title = "Count"), 
+         yaxis = list(title = "Street"),
+         title = "Top 5 Rat Popular Streets in Brooklyn in 2021") %>%
+  hide_legend()
+```
+
+### Manhattan
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(inspection_year == 2021) %>%
+  filter(borough == "Manhattan") %>%
+  mutate(street_name = str_to_title(street_name)) %>%
+  group_by(street_name) %>%
+  summarise(rat_obs = n()) %>%
+  arrange(-rat_obs) %>% 
+  top_n(5) %>%
+  mutate(street_name = fct_reorder(street_name, rat_obs)) %>%
+  plot_ly(x = ~rat_obs, y = ~street_name, color = ~street_name, type = "bar") %>%
+  layout(xaxis = list(title = "Count"), 
+         yaxis = list(title = "Street"),
+         title = "Top 5 Rat Popular Streets in Manhattan in 2021") %>%
+  hide_legend()
+```
+
+### Queens
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(inspection_year == 2021) %>%
+  filter(borough == "Queens") %>%
+  mutate(street_name = str_to_title(street_name)) %>%
+  group_by(street_name) %>%
+  summarise(rat_obs = n()) %>%
+  arrange(-rat_obs) %>% 
+  top_n(5) %>%
+  mutate(street_name = fct_reorder(street_name, rat_obs)) %>%
+  plot_ly(x = ~rat_obs, y = ~street_name, color = ~street_name, type = "bar") %>%
+  layout(xaxis = list(title = "Count"), 
+         yaxis = list(title = "Street"),
+         title = "Top 5 Rat Popular Streets in Queens in 2021") %>%
+  hide_legend()
+```
+
+### Staten Island
+```{r, message=FALSE, warning=FALSE}
+rat %>%
+  filter(inspection_year == 2021) %>%
+  filter(borough == "Staten Island") %>%
+  mutate(street_name = str_to_title(street_name)) %>%
+  group_by(street_name) %>%
+  summarise(rat_obs = n()) %>%
+  arrange(-rat_obs) %>% 
+  top_n(5) %>%
+  mutate(street_name = fct_reorder(street_name, rat_obs)) %>%
+  plot_ly(x = ~rat_obs, y = ~street_name, color = ~street_name, type = "bar") %>%
+  layout(xaxis = list(title = "Count"), 
+         yaxis = list(title = "Street"),
+         title = "Top 5 Rat Popular Streets in Staten Island in 2021") %>%
+  hide_legend()
+```
 
 ```{r, message=FALSE, warning=FALSE}
 # inspection type
@@ -283,25 +377,28 @@ rat_n = rat %>%
   summarise(Count = n())
 
 t = rat %>%
-  mutate(t_avg = (tmin+tmax)/2) %>%
-  distinct(inspection_year, inspection_month, inspection_day, t_avg, tmax, tmin, date)
+  mutate(`Average Temperature` = (tmin+tmax)/2) %>%
+  rename(Date = date) %>%
+  distinct(inspection_year, inspection_month, inspection_day, `Average Temperature`, tmax, tmin, Date)
 
 rat_t = left_join(rat_n, t, by = c("inspection_year", "inspection_month", "inspection_day")) %>%
   as.data.frame()
 
-rat_t %>% 
+p_weather = rat_t %>% 
   filter(inspection_year == 2021) %>%
-  ggplot(aes(x = date, y = t_avg)) + 
-  geom_point(aes(size = Count), alpha = .5, color = "#EEADD5") +
+  ggplot(aes(x = Date, y = `Average Temperature`)) + 
+  geom_point(aes(size = Count), alpha = .5, color = "#66C2A5") +
   geom_smooth(se = FALSE, color = "#8DA0CB") +
   labs(x = "Month",
        y = "Average Temperature",
        title = "Assocition Between Number of Rat Inspections and Temperature")
 
+ggplotly(p_weather)
+
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-# association with Covid-19
+# changes before and after Covid-19
 rat %>%
   filter(inspection_year %in% c(2019, 2020)) %>%
   mutate(inspection_year = as.factor(inspection_year)) %>%
@@ -317,36 +414,41 @@ rat %>%
          title = "Number of Rat Inspections Before and After COVID-19") 
 ```
 
-
 ```{r, message=FALSE, warning=FALSE}
-# heatmap
-nyc = rat_2021 %>%
-  mutate(bbl = paste(boro_code, block, lot)) 
+# association with Covid-19
+rat_obs = rat %>%
+  group_by(date) %>%
+  summarise(Count = n()) 
 
-center_lon = median(nyc$longitude,na.rm = TRUE)
-center_lat = median(nyc$latitude,na.rm = TRUE)
+c = rat_covid %>%
+  distinct(inspection_year, inspection_month, inspection_day, total_case_count, date)
 
-count = rat_2021 %>%
-  mutate(bbl = paste(boro_code, block, lot)) %>%
-  group_by(bbl) %>%
-  count()
+rat_covid_c = left_join(c, rat_obs, by = "date") %>%
+  select(inspection_year, date, Count, total_case_count) %>%
+  as.data.frame()
+  
+rat_covid_c %>% 
+  ggplot(aes(x=Count, y = total_case_count)) +
+  geom_point()
+  
+rat_covid_c %>% 
+  filter(total_case_count<=2000) %>%
+  ggplot(aes(x = date)) + 
+  geom_smooth(aes(y = total_case_count), color = "#66C2A5", se = FALSE) +
+  geom_smooth(aes(y = Count), color = "#8DA0CB", se = FALSE) +
+  labs(x = "Month",
+       y = "Number of Cases",
+       title = "Assocition Between Number of Rat Inspections and COVID-19")
 
-nyc = merge(nyc, count, by = "bbl")
+p_covid = rat_covid_c %>% 
+  ggplot(aes(x = Count, y = total_case_count)) +
+  geom_point(color = "#66C2A5", alpha = 0.5) +
+  geom_smooth(se=FALSE, color = "#8DA0CB") 
+  
 
-factpal = colorFactor("blue", nyc$n)
-
-nyc %>%
-leaflet() %>% 
-  addProviderTiles("CartoDB.Positron") %>%
-  addHeatmap(lng = ~longitude, lat = ~latitude, intensity = ~(nyc$n), blur = 25, max = 0.05, radius = 15) %>%
-  setView(lng=center_lon, lat=center_lat,zoom = 10) 
+ggplotly(p_covid)
 
 ```
-
-
-
-
-
 
 
 
