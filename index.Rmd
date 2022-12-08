@@ -10,7 +10,7 @@ output:
 
 &nbsp;
 
-### Motivation
+<center><h2><strong>Motivation</strong></h2> </center>
 
 New York City is the largest city in the United States. It is known for its hustle and bustle, Broadway shows, and Wall Street legends. However, the Big Apple as it is called is also known for a bit of a rat problem. There are actually claims that “you are never more than six feet from a rat in New York”. There are an estimated 2 million rats of approximately 40-50 members living in colonies across New York City, which is close to a quarter of New York's human population.
 
@@ -22,27 +22,36 @@ Gaining deeper sights into the pattern of rat inspections in both the temporal a
 
 &nbsp;
 
-### Project Outline
+&nbsp;
+
+<center><h2><strong>Project Outline</strong></h2> </center>
+
 
 <img src="pic/outline.jpg">
 
 
 &nbsp;
 
-### Expected Delivery
+&nbsp;
+
+<center><h2><strong>Expected Deliverables</strong></h2> </center>
+
 
 <img src="pic/Delivery.jpg">
 
 &nbsp;
 
-### Screencast
+&nbsp;
+
+<center><h2><strong>Sceancast</strong></h2> </center>
 
 <center><iframe width="910px" height = "512px" src="https://www.youtube.com/embed/6rNvxML07CU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen ></iframe></center>
 
 
 &nbsp;
 
+&nbsp;
 
-### Group Members 
+<center><h2><strong>Group Members</strong></h2> </center>
 
 <center><img width="910px" src="pic/members1.jpg"></center>

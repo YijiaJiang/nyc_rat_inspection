@@ -36,34 +36,7 @@
   font-weight: bold;
 }
 
-/* Makes TOC sticky */
 
-.row-fluid{
-  display: flex;
-}
-
-.tocify {
-  position: -webkit-sticky;
-  position: sticky; 
-  width: 100% !important;
-}
-
-/* No TOC on mobile */
-
-@media screen and (max-width: 767px) {
-  
-  .col-xs-12.col-sm-4.col-md-3 {
-    display: none;
-  }
-
-  .top-text {
-    font-size: 25px;
-  }
-  
-  .bottom-text {
-    font-size: 40px;
-  }
-}
 
 /*---------Links--------*/
 

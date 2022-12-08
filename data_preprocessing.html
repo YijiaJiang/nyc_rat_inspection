@@ -11,7 +11,7 @@
 
 
 
-<title>Proposal</title>
+<title>Report</title>
 
 <script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -383,176 +383,45 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Proposal</h1>
+<h1 class="title toc-ignore">Report</h1>
 
 </div>
 
 
-<p> </p>
-<div id="the-group-members" class="section level3">
-<h3>The Group Members</h3>
-<ul>
-<li>Jia Ji (jj3205)</li>
-<li>Yijia Jiang (yj2687)</li>
-<li>Gonghao Liu (gl2716)</li>
-<li>Yifei Xu (yx2638)</li>
-<li>Ziyan Xu (zx2373)</li>
-</ul>
-<p> </p>
+<p>
+</p>
+<div id="data-sources" class="section level3">
+<h3>Data Sources</h3>
+<div id="rodent-inspection-data" class="section level4">
+<h4>Rodent Inspection Data</h4>
+<p>The <a
+href="https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj">rodent
+inspection data</a> contains the information on rat sightings and
+intervention visits in NYC, which is managed by the New York City
+Department of Health and Mental Hygiene, Division of Environmental
+Health. The data source is the Veterinary, Rodent and Vector
+Surveillance System (VRVSS). It is also available on the <a
+href="https://www.nyc.gov/site/doh/health/health-topics/rats.page">Rat
+Information Portal</a>, which is a web-based mapping application where
+users can view and map rat inspection and intervention data. Users can
+search results from Health Department inspections for rats at the level
+of individual properties, and view neighborhood maps.</p>
 </div>
-<div id="the-tentative-project-title" class="section level3">
-<h3>The Tentative Project Title</h3>
-<p>Have You Ever Seen Rats in NYC?</p>
-<p> </p>
+<div id="nyc-daily-weather-data" class="section level4">
+<h4>NYC Daily Weather Data</h4>
+<p>The <a href="https://www.noaa.gov/">NYC daily weather data</a></p>
 </div>
-<div id="motivation" class="section level3">
-<h3>Motivation</h3>
-<p>One of our team members and her friends were finishing an outdoor
-dinner in Chelsea recently when, from the corner of her eye, she saw
-something move near the edge of their table: A rat had been on the
-table. Rats are among New York’s permanent features and across the city,
-one hears the same thing: they are running amok like never before. Rats
-in NYC are almost everywhere, in the park, on your block and even at
-your table.</p>
-<p>Our dataset contains some information on rat inspection, which is
-provided by the Rat Information Portal (RIP) to do research on evidence
-of rat activities. Gaining deeper sights into the pattern of rat
-inspections in both the temporal and spatial dimensions will help those
-in fear of rats minimize exposure as much as possible. Broadly, it is
-beneficial to identify potential risks of disease-spread and then build
-a clean and pleasant living environment, which is what we as public
-health students should be working towards.</p>
-<p> </p>
+<div id="nyc-covid-19-daily-case-count-data" class="section level4">
+<h4>NYC COVID-19 Daily Case Count Data</h4>
+<p>The <a
+href="https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3">NYC
+COVID-19 daily case count data</a></p>
 </div>
-<div id="anticipated-data-sources" class="section level3">
-<h3>Anticipated Data Sources</h3>
-<p>We intend to mainly use three datasets: <br></p>
-<ul>
-<li>Rodent inspection data from <a
-href="https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj">NYC
-Open Data</a> <br></li>
-<li>Rat related complaint data from 311 Service Requests via <a
-href="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9">NYC
-Open Data</a> <br></li>
-<li>NYC daily weather data from <a
-href="https://www.weather.gov/wrh/climate?wfo=okx">National Weather
-Service</a></li>
-</ul>
-<p> </p>
+<div id="nyc-borough-population-data" class="section level4">
+<h4>NYC Borough Population Data</h4>
+<p>The <a href="http://www.citypopulation.de/en/usa/newyorkcity/">NYC
+borough population data</a></p>
 </div>
-<div id="intended-final-product" class="section level3">
-<h3>Intended Final Product</h3>
-<ul>
-<li>A website containing many pages, which will deliver rat sighting
-analysis in NYC and give recommendations on locations to avoid
-encountering rats</li>
-<li>A report summarizing the spatial analysis, temporal changes, and
-potential relation to other factors of the distribution of rats in
-NYC</li>
-<li>A Shiny App predicting rat sighting in specific locations and times
-within NYC</li>
-</ul>
-<p> </p>
-</div>
-<div id="planned-analysis-visualizations-coding-challenges"
-class="section level3">
-<h3>Planned Analysis / Visualizations / Coding challenges</h3>
-<div id="planned-analysis" class="section level4">
-<h4>Planned Analysis</h4>
-<ul>
-<li>Analyze climatic and geographical characteristics, and results of
-rat inspection</li>
-<li>Compare the number of rat inspection cases across years</li>
-<li>Explore the trend in the number of rat inspections throughout the
-years</li>
-<li>Evaluate the efficiency in handling rat related complaints among
-different agencies</li>
-<li>Conduct hypothesis test to compare the rat density in different
-boroughs and time</li>
-<li>Construct a linear model that predicts the rate of observing a rat
-from various potential covariates, including climatic and geographical
-factors</li>
-</ul>
-<p> </p>
-</div>
-<div id="visualizations" class="section level4">
-<h4>Visualizations</h4>
-<ul>
-<li>Visualize rat activities
-<ul>
-<li>at different times in a day (line chart)</li>
-<li>in different seasons (bar chart)</li>
-<li>in different locations (boxplot)</li>
-<li>in terms of temperatures (heatmap)</li>
-</ul></li>
-<li>Visualize the results of rat inspection (pie chart)</li>
-<li>Visualize the trend of rat inspection over years (line chart)</li>
-<li>Construct interactive maps for rat inspection cases</li>
-<li>Compare the performance among different agencies in dealing with rat
-issues (boxplot)</li>
-<li>Make correlation matrix, PCA plot to check colinearity and to
-simplify the complexity in high-dimensional data in modeling
-section</li>
-</ul>
-<p> </p>
-</div>
-<div id="coding-challenges" class="section level4">
-<h4>Coding challenges</h4>
-<ul>
-<li>Dealing with latitude and longitude variables</li>
-<li>Many missing values in certain variables</li>
-<li>Interactive maps for overall rat inspection cases</li>
-<li>Need to carefully quantify the value to evaluate the efficiency of
-handling rat related complaints</li>
-<li>Multiple hypotheses or multiple comparisons when hypothesis
-testing</li>
-<li>Need to preprocess the data for each year and location before
-modeling</li>
-<li>Need to specify inspection type when constructing the linear
-model</li>
-<li>Shiny App to predict rat sightings in specific locations and times
-(according to the user’s choice)</li>
-</ul>
-<p> </p>
-</div>
-</div>
-<div id="planned-timeline" class="section level3">
-<h3>Planned Timeline</h3>
-<table>
-<thead>
-<tr class="header">
-<th align="left">Time</th>
-<th align="left">Task</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Nov 13 - Nov 18</td>
-<td align="left">Project review meeting</td>
-</tr>
-<tr class="even">
-<td align="left">Nov 19 - Nov 22</td>
-<td align="left">Data preprocessing</td>
-</tr>
-<tr class="odd">
-<td align="left">Nov 23 - Nov 27</td>
-<td align="left">Exploratory data analysis</td>
-</tr>
-<tr class="even">
-<td align="left">Nov 28 - Dec 2</td>
-<td align="left">Statistical analysis (hypothesis test and
-modeling)</td>
-</tr>
-<tr class="odd">
-<td align="left">Dec 3 - Dec 10</td>
-<td align="left">Work on report, webpage and screencast</td>
-</tr>
-<tr class="even">
-<td align="left">Dec 15</td>
-<td align="left">In-class discussion of projects</td>
-</tr>
-</tbody>
-</table>
 </div>
 
 

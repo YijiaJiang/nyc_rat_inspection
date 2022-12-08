@@ -13,7 +13,7 @@
 
 <title>NYC Rat Inspection</title>
 
-<script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -189,8 +189,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -198,9 +198,16 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "\e258";
-  font-family: 'Glyphicons Halflings';
+  content: "&#xe258;";
   border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -257,13 +264,25 @@ $(document).ready(function () {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
+  <a href="data_preprocessing.html">Data Preprocessing</a>
+</li>
+<li>
   <a href="exploratory_data_analysis.html">Exploratory Data Analysis</a>
 </li>
-<li>
-  <a href="statistical_analysis.html">Statistical Analysis</a>
-</li>
-<li>
-  <a href="regression_analysis.html">Regression Analysis</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Statistical Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="statistical_analysis.html">Hypothesis Test</a>
+    </li>
+    <li>
+      <a href="regression_analysis.html">Regression Analysis</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="dashboard.html">Dashboard</a>
@@ -301,8 +320,11 @@ $(document).ready(function () {
 
 
 <p> </p>
-<div id="motivation" class="section level3">
-<h3>Motivation</h3>
+<center>
+<h2>
+<strong>Motivation</strong>
+</h2>
+</center>
 <p>New York City is the largest city in the United States. It is known
 for its hustle and bustle, Broadway shows, and Wall Street legends.
 However, the Big Apple as it is called is also known for a bit of a rat
@@ -333,49 +355,42 @@ potential risks of disease-spread and then build a clean and pleasant
 living environment, which is what we as public health students should be
 working towards.</p>
 <p> </p>
-</div>
-<div id="project-outline" class="section level3">
-<h3>Project Outline</h3>
+<p> </p>
+<center>
+<h2>
+<strong>Project Outline</strong>
+</h2>
+</center>
 <p><img src="pic/outline.jpg"></p>
 <p> </p>
-</div>
-<div id="datasets" class="section level3">
-<h3>Datasets</h3>
-<ul>
-<li>Rodent inspection data from <a
-href="https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj">NYC
-Open Data</a><br />
-</li>
-<li>NYC daily weather data from <a href="https://www.noaa.gov/">NOAA
-National Climatic Data Center</a></li>
-<li>NYC COVID-19 daily case count data from <a
-href="https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3">NYC
-Open Data</a></li>
-<li>NYC Boroughs population from <a
-href="http://www.citypopulation.de/en/usa/newyorkcity/">City
-Population</a></li>
-</ul>
 <p> </p>
-</div>
-<div id="expected-delivery" class="section level3">
-<h3>Expected Delivery</h3>
+<center>
+<h2>
+<strong>Expected Deliverables</strong>
+</h2>
+</center>
 <p><img src="pic/Delivery.jpg"></p>
 <p> </p>
-</div>
-<div id="screencast" class="section level3">
-<h3>Screencast</h3>
+<p> </p>
+<center>
+<h2>
+<strong>Sceancast</strong>
+</h2>
+</center>
 <center>
 <iframe width="910px" height="512px" src="https://www.youtube.com/embed/6rNvxML07CU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>
 </center>
 <p> </p>
-</div>
-<div id="group-members" class="section level3">
-<h3>Group Members</h3>
+<p> </p>
+<center>
+<h2>
+<strong>Group Members</strong>
+</h2>
+</center>
 <center>
 <img width="910px" src="pic/members1.JPG">
 </center>
-</div>
 
 
 
