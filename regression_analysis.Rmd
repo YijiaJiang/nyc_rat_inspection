@@ -60,6 +60,8 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   filter(result != "Passed")
 ```
 
+## Variable selection
+ 
 ```{r}
 cases = rat %>% 
   select(inspection_ym, borough) %>% 
@@ -71,8 +73,11 @@ rat_tidy = rat %>%
   mutate(borough = as.factor(borough), inspection_month = as.factor(inspection_month), 
          prcp = as.numeric(prcp), snow = as.numeric(snow), snwd = as.numeric(snwd),
          tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
-cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>%distinct() 
+cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
 ```
+
+
+## Linear Regression Model
 
 ```{r}
   
