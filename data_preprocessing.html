@@ -11,7 +11,7 @@
 
 
 
-<title>NYC Rat Inspection</title>
+<title>Report</title>
 
 <script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -29,19 +29,15 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 <link rel="icon" type="image/png" href="pic/rat.png"/>
-
-<div class="header-image"> 
-        <div class="image-text">
-          <div class="top-text"></div>
-            <div class="bottom-text">Have You Ever Seen Rats in NYC?</div>
-        </div>
-</div>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -230,6 +226,69 @@ $(document).ready(function () {
 
 
 
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
 
 </head>
 
@@ -237,6 +296,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -298,72 +367,49 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">NYC Rat Inspection</h1>
+<h1 class="title toc-ignore">Report</h1>
 
 </div>
 
 
-<p> </p>
-<div id="motivation" class="section level3">
-<h3>Motivation</h3>
-<p>New York City is the largest city in the United States. It is known
-for its hustle and bustle, Broadway shows, and Wall Street legends.
-However, the Big Apple as it is called is also known for a bit of a rat
-problem. There are actually claims that “you are never more than six
-feet from a rat in New York”. There are an estimated 2 million rats of
-approximately 40-50 members living in colonies across New York City,
-which is close to a quarter of New York’s human population.</p>
-<p>At one time, our team member Ziyan and her friends were finishing an
-outdoor dinner in Chelsea recently when, from the corner of her eye, she
-saw something move near the edge of their table: A rat had been on the
-table. Rats are among New York’s permanent features and across the city,
-one hears the same thing: they are running amok like never before. Rats
-in NYC are almost everywhere, in the park, on your block and even at
-your table.</p>
-<p>According to new data, more rats have been spotted in 2022 alone than
-at any point in the last decade, with 16,000 rodents sightings reported
-through the end of July, up from 2,000 a year ago. Rats are becoming the
-bane of New Yorkers’ existence nowadays. In order to deal with this
-intractable issue, our group are going to use the rodent inspection
-dataset provided by the
-<a style="text-decoration:none" href="https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj">
-Rat Information Portal (RIP)</a> to do data analysis on evidence of rat
-activities.</p>
-<p>Gaining deeper sights into the pattern of rat inspections in both the
-temporal and spatial dimensions will help those in fear of rats minimize
-exposure as much as possible. Broadly, it is beneficial to identify
-potential risks of disease-spread and then build a clean and pleasant
-living environment, which is what we as public health students should be
-working towards.</p>
-<p> </p>
+<div id="data-sources" class="section level3">
+<h3>Data Sources</h3>
+<div id="rodent-inspection-data" class="section level4">
+<h4>Rodent Inspection Data</h4>
+<p>The <a
+href="https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj">rodent
+inspection data</a> contains the information on rat sightings and
+intervention visits in NYC, which is managed by the New York City
+Department of Health and Mental Hygiene, Division of Environmental
+Health. The data source is the Veterinary, Rodent and Vector
+Surveillance System (VRVSS). It is also available on the <a
+href="https://www.nyc.gov/site/doh/health/health-topics/rats.page">Rat
+Information Portal</a>, which is a web-based mapping application where
+users can view and map rat inspection and intervention data. Users can
+search results from Health Department inspections for rats at the level
+of individual properties, and view neighborhood maps.</p>
 </div>
-<div id="project-outline" class="section level3">
-<h3>Project Outline</h3>
-<p><img src="pic/outline.jpg"></p>
-<p> </p>
+<div id="nyc-daily-weather-data" class="section level4">
+<h4>NYC Daily Weather Data</h4>
+<p>The <a href="https://www.noaa.gov/">NYC daily weather data</a></p>
 </div>
-<div id="expected-delivery" class="section level3">
-<h3>Expected Delivery</h3>
-<p><img src="pic/Delivery.jpg"></p>
-<p> </p>
+<div id="nyc-covid-19-daily-case-count-data" class="section level4">
+<h4>NYC COVID-19 Daily Case Count Data</h4>
+<p>The <a
+href="https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3">NYC
+COVID-19 daily case count data</a></p>
 </div>
-<div id="screencast" class="section level3">
-<h3>Screencast</h3>
-<center>
-<iframe width="910px" height="512px" src="https://www.youtube.com/embed/6rNvxML07CU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-</iframe>
-</center>
-<p> </p>
+<div id="nyc-borough-population-data" class="section level4">
+<h4>NYC Borough Population Data</h4>
+<p>The <a href="http://www.citypopulation.de/en/usa/newyorkcity/">NYC
+borough population data</a></p>
 </div>
-<div id="group-members" class="section level3">
-<h3>Group Members</h3>
-<center>
-<img width="910px" src="pic/members1.JPG">
-</center>
 </div>
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -396,6 +442,35 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3,h4,h5",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
