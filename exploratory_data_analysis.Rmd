@@ -366,6 +366,10 @@ rat %>%
          title = "Number of Rat Inspections in Bronx in 2021") 
 ```
 
+&nbsp;
+
+&nbsp;
+
 #### Brooklyn
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
@@ -389,6 +393,10 @@ rat %>%
          yaxis = list(title = "Count"),
          title = "Number of Rat Inspections in Brooklyn in 2021") 
 ```
+
+&nbsp;
+
+&nbsp;
 
 #### Manhattan
 ```{r, message=FALSE, warning=FALSE}
@@ -414,6 +422,10 @@ rat %>%
          title = "Number of Rat Inspections in Manhattan in 2021") 
 ```
 
+&nbsp;
+
+&nbsp;
+
 #### Queens
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
@@ -437,6 +449,10 @@ rat %>%
          yaxis = list(title = "Count"),
          title = "Number of Rat Inspections in Queens in 2021") 
 ```
+
+&nbsp;
+
+&nbsp;
 
 #### Staten Island
 ```{r, message=FALSE, warning=FALSE}
@@ -513,6 +529,10 @@ rat %>%
   hide_legend()
 ```
 
+&nbsp;
+
+&nbsp;
+
 #### Brooklyn
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
@@ -530,6 +550,10 @@ rat %>%
          title = "Top 5 Rat Popular Streets in Brooklyn in 2021") %>%
   hide_legend()
 ```
+
+&nbsp;
+
+&nbsp;
 
 #### Manhattan
 ```{r, message=FALSE, warning=FALSE}
@@ -549,6 +573,10 @@ rat %>%
   hide_legend()
 ```
 
+&nbsp;
+
+&nbsp;
+
 #### Queens
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
@@ -566,6 +594,10 @@ rat %>%
          title = "Top 5 Rat Popular Streets in Queens in 2021") %>%
   hide_legend()
 ```
+
+&nbsp;
+
+&nbsp;
 
 #### Staten Island
 ```{r, message=FALSE, warning=FALSE}
