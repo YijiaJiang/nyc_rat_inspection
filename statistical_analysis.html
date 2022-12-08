@@ -337,6 +337,9 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
+  <a href="data_preprocessing.html">Data Preprocessing</a>
+</li>
+<li>
   <a href="exploratory_data_analysis.html">Exploratory Data Analysis</a>
 </li>
 <li>
@@ -388,66 +391,6 @@ div.tocify {
 </div>
 
 
-<pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
-
-library(tidyverse)
-library(readxl)
-library(patchwork)
-library(plotly)
-library(leaflet)
-library(ggplot2)
-library(lubridate)
-
-knitr::opts_chunk$set(
-  fig.width = 6,
-  fig.asp = .6,
-  out.width = &quot;90%&quot;)
-
-theme_set(theme_minimal() + theme(legend.position = &quot;bottom&quot;))
-options(
-  ggplot2.continuous.colour = &quot;viridis&quot;,
-  ggplot2.continuous.fill = &quot;viridis&quot;
-)
-
-scale_colour_discrete = scale_colour_viridis_d
-scale_fill_discrete = scale_fill_viridis_d</code></pre>
-<pre class="r"><code>url_2012 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv&quot;
-rat_2012 = read_csv(url(url_2012)) 
-url_2013 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2013.csv&quot;
-rat_2013 = read_csv(url(url_2013)) 
-url_2014 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2014.csv&quot;
-rat_2014 = read_csv(url(url_2014)) 
-url_2015 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2015.csv&quot;
-rat_2015 = read_csv(url(url_2015)) 
-url_2016 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2016.csv&quot;
-rat_2016 = read_csv(url(url_2016)) 
-url_2017 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2017.csv&quot;
-rat_2017 = read_csv(url(url_2017)) 
-url_2018 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv&quot;
-rat_2018 = read_csv(url(url_2018)) 
-url_2019 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv&quot;
-rat_2019 = read_csv(url(url_2019)) 
-url_2020 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv&quot;
-rat_2020 = read_csv(url(url_2020)) 
-url_2021 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv&quot;
-rat_2021 = read_csv(url(url_2021)) 
-rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %&gt;%
-  select(-...1) %&gt;%
-   mutate(inspection_month_n = recode(inspection_month, 
-                                   &quot;Jan&quot; = 1,
-                                   &quot;Feb&quot; = 2,
-                                   &quot;Mar&quot; = 3,
-                                   &quot;Apr&quot; = 4,
-                                   &quot;May&quot; = 5,
-                                   &quot;Jun&quot; = 6,
-                                   &quot;Jul&quot; = 7,
-                                   &quot;Aug&quot; = 8,
-                                   &quot;Sep&quot; = 9,
-                                   &quot;Oct&quot; = 10,
-                                   &quot;Nov&quot; = 11,
-                                   &quot;Dec&quot; = 12)) %&gt;%
-  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = &quot;-&quot;))%&gt;%
-  mutate(date = as.Date(date,format = &quot;%Y-%m-%d&quot;))</code></pre>
 <div id="boroughs" class="section level2">
 <h2>Boroughs</h2>
 <p> </p>
@@ -469,10 +412,9 @@ rat_years = rat %&gt;%
   summarize(frequency = n()) %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
-  pivot_wider(names_from = &quot;inspection_year&quot;, values_from = &quot;frequency&quot;)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<pre class="r"><code># print the table
+  pivot_wider(names_from = &quot;inspection_year&quot;, values_from = &quot;frequency&quot;)
+
+# print the table
 rat_years %&gt;% t() %&gt;% 
 knitr::kable(caption = &quot;Distribution of inspections across the years&quot;)</code></pre>
 <table>
@@ -579,6 +521,7 @@ chisq.test(rat_years[,-1]) %&gt;%
 hypothesis at 99% significant level. This means that the inspections
 among boroughs have a different distribution across years.</p>
 <p> </p>
+<p> </p>
 </div>
 <div id="chi-square-testing-homogenity-among-boroughs-in-2021"
 class="section level3">
@@ -598,10 +541,9 @@ rat_boro = rat_2021 %&gt;%
   summarize(frequency = n()) %&gt;%
   mutate(borough = as.factor(borough),
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %&gt;% 
-  dplyr::select(borough, frequency)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;borough&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<pre class="r"><code># print the table
+  dplyr::select(borough, frequency)
+
+# print the table
 knitr::kable(rat_boro, caption = &quot;Distribution of inspections in 2021&quot;)</code></pre>
 <table>
 <caption>Distribution of inspections in 2021</caption>
@@ -645,6 +587,7 @@ chisq.test(rat_boro[,-1]) %&gt;%
 hypothesis, the inspections are not equally distributed among boroughs
 in 2021.</p>
 <p> </p>
+<p> </p>
 </div>
 </div>
 <div id="weather-and-covid-19" class="section level2">
@@ -682,10 +625,9 @@ rat_temp =
   summarize(frequency = n()) %&gt;%
   mutate(Feeling = as.factor(Feeling),
     Feeling = fct_reorder(Feeling, frequency, .desc = TRUE)) %&gt;% 
-  pivot_wider(names_from = &quot;Feeling&quot;, values_from = &quot;frequency&quot;) </code></pre>
-<pre><code>## Adding missing grouping variables: `inspection_year`, `inspection_month`,
-## `inspection_day`</code></pre>
-<pre class="r"><code># print the table
+  pivot_wider(names_from = &quot;Feeling&quot;, values_from = &quot;frequency&quot;) 
+
+# print the table
 knitr::kable(rat_temp, caption = &quot;The association between number of rat inspections and temperature in 2021&quot;)</code></pre>
 <table>
 <caption>The association between number of rat inspections and
@@ -720,6 +662,7 @@ chisq.test(rat_temp[,-1]) %&gt;%
 hypothesis, the inspections are not equally distributed in different
 weather in 2021.</p>
 <p> </p>
+<p> </p>
 </div>
 <div
 id="wilcoxon-rank-sum-testing-changes-of-inspection-density-caused-by-covid-19"
@@ -742,10 +685,9 @@ rat_covid = rbind(rat_2019, rat_2020) %&gt;%
   mutate(Inspection_month = inspection_month %&gt;% 
                        fct_relevel(&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;,&quot;Apr&quot;,&quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;)) %&gt;%
   group_by(Inspection_year,Inspection_month) %&gt;%
-  summarize(Frequency = n())</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;Inspection_year&#39;. You can override using
-## the `.groups` argument.</code></pre>
-<pre class="r"><code># print the table
+  summarize(Frequency = n())
+
+# print the table
 rat_covid2 = rat_covid %&gt;%   
   pivot_wider(names_from = &quot;Inspection_year&quot;, values_from = &quot;Frequency&quot;)
 knitr::kable(rat_covid2, caption = &quot;Number of rat inspections before and after covid&quot;)</code></pre>
