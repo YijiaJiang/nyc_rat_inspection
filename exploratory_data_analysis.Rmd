@@ -684,11 +684,7 @@ c = rat_covid %>%
 rat_covid_c = left_join(c, rat_obs, by = "date") %>%
   select(inspection_year, date, Count, total_case_count) %>%
   as.data.frame()
-  
-rat_covid_c %>% 
-  ggplot(aes(x=Count, y = total_case_count)) +
-  geom_point()
-  
+
 p_covid = rat_covid_c %>% 
   filter(total_case_count<=2000) %>%
   rename(Date = date, 
