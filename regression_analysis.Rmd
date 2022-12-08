@@ -58,21 +58,20 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   mutate(date = as.Date(date,format = "%Y-%m-%d")) %>% 
   mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
   mutate(covid_yn = case_when(date < "2020-02-29" ~ 0,
-                              TRUE ~ 1))
+                              TRUE ~ 1)) %>%
+  separate(inspection_time, into = c("hour", "minute", "second")) %>%
+  mutate(hour = as.numeric(hour)) %>%
+  mutate(inspection_daytime = case_when(
+      hour < 6 | hour >= 18 ~ "Night",
+      hour >= 6 & hour < 12 ~ "Morning",
+      hour >= 12 & hour < 18 ~ "Afternoon"))
   
-#  separate(inspection_time, into = c("hour", "minute", "second")) %>%
-#  mutate(hour = as.numeric(hour)) %>%
-#  mutate(inspection_daytime = case_when(
-#      hour < 6 | hour >= 18 ~ "Night",
-#      hour >= 6 & hour < 12 ~ "Morning",
-#      hour >= 12 & hour < 18 ~ "Afternoon")) %>%
-#  
 #%>%  filter(result != "Passed")
 ```
 
 ## Variable selection
  
-```{r}
+```{r, message = FALSE, warning = FALSE,comment = FALSE}
 cases = rat %>% 
   select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>% 
   group_by(inspection_ym, borough) %>% 
@@ -104,19 +103,19 @@ cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "
 
 ## Linear Regression Model
 
-```{r}
+```{r, message = FALSE, warning = FALSE,comment = FALSE}
   
-model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_tmin + avg_tmax, data = cases_borough_monthly) 
+model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
 broom::tidy(model_linear_original) %>% 
   knitr::kable()
+summary(model_linear_original)
 
 model_linear = step(model_linear_original, direction = "backward")
 broom::tidy(model_linear) %>% 
   knitr::kable()
 
 
-#model_interact = lm(borough_month_cases ~ inspection_month + borough + snow + prcp + snwd + tmin + tmax , data = cases_borough_month) 
-#broom::tidy(model_interact) %>% knitr::kable()
+summary(model_linear)
 ```
 
 ## Model diagnostics
@@ -147,12 +146,13 @@ We set the Result variable as the binary outcome. Passed(0) means none was inspe
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
 
 rat_binary = rat %>% 
-  select(result, borough, inspection_month, inspection_daytime, prcp, snow, snwd, tmin, tmax) %>%
+  select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
     result == "Passed" ~ 0, 
     TRUE ~ 1)) %>%
   mutate(inspection_result = as.factor(inspection_result), 
          borough = as.factor(borough),
+         covid_yn = as.factor(covid_yn),
          inspection_month = as.factor(inspection_month), 
          inspection_daytime = as.factor(inspection_daytime), 
          prcp = as.numeric(prcp), 
