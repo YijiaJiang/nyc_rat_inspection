@@ -54,9 +54,10 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
                                    "Oct" = 10,
                                    "Nov" = 11,
                                    "Dec" = 12)) %>%
-  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
-  mutate(date = as.Date(date,format = "%Y-%m-%d"))%>% 
-  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) 
+  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
+  mutate(date = as.Date(date,format = "%Y-%m-%d")) %>% 
+  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %>%
+  filter(result != "Passed")
 ```
 
 ```{r}
@@ -66,8 +67,8 @@ cases = rat %>%
   add_count(borough, inspection_ym, name = "borough_month_cases") %>%
   distinct()
 rat_tidy = rat %>% 
-  select(borough, inspection_ym, prcp, snow, snwd, tmin, tmax) %>%
-  mutate(borough = as.factor(borough), inspection_ym = as.factor(inspection_ym), 
+  select(borough, inspection_ym, inspection_month, prcp, snow, snwd, tmin, tmax) %>%
+  mutate(borough = as.factor(borough), inspection_month = as.factor(inspection_month), 
          prcp = as.numeric(prcp), snow = as.numeric(snow), snwd = as.numeric(snwd),
          tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
 cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>%distinct() 
@@ -75,18 +76,21 @@ cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "bo
 
 ```{r}
   
-original_lm = lm(borough_month_cases ~ inspection_ym + borough + prcp + snow + snwd + tmin + tmax, data = cases_borough_month) 
+original_lm = lm(borough_month_cases ~ inspection_month + borough + prcp + snow + snwd + tmin + tmax, data = cases_borough_month) 
 broom::tidy(original_lm) %>% 
   knitr::kable()
-model_interact = lm(borough_month_cases ~ inspection_ym + borough + snow + prcp + snwd + tmin + tmax + tmin*snwd, data = cases_borough_month) 
-broom::tidy(model_interact) %>% 
+
+step_lm = step(original_lm, direction = "backward")
+broom::tidy(step_lm) %>% 
   knitr::kable()
+
+
+#model_interact = lm(borough_month_cases ~ inspection_month + borough + snow + prcp + snwd + tmin + tmax , data = cases_borough_month) 
+#broom::tidy(model_interact) %>% knitr::kable()
 ```
 
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
-step_lm = step(model_interact, direction = "backward")
-broom::tidy(step_lm) %>% 
-  knitr::kable()
+
 ```
 
 
