@@ -76,27 +76,21 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   mutate(date = as.Date(date,format = "%Y-%m-%d"))
 ```
 
-## Over time
-
-### Chi-square testing homogenity
-
-&nbsp;
-
 ## Boroughs
 
 &nbsp;
 
 ### Chi-square testing homogenity among boroughs in recent years
 
-We decide to look at the nearest three years to figure out the distribution of inspections varies in different boroughs from year to year
+We decide to look at the number of inspections over years to figure out the distribution of inspections varies in different boroughs from year to year.
 
-$H_0$ : The distribution of inspections among boroughs are same across the three years.
+$H_0$ : The distribution of inspections among boroughs are same over years.
 
-$H_1$ : The distribution of inspections among boroughs aren’t all the same across the three years.
+$H_1$ : The distribution of inspections among boroughs aren’t all the same over years.
 
 ```{r}
 # create a data frame
-rat_years = rbind(rat_2019, rat_2020, rat_2021) %>% 
+rat_years = rat %>% 
   janitor::clean_names() %>% 
   dplyr::select(inspection_year, borough) %>% 
   group_by(borough, inspection_year) %>%
@@ -105,16 +99,16 @@ rat_years = rbind(rat_2019, rat_2020, rat_2021) %>%
     borough = fct_reorder(borough, frequency, .desc = TRUE)) %>% 
   pivot_wider(names_from = "inspection_year", values_from = "frequency")
 
-#print the table
+# print the table
 rat_years %>% t() %>% 
 knitr::kable(caption = "Distribution of inspections across the years")
 
-#Chi-square test
+# Chi-square test
 chisq.test(rat_years[,-1]) %>% 
    broom::tidy()
 ```
 
-We can see from the Chi-square test above, we reject the null hypothesis at 99% significant level. This means that the inspections among boroughs have a different distribution across the recent three years.
+We can see from the Chi-square test above, we reject the null hypothesis at 99% significant level. This means that the inspections among boroughs have a different distribution across years.
 
 &nbsp;
 
@@ -153,9 +147,53 @@ We can see from the chi-square test result we should reject the null hypothesis,
 
 &nbsp;
 
+### Chi-sqaure testing association betwwen inspection density and temperature in 2021
+
+$H_0$ : The distribution of inspections in different weather are same in 2021.
+
+$H_1$ : The distribution of inspections in different weather aren’t all the same in 2021.
+
+```{r}
+# create a data frame
+rat_n = rat_2021 %>%
+  group_by(inspection_year, inspection_month, inspection_day)
+
+rat_t = rat %>%
+  mutate(Average_Temperature = (tmin + tmax)/2) %>% 
+  rename(Date = date) %>%
+  mutate(Feeling = as.character(Average_Temperature)) %>% 
+  mutate(Feeling = case_when(
+      Average_Temperature <= 0 ~ 'Frozen',
+      Average_Temperature <= 10 ~ 'Cold',
+      Average_Temperature <= 20 ~ 'Cool',
+      Average_Temperature <= 30 ~ 'Warm',
+      Average_Temperature <= 40 ~ 'Hot')) %>% 
+  distinct(inspection_year, inspection_month, inspection_day, Date, Average_Temperature, tmax, tmin, Feeling)
+
+rat_temp = 
+  left_join(rat_n, rat_t, by = c("inspection_year", "inspection_month", "inspection_day")) %>%
+  dplyr::select(Average_Temperature, Feeling) %>% 
+  group_by(Feeling) %>%
+  summarize(frequency = n()) %>%
+  mutate(Feeling = as.factor(Feeling),
+    Feeling = fct_reorder(Feeling, frequency, .desc = TRUE)) %>% 
+  pivot_wider(names_from = "Feeling", values_from = "frequency") 
+
+# print the table
+knitr::kable(rat_temp, caption = "The association between number of rat inspections and temperature in 2021")
+
+# chi-square test
+chisq.test(rat_temp[,-1]) %>% 
+  broom::tidy()
+```
+
+We can see from the chi-square test result we should reject the null hypothesis, the inspections are not equally distributed in different weather in 2021.
+
+&nbsp;
+
 ### Wilcoxon Rank-sum testing changes of inspection density caused by covid-19
 
-Firstly, for the rodent inspection across time, we compared mean difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
+For the rodent inspection across time, we compared mean difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
 
 $H_0$ : The distribution of annual inspection before covid and after covid is same.
 
@@ -178,11 +216,9 @@ rat_covid2 = rat_covid %>%
   pivot_wider(names_from = "Inspection_year", values_from = "Frequency")
 knitr::kable(rat_covid2, caption = "Number of rat inspections before and after covid")
 
-# Wilcoxon Rank-sum testing
+# Wilcoxon Rank-sum test
 wilcox.test(Frequency ~ Inspection_year, data = rat_covid,
                    exact = FALSE)
 ```
 
 We can see from the Wilcoxon Rank-sum test result that the true location shift is not equal to 0, which means that the medians of two populations differ. Therefore, we have the evidence to reject the null hypothesis and conclude that there is a difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
-
-&nbsp;
