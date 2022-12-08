@@ -172,7 +172,7 @@ rat_binary = rat %>%
 
 
 ```{r}
-model_logit_original = glm(inspection_result ~ inspection_month + borough + inspection_daytime + prcp + snow + snwd + tmin + tmax, data = rat_binary, family="binomial")
+model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + tmin, data = rat_binary, family="binomial")
 
 model_logit = step(model_logit_original, direction = "backward")
 broom::tidy(model_linear) %>% 
