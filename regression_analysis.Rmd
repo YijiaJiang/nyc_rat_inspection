@@ -42,19 +42,18 @@ rat_2021 = read_csv(url(url_2021))
 ```{r}
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
-   mutate(inspection_month_n = recode(inspection_month, 
-                                   "Jan" = 1,
-                                   "Feb" = 2,
-                                   "Mar" = 3,
-                                   "Apr" = 4,
-                                   "May" = 5,
-                                   "Jun" = 6,
-                                   "Jul" = 7,
-                                   "Aug" = 8,
-                                   "Sep" = 9,
-                                   "Oct" = 10,
-                                   "Nov" = 11,
-                                   "Dec" = 12)) %>%
+   mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
+                                   inspection_month == "Feb" ~ 2,
+                                   inspection_month == "Mar" ~ 3,
+                                   inspection_month == "Apr" ~ 4,
+                                   inspection_month == "May" ~ 5,
+                                   inspection_month == "Jun" ~ 6,
+                                   inspection_month == "Jul" ~ 7,
+                                   inspection_month == "Aug" ~ 8,
+                                   inspection_month == "Sep" ~ 9,
+                                   inspection_month == "Oct" ~ 10,
+                                   inspection_month == "Nov" ~ 11,
+                                   inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
   mutate(date = as.Date(date,format = "%Y-%m-%d")) %>% 
   mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %>%
@@ -71,19 +70,31 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
  
 ```{r}
 cases = rat %>% 
-  select(inspection_ym, borough) %>% 
+  select(borough, inspection_ym, inspection_month, prcp, snow, snwd, tmin, tmax) %>% 
   group_by(inspection_ym, borough) %>% 
-  add_count(borough, inspection_ym, name = "borough_month_cases") %>%
-  distinct()
+  add_count(borough, inspection_ym, name = "borough_monthly_cases") %>%
+  select(-prcp, -snow, -snwd, -tmin, -tmax)
+
 
 rat_tidy = rat %>% 
-  select(borough, inspection_ym, inspection_month, inspection_daytime, prcp, snow, snwd, tmin, tmax) %>%
-  mutate(borough = as.factor(borough), inspection_month = as.factor(inspection_month), 
-         inspection_daytime = as.factor(inspection_daytime), prcp = as.numeric(prcp), 
-         snow = as.numeric(snow), snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
+  select(borough, inspection_ym, inspection_month, prcp, snow, snwd, tmin, tmax) %>%
+  mutate(borough = as.factor(borough), 
+         inspection_month = as.factor(inspection_month), 
+        
+         prcp = as.numeric(prcp), 
+         snow = as.numeric(snow), 
+         snwd = as.numeric(snwd),
+         tmin = as.numeric(tmin), 
+         tmax = as.numeric(tmax)) %>% 
+  group_by(inspection_ym, borough) %>% summarise(avg_prcp = mean(prcp),
+                                                 avg_snow = mean(snow),
+                                                 avg_snwd = mean(snwd),
+                                                 avg_tmin = mean(tmin),
+                                                 avg_tmax = mean(tmax))
 
-cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
+
+
+cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
 ```
 
 
@@ -91,7 +102,7 @@ cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "bo
 
 ```{r}
   
-model_linear_original = lm(borough_month_cases ~ inspection_month + borough + inspection_daytime + prcp + snow + snwd + tmin + tmax, data = cases_borough_month) 
+model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + avg_prcp + avg_snow + avg_snwd + avg_tmin + avg_tmax, data = cases_borough_monthly) 
 broom::tidy(model_linear_original) %>% 
   knitr::kable()
 
@@ -179,19 +190,18 @@ rat_covid = read_csv(url_covid)
 
 
 rat_covid = rat_covid %>%
-  mutate(inspection_month_n = recode(inspection_month, 
-                                   "Jan" = 1,
-                                   "Feb" = 2,
-                                   "Mar" = 3,
-                                   "Apr" = 4,
-                                   "May" = 5,
-                                   "Jun" = 6,
-                                   "Jul" = 7,
-                                   "Aug" = 8,
-                                   "Sep" = 9,
-                                   "Oct" = 10,
-                                   "Nov" = 11,
-                                   "Dec" = 12)) %>%
+  mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
+                                   inspection_month == "Feb" ~ 2,
+                                   inspection_month == "Mar" ~ 3,
+                                   inspection_month == "Apr" ~ 4,
+                                   inspection_month == "May" ~ 5,
+                                   inspection_month == "Jun" ~ 6,
+                                   inspection_month == "Jul" ~ 7,
+                                   inspection_month == "Aug" ~ 8,
+                                   inspection_month == "Sep" ~ 9,
+                                   inspection_month == "Oct" ~ 10,
+                                   inspection_month == "Nov" ~ 11,
+                                   inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
   mutate(date = as.Date(date,format = "%Y-%m-%d"))
 
