@@ -78,7 +78,10 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
                                    "Nov" = 11,
                                    "Dec" = 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
-  mutate(date = as.Date(date,format = "%Y-%m-%d"))
+  mutate(date = as.Date(date,format = "%Y-%m-%d")) 
+
+rat_act = rat %>%
+  filter(!result == "Passed")
 
 rat_covid = rat_covid %>%
   mutate(inspection_month_n = recode(inspection_month, 
@@ -666,7 +669,7 @@ rat %>%
 
 ### Inspection Results
 
-The result of passed had the largest proportion, accounting for 61.6%. Particularly, 13.6% of results were rat activity. We would like to mention here that active rat signs include any of six different signs below:  
+The result of passed had the largest proportion, accounting for 61.6%. Even though in such circumstances, inspector recieved the rat complains but did not observe active signs of rat and mouse activity, or conditions conducive to rodent activity, on the property, we cannot say there was no rats due to their high speed of scurry and wide range of activity. Particularly, 13.6% of results were rat activity. We would like to mention here that active rat signs include any of six different signs below:  
 
 * fresh tracks
 * fresh droppings
