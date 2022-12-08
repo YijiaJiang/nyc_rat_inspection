@@ -403,8 +403,7 @@ rat %>%
             name = "Borough Average") %>%
   layout(xaxis = list(title = "Month"), 
          yaxis = list(title = "Count"),
-         title = "Number of Rat Inspections in Queens in 2021") %>%
-  hide_legend()
+         title = "Number of Rat Inspections in Queens in 2021") 
 ```
 
 #### Staten Island
@@ -615,13 +614,22 @@ rat %>%
 
 # Weather and COVID-19
 
+From previous analysis, we found that weather and COVID-19 were two potential covariates that might affect the rat inspections. As is known to all, rats don't prefer the cold weather but gravitate to temperatures between 30 and 32 degrees Celsius.  
+In March 2020, countries around the world including the U.S. deployed various measures of lockdown that lasted on for over a year. This response to the pandemic dominated people's daily lives: they rarely went outside and basically worked from home. As a result, rats lost their "sweet home" and the number of inspections might become smaller.
+
+### Weather
+
+Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the temperatures were almost above 0 degree Celsius and we could not determine immediately that rats seldom wandered outside when the temperatures were extremely low. 
+
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n = rat %>%
+  filter(inspection_year == 2021) %>%
   group_by(inspection_year, inspection_month, inspection_day) %>%
   summarise(Count = n())
 
 t = rat %>%
+  filter(inspection_year == 2021) %>%
   mutate(`Average Temperature` = (tmin+tmax)/2) %>%
   rename(Date = date) %>%
   distinct(inspection_year, inspection_month, inspection_day, `Average Temperature`, tmax, tmin, Date)
@@ -630,17 +638,20 @@ rat_t = left_join(rat_n, t, by = c("inspection_year", "inspection_month", "inspe
   as.data.frame()
 
 p_weather = rat_t %>% 
-  filter(inspection_year == 2021) %>%
   ggplot(aes(x = Date, y = `Average Temperature`)) + 
   geom_point(aes(size = Count), alpha = .5, color = "#66C2A5") +
   geom_smooth(se = FALSE, color = "#8DA0CB") +
   labs(x = "Month",
        y = "Average Temperature",
-       title = "Assocition Between Number of Rat Inspections and Temperature")
+       title = "Assocition Between Number of Rat Inspections and Temperature in 2021")
 
 ggplotly(p_weather)
 
 ```
+
+### COVID-19
+
+Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000. In April 2021, only 4 cases of rat inspections were recorded.
 
 ```{r, message=FALSE, warning=FALSE}
 # changes before and after Covid-19
@@ -656,8 +667,10 @@ rat %>%
           color = ~inspection_year) %>%
   layout(xaxis = list(title = "Inspection Month"), 
          yaxis = list(title = "Number of Inspections"),
-         title = "Number of Rat Inspections Before and After COVID-19") 
+         title = "### COVID-19") 
 ```
+
+We also explored the association between the number of rat inspections and COVID-ID cases. This plot removed the outliers of extremely high daily confirmed cases to focus on the trend. Generally speaking, as the surge of COVID-19 confirmed cases, the number of rat inspections presented a decreaseing trend. This finding verified our thought that lockdown policy and self-quarantine reduced the inspection chances and made rats lose their survival environment.
 
 ```{r, message=FALSE, warning=FALSE}
 # association with Covid-19
@@ -676,20 +689,19 @@ rat_covid_c %>%
   ggplot(aes(x=Count, y = total_case_count)) +
   geom_point()
   
-rat_covid_c %>% 
+p_covid = rat_covid_c %>% 
   filter(total_case_count<=2000) %>%
-  ggplot(aes(x = date)) + 
-  geom_smooth(aes(y = total_case_count), color = "#66C2A5", se = FALSE) +
-  geom_smooth(aes(y = Count), color = "#8DA0CB", se = FALSE) +
+  rename(Date = date, 
+         `COVID-19 Cases` = total_case_count,
+         `Rat Inspections` = Count) %>%
+  ggplot(aes(x = Date)) + 
+  geom_smooth(aes(y = `COVID-19 Cases`, color = "COVID-19"), se = FALSE) +
+  geom_smooth(aes(y = `Rat Inspections`, color = "Rat"), se = FALSE) +
   labs(x = "Month",
        y = "Number of Cases",
-       title = "Assocition Between Number of Rat Inspections and COVID-19")
-
-p_covid = rat_covid_c %>% 
-  ggplot(aes(x = Count, y = total_case_count)) +
-  geom_point(color = "#66C2A5", alpha = 0.5) +
-  geom_smooth(se=FALSE, color = "#8DA0CB") 
-  
+       title = "Assocition Between Number of Rat Inspections and COVID-19",
+       color = "Type") +
+  scale_color_manual(values = c("Rat" = "#8DA0CB", "COVID-19" = "#66C2A5"))
 
 ggplotly(p_covid)
 
