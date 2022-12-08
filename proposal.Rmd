@@ -8,11 +8,13 @@ output:
     toc_depth: 5
 ---
 
+
+&nbsp;
+
 ```{r,include=FALSE}
 library(tidyverse)
 ```
 
-&NewLine;
 
 ### The Group Members 
 - Jia Ji (jj3205)

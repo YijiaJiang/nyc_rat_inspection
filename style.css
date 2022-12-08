@@ -36,17 +36,6 @@
   font-weight: bold;
 }
 
-/* Makes TOC sticky */
-
-.row-fluid{
-  display: flex;
-}
-
-.tocify {
-  position: -webkit-sticky;
-  position: sticky; 
-  width: 100% !important;
-}
 
 
 /*---------Links--------*/
@@ -60,5 +49,6 @@
 .title{
     display: none;
 }
+
 
 

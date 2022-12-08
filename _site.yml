@@ -3,12 +3,16 @@ output_dir: "."
 navbar:
   title: "NYC RAT INSPECTION"
   right:
+    - text: "Data Preprocessing"
+      href: data_preprocessing.html
     - text: "Exploratory Data Analysis"
       href: exploratory_data_analysis.html
     - text: "Statistical Analysis"
-      href: statistical_analysis.html
-    - text: "Regression Analysis"
-      href: regression_analysis.html
+      menu: 
+      - text: "Hypothesis Test"
+        href: statistical_analysis.html
+      - text: "Regression Analysis"
+        href: regression_analysis.html
     - text: "Dashboard"
       href: dashboard.html
     - text: "Shiny App"
