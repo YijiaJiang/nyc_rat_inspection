@@ -1,5 +1,5 @@
 ---
-title: "Regression Analysis"
+title: "Regression"
 output: 
   html_document:
     toc: true
@@ -8,3 +8,6 @@ output:
     toc_depth: 5
     code_folding: hide
 ---
+
+&nbsp;
+

@@ -13,7 +13,7 @@
 
 <title>Report</title>
 
-<script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -185,8 +185,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -194,9 +194,16 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "\e258";
-  font-family: 'Glyphicons Halflings';
+  content: "&#xe258;";
   border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -331,11 +338,20 @@ div.tocify {
 <li>
   <a href="exploratory_data_analysis.html">Exploratory Data Analysis</a>
 </li>
-<li>
-  <a href="statistical_analysis.html">Statistical Analysis</a>
-</li>
-<li>
-  <a href="regression_analysis.html">Regression Analysis</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Statistical Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="statistical_analysis.html">Hypothesis Test</a>
+    </li>
+    <li>
+      <a href="regression_analysis.html">Regression Analysis</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="dashboard.html">Dashboard</a>
@@ -372,8 +388,10 @@ div.tocify {
 </div>
 
 
+<p> </p>
 <div id="data-sources" class="section level3">
 <h3>Data Sources</h3>
+<p> </p>
 <div id="rodent-inspection-data" class="section level4">
 <h4>Rodent Inspection Data</h4>
 <p>The <a
@@ -388,16 +406,19 @@ Information Portal</a>, which is a web-based mapping application where
 users can view and map rat inspection and intervention data. Users can
 search results from Health Department inspections for rats at the level
 of individual properties, and view neighborhood maps.</p>
+<p> </p>
 </div>
 <div id="nyc-daily-weather-data" class="section level4">
 <h4>NYC Daily Weather Data</h4>
 <p>The <a href="https://www.noaa.gov/">NYC daily weather data</a></p>
+<p> </p>
 </div>
 <div id="nyc-covid-19-daily-case-count-data" class="section level4">
 <h4>NYC COVID-19 Daily Case Count Data</h4>
 <p>The <a
 href="https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3">NYC
 COVID-19 daily case count data</a></p>
+<p> </p>
 </div>
 <div id="nyc-borough-population-data" class="section level4">
 <h4>NYC Borough Population Data</h4>

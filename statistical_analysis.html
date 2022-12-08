@@ -11,9 +11,9 @@
 
 
 
-<title>Statistical Analysis</title>
+<title>Hypothesis Test</title>
 
-<script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -186,8 +186,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -195,9 +195,16 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "\e258";
-  font-family: 'Glyphicons Halflings';
+  content: "&#xe258;";
   border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -335,11 +342,20 @@ div.tocify {
 <li>
   <a href="exploratory_data_analysis.html">Exploratory Data Analysis</a>
 </li>
-<li>
-  <a href="statistical_analysis.html">Statistical Analysis</a>
-</li>
-<li>
-  <a href="regression_analysis.html">Regression Analysis</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Statistical Analysis
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="statistical_analysis.html">Hypothesis Test</a>
+    </li>
+    <li>
+      <a href="regression_analysis.html">Regression Analysis</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="dashboard.html">Dashboard</a>
@@ -379,13 +395,14 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Statistical Analysis</h1>
+<h1 class="title toc-ignore">Hypothesis Test</h1>
 
 </div>
 
 
-<div id="homogenity-among-oroughs" class="section level2">
-<h2>Homogenity among oroughs</h2>
+<p> </p>
+<div id="homogenity-among-boroughs" class="section level2">
+<h2>Homogenity among Boroughs</h2>
 <p> </p>
 <p>In the section of borough visualizations, we find some indepence
 among different boroughs in New York. To verify this, we plan to usw
@@ -589,7 +606,7 @@ in 2021.</p>
 </div>
 </div>
 <div id="association-with-weather-and-covid-19" class="section level2">
-<h2>Association with weather and covid-19</h2>
+<h2>Association with Weather and COVID-19</h2>
 <p> </p>
 <p>In the visualization, we see some difference of rat inspections as
 the temperature and weather change, as well as the happening of
@@ -670,7 +687,7 @@ weather in 2021.</p>
 id="wilcoxon-rank-sum-testing-changes-of-inspection-density-caused-by-covid-19"
 class="section level3">
 <h3>Wilcoxon Rank-sum testing changes of inspection density caused by
-covid-19</h3>
+COVID-19</h3>
 <p>For the rodent inspection across time, we compared mean difference
 between inspection density in 2019 before covid and inspection density
 in 2020 after covid.</p>

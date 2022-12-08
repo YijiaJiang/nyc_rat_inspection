@@ -8,14 +8,19 @@ output:
     toc_depth: 5
 ---
 
+&nbsp;
 
 ### Data Sources
+
+&nbsp;
+
 
 #### Rodent Inspection Data
 
 The [rodent inspection data](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) contains the information on rat sightings and intervention visits in NYC, which is managed by the New York City Department of Health and Mental Hygiene, Division of Environmental Health. The data source is the Veterinary, Rodent and Vector Surveillance System (VRVSS). It is also available on the [Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page), which is a web-based mapping application where users can view and map rat inspection and intervention data. Users can search results from Health Department inspections for rats at the level of individual properties, and view neighborhood maps. 
 
 
+&nbsp;
 
 
 #### NYC Daily Weather Data
@@ -23,14 +28,14 @@ The [rodent inspection data](https://data.cityofnewyork.us/Health/Rodent-Inspect
 The [NYC daily weather data](https://www.noaa.gov/) 
 
 
-
+&nbsp;
 
 #### NYC COVID-19 Daily Case Count Data
 
 
 The [NYC COVID-19 daily case count data](https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3)
 
-
+&nbsp;
 
 #### NYC Borough Population Data
 
