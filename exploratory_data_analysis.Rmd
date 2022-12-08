@@ -258,7 +258,7 @@ p_area = rat %>%
 p_rat / (p_pop + p_area)
 ```
 
-As for the rat density in terms of population, it turned out that Manhattan that ranked the first with 0.020321 inspections per person. Similarly, when it comes to the density regarding land area, Manhattan, with 1411.6 inspections per square mile far higher than other four boroughs, won again. Undoubtfully, Manhattan was the most "rattiest" borough in New York City. Moreover, Queens and Staten Island were still the boroughs with least rat inspections.
+As for the rat density in terms of population, it turned out that Manhattan ranked the first with 0.020321 inspections per person. Similarly, when it comes to the density regarding land area, Manhattan, with 1411.6 inspections per square mile far higher than other four boroughs, won again. Undoubtfully, Manhattan was the most "rattiest" borough in New York City. Moreover, Queens and Staten Island were still the boroughs with least rat inspections.
 
 ```{r}
 boro = c(1, 2, 3, 4, 5)
@@ -300,7 +300,7 @@ p_density_p + p_density_a
 
 ### Rat Inspections by Month in Each Borough {.tabset}
 
-In order to obtain more demographic information, we analyzed the rat inspections stratified by borough and month. Generally, for all five boroughs, more rats were inspected in late spring and summer in 2021, especially in July and August.  
+In order to obtain more demographic information, we analyzed the rat inspections stratified by borough and month. Generally, for all five boroughs, more rats were inspected in late spring and summer in 2021, especially in July and August. Individually, Bronx, Brooklyn and Manhattan were above the borough average level while Queens and Staten Island were significantly below the average, which was consistent with our previous findings.
 
 #### Bronx
 ```{r, message=FALSE, warning=FALSE}
@@ -431,6 +431,9 @@ rat %>%
          title = "Number of Rat Inspections in Staten Island in 2021") 
 ```
 
+### Overall Top 15 Rat Popular Streets
+
+To be more detailed, we investigated the fifteen streets with most rat inspections in New York City. Among them, Greene Avenue, Brooklyn with 1366 cases, Broadway, Manhattan with 1154 cases and Hart Street, Brooklyn with 1118 cases ranked the top 3.  
 
 ```{r, message=FALSE, warning=FALSE}
 # Overall top 15 streets
@@ -449,7 +452,9 @@ rat %>%
   hide_legend()
 ```
 
-### Top 5 Rat Popular Street{.tabset}
+### Top 5 Rat Popular Streets {.tabset}
+
+Below are the five streets with most rat inspections in each borough, respectively.
 
 #### Bronx
 ```{r, message=FALSE, warning=FALSE}
@@ -541,6 +546,14 @@ rat %>%
   hide_legend()
 ```
 
+# Inspection Types and Results
+
+Inspection type and result were two important attributes, which reflect the motivation, method and result of rat inspections. In addition, some other problem conditions such as garbage (poor containerization of food waste resulting in the feeding of rats), harborage (clutter and dense vegetation promoting the nesting of rats), could be identified during this process.
+
+### Inspection Types
+
+We can easily observed that initial inspection was the most frequent inspection, accounted for 70.3%. It represents inspection conducted in response to a 311 complaint, or a proactive inspection conducted through our neighborhood indexing program. Baiting and compliance (follow-up) inspection followed. It's very rare to see clean-up and stoppage in the inspection process.
+
 ```{r, message=FALSE, warning=FALSE}
 # inspection type
 colors = c("#38C5A3", "#F09968", "#D2959B", "#B499CB", "#EE90BA", "#A8D14F", "#E5D800", "#FCCD4C", "#E2BF96", "#B3B3B3")
@@ -568,6 +581,16 @@ rat %>%
 
 ```
 
+### Inspection Results
+
+The result of passed had the largest proportion, accounting for 61.6%. Particularly, 13.6% of results were rat activity. We would like to mention here that active rat signs include any of six different signs below:  
+
+* fresh tracks
+* fresh droppings
+* active burrows
+* active runways and rub marks
+* fresh gnawing marks
+* live rats
 
 ```{r, message=FALSE, warning=FALSE}
 # inspection results
