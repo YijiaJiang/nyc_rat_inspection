@@ -667,7 +667,7 @@ rat %>%
           color = ~inspection_year) %>%
   layout(xaxis = list(title = "Inspection Month"), 
          yaxis = list(title = "Number of Inspections"),
-         title = "### COVID-19") 
+         title = "Comparison of Rat Inspections Before and After COVID-19") 
 ```
 
 We also explored the association between the number of rat inspections and COVID-ID cases. This plot removed the outliers of extremely high daily confirmed cases to focus on the trend. Generally speaking, as the surge of COVID-19 confirmed cases, the number of rat inspections presented a decreaseing trend. This finding verified our thought that lockdown policy and self-quarantine reduced the inspection chances and made rats lose their survival environment.
