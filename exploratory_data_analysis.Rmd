@@ -179,13 +179,14 @@ rat %>%
 
 &nbsp;
 
-### Rat Inspections Througout a Day
+### Rat Inspections Througout a Day {.tabset}
 
-Most rat inspections happened at daytime regardless of the month, concentrated at 9am-12pm. Contradicted with the common sense that rats prefer nightlife, this finding would be corresponding to inspectors' daily schedule. Additionally, there are a few explanations for rat sightings during daylight hours:  
+Most rat inspections happened at daytime regardless of the month, concentrated at 9am-12pm. Contradicted with the common sense that rats prefer nightlife, this finding would be corresponding to inspectors' daily schedule. Additionally, there are a few explanations for observing rat during daylight hours:  
 
 *  The infestation is large  
 *  The older/sub-dominant rats cannot compete with dominant rats for food during the safer night time period
 
+#### Inspection
 ```{r, message=FALSE, warning=FALSE}
 rat_2021 %>%
   mutate(inspection_day = as.factor(inspection_day)) %>%
@@ -204,6 +205,34 @@ rat_2021 %>%
                       ticktext = c("12am", "3am", "6am", "9am", "12pm", "3pm", "6pm", "9pm", "12am")),
          yaxis = list(title = "Count"),
          title = "Number of Rat Inspections Throughout a Day in 2021") %>%
+  hide_legend()
+
+```
+
+&nbsp;
+
+&nbsp;
+
+#### Observed
+```{r, message=FALSE, warning=FALSE}
+rat_2021 %>%
+  filter(!result == "Passed") %>%
+  mutate(inspection_day = as.factor(inspection_day)) %>%
+  mutate(inspection_month = as.factor(inspection_month)) %>%
+  mutate(inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  separate(inspection_time, into = c("hour", "minute", "second")) %>%
+  rename(Month = inspection_month) %>%
+  group_by(Month, inspection_day, hour) %>%
+  summarise(n_obs = n()) %>%
+  plot_ly(x = ~hour, y = ~n_obs, type = "scatter",
+          color = ~inspection_day,
+          frame = ~Month) %>%
+  layout(xaxis = list(title = "Time", range = list(0,24), dtick = 3, 
+                      tickvals = c(0, 3, 6, 9, 12, 15, 18, 21, 24),
+                      ticktext = c("12am", "3am", "6am", "9am", "12pm", "3pm", "6pm", "9pm", "12am")),
+         yaxis = list(title = "Count"),
+         title = "Number of Observed Rats Throughout a Day in 2021") %>%
   hide_legend()
 
 ```
@@ -718,10 +747,11 @@ In March 2020, countries around the world including the U.S. deployed various me
 
 &nbsp;
 
-### Weather
+### Weather {.tabset}
 
-Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the temperatures were almost above 0 degree Celsius and we could not determine immediately that rats seldom wandered outside when the temperatures were extremely low. 
+Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the temperatures were almost above 0 degree Celsius and we could not determine immediately whether rats seldom wandered outside when the temperatures were extremely low. 
 
+### Inspection
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n = rat %>%
@@ -754,6 +784,40 @@ ggplotly(p_weather)
 
 &nbsp;
 
+### Observed
+```{r, message=FALSE, warning=FALSE}
+# association with temperature
+rat_n_o = rat %>%
+  filter(!result == "Passed") %>%
+  filter(inspection_year == 2021) %>%
+  group_by(inspection_year, inspection_month, inspection_day) %>%
+  summarise(Count = n())
+
+t = rat %>%
+  filter(inspection_year == 2021) %>%
+  mutate(`Average Temperature` = (tmin+tmax)/2) %>%
+  rename(Date = date) %>%
+  distinct(inspection_year, inspection_month, inspection_day, `Average Temperature`, tmax, tmin, Date)
+
+rat_t_o = left_join(rat_n_o, t, by = c("inspection_year", "inspection_month", "inspection_day")) %>%
+  as.data.frame()
+
+p_weather_o = rat_t_o %>% 
+  ggplot(aes(x = Date, y = `Average Temperature`)) + 
+  geom_point(aes(size = Count), alpha = .5, color = "#66C2A5") +
+  geom_smooth(se = FALSE, color = "#8DA0CB") +
+  labs(x = "Month",
+       y = "Average Temperature",
+       title = "Assocition Between Number of Observed Rats and Temperature in 2021")
+
+ggplotly(p_weather_o)
+
+```
+
+&nbsp;
+
+&nbsp;
+
 ### COVID-19
 
 Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000 per month. In April 2021, only 4 cases of rat inspections were recorded.
@@ -775,7 +839,7 @@ rat %>%
          title = "Comparison of Rat Inspections Before and After COVID-19") 
 ```
 
-We also explored the association between the number of rat inspections and COVID-ID cases. This plot removed the outliers of extremely high daily confirmed cases to focus on the trend. Generally speaking, as the surge of COVID-19 confirmed cases, the number of rat inspections presented a decreaseing trend. This finding verified our thought that lockdown policy and self-quarantine reduced the inspection chances and made rats lose their survival environment.
+We also explored the association between the number of rat inspections and COVID-ID cases. This plot removed the outliers of extremely high daily confirmed cases to focus on the trend. Generally speaking, as the surge of COVID-19 confirmed cases, the number of rat inspections presented a decreasing trend. This finding verified our thought that lockdown policy and self-quarantine reduced the inspection chances and made rats lose their survival environment.
 
 ```{r, message=FALSE, warning=FALSE}
 # association with Covid-19
