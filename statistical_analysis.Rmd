@@ -72,13 +72,18 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
                                    "Oct" = 10,
                                    "Nov" = 11,
                                    "Dec" = 12)) %>%
-  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
+  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
   mutate(date = as.Date(date,format = "%Y-%m-%d"))
 ```
 
-## Boroughs
+## Homogenity among oroughs
 
 &nbsp;
+
+In the section of borough visualizations, we find some indepence among different boroughs in New York. To verify this, we plan to usw chi-square test to see homogenity among boroughs in recent years and homogenity among boroughs in 2021.
+
+&nbsp;
+
 
 ### Chi-square testing homogenity among boroughs in recent years
 
@@ -147,7 +152,11 @@ We can see from the chi-square test result we should reject the null hypothesis,
 
 &nbsp;
 
-## Weather and covid-19
+## Association with weather and covid-19
+
+&nbsp;
+
+In the visualization, we see some difference of rat inspections as the temperature and weather change, as well as the happening of covid-19. 
 
 &nbsp;
 
