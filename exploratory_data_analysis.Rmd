@@ -747,7 +747,7 @@ ggplotly(p_weather)
 
 ### COVID-19
 
-Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000. In April 2021, only 4 cases of rat inspections were recorded.
+Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000 per month. In April 2021, only 4 cases of rat inspections were recorded.
 
 ```{r, message=FALSE, warning=FALSE}
 # changes before and after Covid-19
