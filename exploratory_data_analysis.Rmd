@@ -808,7 +808,21 @@ ggplotly(p_covid)
 
 ```
 
+&nbsp;
+
+&nbsp;
+
 ## Summaries
+
+Based on the comprehensive analyses, we mainly found that:  
+
+* From 2012 to 2018, the number of rat inspections presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19.
+* Brooklyn had the largest number of rat inspections while Manhattan had the highest density of rat inspections, regardless of per-person or per-area.
+* More rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
+
+&nbsp;
+
+&nbsp;
 
 ## Exploratory Statistical Analyses
 
