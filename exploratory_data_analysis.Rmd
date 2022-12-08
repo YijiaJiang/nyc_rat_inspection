@@ -102,6 +102,12 @@ rat_covid = rat_covid %>%
 
 ```
 
+In this section, we would like to explore the pattern and characteristics of rat inspections through multiple visualization dimensions and analyze the association between inspections and various potential covariates, including climatic, geographical factors.
+
+&nbsp;
+
+&nbsp;
+
 ## Time Visualizations
 
 &nbsp;
@@ -210,7 +216,7 @@ rat_2021 %>%
 
 &nbsp;
 
-In this section, we explored the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not. 
+We explored the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not. 
 
 &nbsp;
 
@@ -802,6 +808,9 @@ ggplotly(p_covid)
 
 ```
 
+## Summaries
+
+## Exploratory Statistical Analyses
 
 
 
