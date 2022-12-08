@@ -102,6 +102,12 @@ cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "
 ```
 
 
+```{r, include=FALSE}
+# export the tidied dataset of modelling for shiny
+write.csv(rat_tidy,"./rat_app/www/rat_tidy.csv")
+```
+
+
 ## Linear Regression Model
 
 ```{r}
