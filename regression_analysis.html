@@ -13,7 +13,7 @@
 
 <title>Regression Analysis</title>
 
-<script src="site_libs/header-attrs-2.17/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
@@ -186,8 +186,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "\e259";
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -195,9 +195,16 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "\e258";
-  font-family: 'Glyphicons Halflings';
+  content: "&#xe258;";
   border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -381,7 +388,2887 @@ div.tocify {
 </div>
 
 
+<pre class="r"><code>library(tidyverse)
+library(readxl)</code></pre>
+<pre class="r"><code>url_2012 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv&quot;
+rat_2012 = read_csv(url(url_2012)) 
+url_2013 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2013.csv&quot;
+rat_2013 = read_csv(url(url_2013)) 
+url_2014 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2014.csv&quot;
+rat_2014 = read_csv(url(url_2014)) 
+url_2015 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2015.csv&quot;
+rat_2015 = read_csv(url(url_2015)) 
+url_2016 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2016.csv&quot;
+rat_2016 = read_csv(url(url_2016)) 
+url_2017 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2017.csv&quot;
+rat_2017 = read_csv(url(url_2017)) 
+url_2018 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv&quot;
+rat_2018 = read_csv(url(url_2018)) 
+url_2019 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv&quot;
+rat_2019 = read_csv(url(url_2019)) 
+url_2020 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv&quot;
+rat_2020 = read_csv(url(url_2020)) 
+url_2021 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv&quot;
+rat_2021 = read_csv(url(url_2021)) </code></pre>
+<pre class="r"><code>rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %&gt;%
+  select(-...1) %&gt;%
+   mutate(inspection_month_n = recode(inspection_month, 
+                                   &quot;Jan&quot; = 1,
+                                   &quot;Feb&quot; = 2,
+                                   &quot;Mar&quot; = 3,
+                                   &quot;Apr&quot; = 4,
+                                   &quot;May&quot; = 5,
+                                   &quot;Jun&quot; = 6,
+                                   &quot;Jul&quot; = 7,
+                                   &quot;Aug&quot; = 8,
+                                   &quot;Sep&quot; = 9,
+                                   &quot;Oct&quot; = 10,
+                                   &quot;Nov&quot; = 11,
+                                   &quot;Dec&quot; = 12)) %&gt;%
+  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = &quot;-&quot;))%&gt;%
+  mutate(date = as.Date(date,format = &quot;%Y-%m-%d&quot;))%&gt;% 
+  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) </code></pre>
+<pre class="r"><code>cases = rat %&gt;% 
+  select(inspection_ym, borough) %&gt;% 
+  group_by(inspection_ym, borough) %&gt;% 
+  add_count(borough, inspection_ym, name = &quot;borough_month_cases&quot;) %&gt;%
+  distinct()
 
+
+rat_tidy = rat %&gt;% 
+  select(borough, inspection_ym, prcp, snow, snwd, tmin, tmax) %&gt;%
+  mutate(borough = as.factor(borough), inspection_ym = as.factor(inspection_ym), 
+         prcp = as.numeric(prcp), snow = as.numeric(snow), snwd = as.numeric(snwd),
+         tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
+cases_borough_month = merge(x = rat_tidy, y = cases, by = c(&quot;inspection_ym&quot;, &quot;borough&quot;)) %&gt;%distinct() </code></pre>
+<pre class="r"><code>original_lm = lm(borough_month_cases ~ inspection_ym + borough + prcp + snow + snwd + tmin + tmax, data = cases_borough_month) 
+
+broom::tidy(original_lm) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="20%" />
+<col width="17%" />
+<col width="18%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">2843.1096830</td>
+<td align="right">132.6706014</td>
+<td align="right">21.4298394</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 10</td>
+<td align="right">826.9986186</td>
+<td align="right">189.2983289</td>
+<td align="right">4.3687582</td>
+<td align="right">0.0000126</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 11</td>
+<td align="right">-328.4503388</td>
+<td align="right">198.9092403</td>
+<td align="right">-1.6512573</td>
+<td align="right">0.0987106</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 12</td>
+<td align="right">619.4018296</td>
+<td align="right">177.8487011</td>
+<td align="right">3.4827459</td>
+<td align="right">0.0004980</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 2</td>
+<td align="right">963.5613866</td>
+<td align="right">175.7631129</td>
+<td align="right">5.4821593</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 3</td>
+<td align="right">2738.5892940</td>
+<td align="right">173.3641393</td>
+<td align="right">15.7967461</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 4</td>
+<td align="right">2914.6510232</td>
+<td align="right">177.1903222</td>
+<td align="right">16.4492676</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 5</td>
+<td align="right">2767.2121032</td>
+<td align="right">179.3718706</td>
+<td align="right">15.4272356</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 6</td>
+<td align="right">2336.6303965</td>
+<td align="right">182.7503027</td>
+<td align="right">12.7859181</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 7</td>
+<td align="right">1749.4162475</td>
+<td align="right">190.1075250</td>
+<td align="right">9.2022462</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 8</td>
+<td align="right">1236.9370308</td>
+<td align="right">185.3459877</td>
+<td align="right">6.6736650</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 9</td>
+<td align="right">979.1703169</td>
+<td align="right">185.4620062</td>
+<td align="right">5.2796275</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 1</td>
+<td align="right">647.0234904</td>
+<td align="right">178.5831509</td>
+<td align="right">3.6230937</td>
+<td align="right">0.0002922</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 10</td>
+<td align="right">1197.7020831</td>
+<td align="right">178.3238206</td>
+<td align="right">6.7164447</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 11</td>
+<td align="right">792.3422312</td>
+<td align="right">184.1760751</td>
+<td align="right">4.3020910</td>
+<td align="right">0.0000170</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 12</td>
+<td align="right">-111.8306821</td>
+<td align="right">186.1147985</td>
+<td align="right">-0.6008694</td>
+<td align="right">0.5479377</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 2</td>
+<td align="right">854.9016665</td>
+<td align="right">188.0460207</td>
+<td align="right">4.5462364</td>
+<td align="right">0.0000055</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 3</td>
+<td align="right">864.8371603</td>
+<td align="right">175.3814426</td>
+<td align="right">4.9311783</td>
+<td align="right">0.0000008</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 4</td>
+<td align="right">1057.2174141</td>
+<td align="right">176.1910109</td>
+<td align="right">6.0004050</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 5</td>
+<td align="right">1099.9826192</td>
+<td align="right">180.0429495</td>
+<td align="right">6.1095568</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 6</td>
+<td align="right">-127.5143462</td>
+<td align="right">187.9689272</td>
+<td align="right">-0.6783799</td>
+<td align="right">0.4975431</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 7</td>
+<td align="right">547.5430604</td>
+<td align="right">190.5294858</td>
+<td align="right">2.8737970</td>
+<td align="right">0.0040624</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 8</td>
+<td align="right">364.0689565</td>
+<td align="right">186.9875126</td>
+<td align="right">1.9470228</td>
+<td align="right">0.0515539</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 9</td>
+<td align="right">985.4786675</td>
+<td align="right">183.4381936</td>
+<td align="right">5.3722654</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 1</td>
+<td align="right">-455.1165366</td>
+<td align="right">192.4530390</td>
+<td align="right">-2.3648187</td>
+<td align="right">0.0180538</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 10</td>
+<td align="right">441.0116145</td>
+<td align="right">178.2299609</td>
+<td align="right">2.4743966</td>
+<td align="right">0.0133590</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 11</td>
+<td align="right">293.2520283</td>
+<td align="right">187.5024511</td>
+<td align="right">1.5639904</td>
+<td align="right">0.1178446</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 12</td>
+<td align="right">902.5071824</td>
+<td align="right">177.1904749</td>
+<td align="right">5.0934294</td>
+<td align="right">0.0000004</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 2</td>
+<td align="right">-650.4378645</td>
+<td align="right">236.4492316</td>
+<td align="right">-2.7508563</td>
+<td align="right">0.0059523</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 3</td>
+<td align="right">1303.0247157</td>
+<td align="right">177.7144156</td>
+<td align="right">7.3321273</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 4</td>
+<td align="right">2012.5290025</td>
+<td align="right">175.7793357</td>
+<td align="right">11.4491786</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 5</td>
+<td align="right">1152.3324093</td>
+<td align="right">181.3225852</td>
+<td align="right">6.3551510</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 6</td>
+<td align="right">939.9407473</td>
+<td align="right">187.0101239</td>
+<td align="right">5.0261490</td>
+<td align="right">0.0000005</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 7</td>
+<td align="right">924.4674108</td>
+<td align="right">186.3350036</td>
+<td align="right">4.9613191</td>
+<td align="right">0.0000007</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 8</td>
+<td align="right">1024.8269371</td>
+<td align="right">185.0953847</td>
+<td align="right">5.5367504</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 9</td>
+<td align="right">748.7758319</td>
+<td align="right">183.0807807</td>
+<td align="right">4.0898658</td>
+<td align="right">0.0000434</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 1</td>
+<td align="right">238.6643269</td>
+<td align="right">187.5372085</td>
+<td align="right">1.2726239</td>
+<td align="right">0.2031747</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 10</td>
+<td align="right">797.7959896</td>
+<td align="right">177.3542269</td>
+<td align="right">4.4983196</td>
+<td align="right">0.0000069</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 11</td>
+<td align="right">337.6950815</td>
+<td align="right">186.1499229</td>
+<td align="right">1.8141027</td>
+<td align="right">0.0696854</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 12</td>
+<td align="right">1069.8909157</td>
+<td align="right">175.7231638</td>
+<td align="right">6.0885025</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 2</td>
+<td align="right">-100.5302889</td>
+<td align="right">220.3971433</td>
+<td align="right">-0.4561324</td>
+<td align="right">0.6483025</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 3</td>
+<td align="right">959.0237577</td>
+<td align="right">183.4141784</td>
+<td align="right">5.2287329</td>
+<td align="right">0.0000002</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 4</td>
+<td align="right">1437.4909415</td>
+<td align="right">174.1724790</td>
+<td align="right">8.2532611</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 5</td>
+<td align="right">1130.4553438</td>
+<td align="right">181.5347837</td>
+<td align="right">6.2272107</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 6</td>
+<td align="right">953.1916707</td>
+<td align="right">180.2065590</td>
+<td align="right">5.2894394</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 7</td>
+<td align="right">892.7765864</td>
+<td align="right">185.0963132</td>
+<td align="right">4.8233083</td>
+<td align="right">0.0000014</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 8</td>
+<td align="right">576.0036831</td>
+<td align="right">184.1672029</td>
+<td align="right">3.1276127</td>
+<td align="right">0.0017663</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 9</td>
+<td align="right">608.7845291</td>
+<td align="right">186.3819548</td>
+<td align="right">3.2663276</td>
+<td align="right">0.0010924</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 1</td>
+<td align="right">681.3793563</td>
+<td align="right">182.8000940</td>
+<td align="right">3.7274563</td>
+<td align="right">0.0001943</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 10</td>
+<td align="right">1700.5721860</td>
+<td align="right">181.9117679</td>
+<td align="right">9.3483352</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 11</td>
+<td align="right">2005.6464085</td>
+<td align="right">182.0125540</td>
+<td align="right">11.0192751</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 12</td>
+<td align="right">1772.2333102</td>
+<td align="right">179.0479938</td>
+<td align="right">9.8980909</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 2</td>
+<td align="right">1524.7492285</td>
+<td align="right">176.7892102</td>
+<td align="right">8.6246736</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 3</td>
+<td align="right">2170.5506248</td>
+<td align="right">169.1846190</td>
+<td align="right">12.8294796</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 4</td>
+<td align="right">1141.0201291</td>
+<td align="right">175.8568682</td>
+<td align="right">6.4883456</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 5</td>
+<td align="right">949.8540854</td>
+<td align="right">181.1869603</td>
+<td align="right">5.2423976</td>
+<td align="right">0.0000002</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 6</td>
+<td align="right">1078.7153912</td>
+<td align="right">176.8307309</td>
+<td align="right">6.1002711</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 7</td>
+<td align="right">1354.6236182</td>
+<td align="right">178.3849992</td>
+<td align="right">7.5938202</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 8</td>
+<td align="right">1757.6062399</td>
+<td align="right">183.3225965</td>
+<td align="right">9.5875046</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 9</td>
+<td align="right">1960.5125444</td>
+<td align="right">178.3070682</td>
+<td align="right">10.9951477</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 1</td>
+<td align="right">2418.9858179</td>
+<td align="right">179.0870059</td>
+<td align="right">13.5073218</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 10</td>
+<td align="right">3001.6773487</td>
+<td align="right">180.1711747</td>
+<td align="right">16.6601420</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 11</td>
+<td align="right">3307.2542484</td>
+<td align="right">181.8508948</td>
+<td align="right">18.1866262</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 12</td>
+<td align="right">2833.8062157</td>
+<td align="right">179.9849056</td>
+<td align="right">15.7446882</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 2</td>
+<td align="right">2807.2010333</td>
+<td align="right">183.3715274</td>
+<td align="right">15.3088163</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 3</td>
+<td align="right">2462.7735353</td>
+<td align="right">177.4826603</td>
+<td align="right">13.8761360</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 4</td>
+<td align="right">2712.0635505</td>
+<td align="right">179.9236434</td>
+<td align="right">15.0734139</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 5</td>
+<td align="right">2472.2871466</td>
+<td align="right">174.0920933</td>
+<td align="right">14.2010306</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 6</td>
+<td align="right">2930.0976694</td>
+<td align="right">181.1232106</td>
+<td align="right">16.1773726</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 7</td>
+<td align="right">2077.7039997</td>
+<td align="right">182.8730504</td>
+<td align="right">11.3614554</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 8</td>
+<td align="right">3075.0751606</td>
+<td align="right">181.0867576</td>
+<td align="right">16.9812260</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 9</td>
+<td align="right">2799.6724989</td>
+<td align="right">185.8592974</td>
+<td align="right">15.0633976</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 1</td>
+<td align="right">2509.7761385</td>
+<td align="right">186.2960183</td>
+<td align="right">13.4719795</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 10</td>
+<td align="right">2650.2391715</td>
+<td align="right">172.8001261</td>
+<td align="right">15.3370211</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 11</td>
+<td align="right">2484.7085139</td>
+<td align="right">175.3049586</td>
+<td align="right">14.1736351</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 12</td>
+<td align="right">3628.2779611</td>
+<td align="right">172.1791006</td>
+<td align="right">21.0726967</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 2</td>
+<td align="right">2709.1608930</td>
+<td align="right">179.1170669</td>
+<td align="right">15.1250852</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 3</td>
+<td align="right">3057.4360440</td>
+<td align="right">171.0080536</td>
+<td align="right">17.8789009</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 4</td>
+<td align="right">3024.0974867</td>
+<td align="right">172.1620447</td>
+<td align="right">17.5654134</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 5</td>
+<td align="right">2936.0798008</td>
+<td align="right">178.6668604</td>
+<td align="right">16.4332646</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 6</td>
+<td align="right">3535.0115092</td>
+<td align="right">180.6407958</td>
+<td align="right">19.5692866</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 7</td>
+<td align="right">2692.2252473</td>
+<td align="right">184.8098821</td>
+<td align="right">14.5675394</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 8</td>
+<td align="right">2682.9655822</td>
+<td align="right">181.4405800</td>
+<td align="right">14.7870205</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 9</td>
+<td align="right">2411.2700021</td>
+<td align="right">179.2535989</td>
+<td align="right">13.4517244</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 1</td>
+<td align="right">3142.4900053</td>
+<td align="right">174.3038505</td>
+<td align="right">18.0288043</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 10</td>
+<td align="right">2159.7736436</td>
+<td align="right">172.9417598</td>
+<td align="right">12.4884449</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 11</td>
+<td align="right">2266.7539285</td>
+<td align="right">177.7720872</td>
+<td align="right">12.7508990</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 12</td>
+<td align="right">3225.5484840</td>
+<td align="right">171.2773354</td>
+<td align="right">18.8323136</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 2</td>
+<td align="right">2716.2610032</td>
+<td align="right">173.0413696</td>
+<td align="right">15.6971770</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 3</td>
+<td align="right">3653.3285808</td>
+<td align="right">171.1867011</td>
+<td align="right">21.3411939</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 4</td>
+<td align="right">3961.4646231</td>
+<td align="right">172.5414667</td>
+<td align="right">22.9594932</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 5</td>
+<td align="right">2638.9540636</td>
+<td align="right">172.7144027</td>
+<td align="right">15.2792936</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 6</td>
+<td align="right">2918.1729748</td>
+<td align="right">177.1887469</td>
+<td align="right">16.4692907</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 7</td>
+<td align="right">1860.0422427</td>
+<td align="right">182.7441619</td>
+<td align="right">10.1783949</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 8</td>
+<td align="right">2440.5421042</td>
+<td align="right">178.4360524</td>
+<td align="right">13.6774047</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 9</td>
+<td align="right">2590.1077036</td>
+<td align="right">178.0562136</td>
+<td align="right">14.5465730</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 1</td>
+<td align="right">-395.2722172</td>
+<td align="right">192.4565312</td>
+<td align="right">-2.0538259</td>
+<td align="right">0.0400129</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 10</td>
+<td align="right">-1040.0961663</td>
+<td align="right">181.6712159</td>
+<td align="right">-5.7251566</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 11</td>
+<td align="right">-872.5733137</td>
+<td align="right">179.8491934</td>
+<td align="right">-4.8516943</td>
+<td align="right">0.0000012</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 12</td>
+<td align="right">-584.2096354</td>
+<td align="right">176.7793895</td>
+<td align="right">-3.3047384</td>
+<td align="right">0.0009533</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 2</td>
+<td align="right">1628.3602089</td>
+<td align="right">173.0561469</td>
+<td align="right">9.4094329</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 3</td>
+<td align="right">546.2419760</td>
+<td align="right">203.8697212</td>
+<td align="right">2.6793678</td>
+<td align="right">0.0073856</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 4</td>
+<td align="right">-3031.7333860</td>
+<td align="right">744.9827972</td>
+<td align="right">-4.0695348</td>
+<td align="right">0.0000474</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 5</td>
+<td align="right">-1640.8118593</td>
+<td align="right">225.0439314</td>
+<td align="right">-7.2910736</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 6</td>
+<td align="right">-803.6041115</td>
+<td align="right">186.6706546</td>
+<td align="right">-4.3049301</td>
+<td align="right">0.0000168</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 7</td>
+<td align="right">-495.7174287</td>
+<td align="right">189.7490524</td>
+<td align="right">-2.6124896</td>
+<td align="right">0.0089991</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 8</td>
+<td align="right">-333.2565527</td>
+<td align="right">190.4764611</td>
+<td align="right">-1.7495944</td>
+<td align="right">0.0802124</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 9</td>
+<td align="right">-19.9256795</td>
+<td align="right">182.1849840</td>
+<td align="right">-0.1093706</td>
+<td align="right">0.9129103</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 1</td>
+<td align="right">-755.7562700</td>
+<td align="right">177.8803966</td>
+<td align="right">-4.2486766</td>
+<td align="right">0.0000217</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 10</td>
+<td align="right">-1163.2426765</td>
+<td align="right">181.7606372</td>
+<td align="right">-6.3998602</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 11</td>
+<td align="right">440.1505258</td>
+<td align="right">172.8859759</td>
+<td align="right">2.5459007</td>
+<td align="right">0.0109113</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 12</td>
+<td align="right">437.7656500</td>
+<td align="right">173.2019856</td>
+<td align="right">2.5274863</td>
+<td align="right">0.0115002</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 2</td>
+<td align="right">-1139.6571680</td>
+<td align="right">200.8028223</td>
+<td align="right">-5.6755037</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 3</td>
+<td align="right">-351.2419832</td>
+<td align="right">172.0948266</td>
+<td align="right">-2.0409793</td>
+<td align="right">0.0412734</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 4</td>
+<td align="right">42.5415759</td>
+<td align="right">174.3706966</td>
+<td align="right">0.2439720</td>
+<td align="right">0.8072564</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 5</td>
+<td align="right">543.0770771</td>
+<td align="right">175.5173803</td>
+<td align="right">3.0941499</td>
+<td align="right">0.0019780</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 6</td>
+<td align="right">942.9511150</td>
+<td align="right">181.2309875</td>
+<td align="right">5.2030347</td>
+<td align="right">0.0000002</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 7</td>
+<td align="right">1728.7131258</td>
+<td align="right">186.0584444</td>
+<td align="right">9.2912371</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 8</td>
+<td align="right">2237.3660478</td>
+<td align="right">187.5736943</td>
+<td align="right">11.9279308</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 9</td>
+<td align="right">-485.5679462</td>
+<td align="right">184.4755885</td>
+<td align="right">-2.6321529</td>
+<td align="right">0.0084948</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughBrooklyn</td>
+<td align="right">-145.7420146</td>
+<td align="right">34.6015743</td>
+<td align="right">-4.2120053</td>
+<td align="right">0.0000255</td>
+</tr>
+<tr class="even">
+<td align="left">boroughManhattan</td>
+<td align="right">256.8351365</td>
+<td align="right">34.0047473</td>
+<td align="right">7.5529200</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughQueens</td>
+<td align="right">-3095.2376030</td>
+<td align="right">35.3498779</td>
+<td align="right">-87.5600650</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">boroughStaten Island</td>
+<td align="right">-3983.8793543</td>
+<td align="right">37.0956519</td>
+<td align="right">-107.3947793</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">prcp</td>
+<td align="right">0.7960391</td>
+<td align="right">1.2034619</td>
+<td align="right">0.6614577</td>
+<td align="right">0.5083308</td>
+</tr>
+<tr class="even">
+<td align="left">snow</td>
+<td align="right">0.1929441</td>
+<td align="right">1.0529629</td>
+<td align="right">0.1832393</td>
+<td align="right">0.8546132</td>
+</tr>
+<tr class="odd">
+<td align="left">snwd</td>
+<td align="right">-0.3357509</td>
+<td align="right">0.4654797</td>
+<td align="right">-0.7213009</td>
+<td align="right">0.4707376</td>
+</tr>
+<tr class="even">
+<td align="left">tmin</td>
+<td align="right">-0.9512145</td>
+<td align="right">5.2636509</td>
+<td align="right">-0.1807138</td>
+<td align="right">0.8565951</td>
+</tr>
+<tr class="odd">
+<td align="left">tmax</td>
+<td align="right">1.8184422</td>
+<td align="right">4.3860323</td>
+<td align="right">0.4145985</td>
+<td align="right">0.6784428</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>model_interact = lm(borough_month_cases ~ inspection_ym + borough + snow + prcp + snwd + tmin + tmax + tmin*snwd, data = cases_borough_month) 
+
+
+broom::tidy(model_interact) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="30%" />
+<col width="20%" />
+<col width="17%" />
+<col width="18%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">2842.2704587</td>
+<td align="right">132.6782200</td>
+<td align="right">21.4222836</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 10</td>
+<td align="right">832.4223970</td>
+<td align="right">189.4516351</td>
+<td align="right">4.3938517</td>
+<td align="right">0.0000112</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 11</td>
+<td align="right">-327.1446390</td>
+<td align="right">198.9212525</td>
+<td align="right">-1.6445937</td>
+<td align="right">0.1000783</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 12</td>
+<td align="right">620.7177452</td>
+<td align="right">177.8614396</td>
+<td align="right">3.4898950</td>
+<td align="right">0.0004848</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 2</td>
+<td align="right">964.7187073</td>
+<td align="right">175.7737724</td>
+<td align="right">5.4884110</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 3</td>
+<td align="right">2741.1206417</td>
+<td align="right">173.4030323</td>
+<td align="right">15.8078011</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 4</td>
+<td align="right">2917.7605825</td>
+<td align="right">177.2462573</td>
+<td align="right">16.4616203</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 5</td>
+<td align="right">2773.3020263</td>
+<td align="right">179.5744447</td>
+<td align="right">15.4437455</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 6</td>
+<td align="right">2343.8122008</td>
+<td align="right">183.0255988</td>
+<td align="right">12.8059256</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 7</td>
+<td align="right">1758.3300803</td>
+<td align="right">190.5135612</td>
+<td align="right">9.2294221</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 8</td>
+<td align="right">1245.6124908</td>
+<td align="right">185.7404921</td>
+<td align="right">6.7061979</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 9</td>
+<td align="right">986.0886453</td>
+<td align="right">185.7141025</td>
+<td align="right">5.3097133</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 1</td>
+<td align="right">646.5708417</td>
+<td align="right">178.5876242</td>
+<td align="right">3.6204684</td>
+<td align="right">0.0002952</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 10</td>
+<td align="right">1202.7565989</td>
+<td align="right">178.4652294</td>
+<td align="right">6.7394450</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 11</td>
+<td align="right">794.1151699</td>
+<td align="right">184.1959983</td>
+<td align="right">4.3112509</td>
+<td align="right">0.0000164</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 12</td>
+<td align="right">-112.2670916</td>
+<td align="right">186.1192942</td>
+<td align="right">-0.6031996</td>
+<td align="right">0.5463866</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 2</td>
+<td align="right">852.7378260</td>
+<td align="right">188.0735659</td>
+<td align="right">4.5340653</td>
+<td align="right">0.0000058</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 3</td>
+<td align="right">865.0363567</td>
+<td align="right">175.3849676</td>
+<td align="right">4.9322149</td>
+<td align="right">0.0000008</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 4</td>
+<td align="right">1060.3206114</td>
+<td align="right">176.2470092</td>
+<td align="right">6.0161056</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 5</td>
+<td align="right">1105.2433762</td>
+<td align="right">180.1944546</td>
+<td align="right">6.1336148</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 6</td>
+<td align="right">-119.8634006</td>
+<td align="right">188.2724162</td>
+<td align="right">-0.6366488</td>
+<td align="right">0.5243651</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 7</td>
+<td align="right">557.2495079</td>
+<td align="right">191.0091361</td>
+<td align="right">2.9173971</td>
+<td align="right">0.0035358</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 8</td>
+<td align="right">372.6615938</td>
+<td align="right">187.3712650</td>
+<td align="right">1.9888940</td>
+<td align="right">0.0467342</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 9</td>
+<td align="right">991.6366264</td>
+<td align="right">183.6408076</td>
+<td align="right">5.3998708</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 1</td>
+<td align="right">-445.5667561</td>
+<td align="right">192.9129053</td>
+<td align="right">-2.3096783</td>
+<td align="right">0.0209219</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 10</td>
+<td align="right">446.4138065</td>
+<td align="right">178.3910865</td>
+<td align="right">2.5024446</td>
+<td align="right">0.0123463</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 11</td>
+<td align="right">294.9274074</td>
+<td align="right">187.5204159</td>
+<td align="right">1.5727749</td>
+<td align="right">0.1157957</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 12</td>
+<td align="right">903.5769926</td>
+<td align="right">177.2000420</td>
+<td align="right">5.0991918</td>
+<td align="right">0.0000003</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 2</td>
+<td align="right">-641.3551181</td>
+<td align="right">236.7897612</td>
+<td align="right">-2.7085424</td>
+<td align="right">0.0067670</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 3</td>
+<td align="right">1307.0263780</td>
+<td align="right">177.8046017</td>
+<td align="right">7.3509142</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 4</td>
+<td align="right">2014.9982793</td>
+<td align="right">175.8160831</td>
+<td align="right">11.4608302</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 5</td>
+<td align="right">1157.6550247</td>
+<td align="right">181.4765475</td>
+<td align="right">6.3790889</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 6</td>
+<td align="right">947.7497413</td>
+<td align="right">187.3277039</td>
+<td align="right">5.0593144</td>
+<td align="right">0.0000004</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 7</td>
+<td align="right">933.1036808</td>
+<td align="right">186.7239532</td>
+<td align="right">4.9972361</td>
+<td align="right">0.0000006</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 8</td>
+<td align="right">1032.8298461</td>
+<td align="right">185.4321115</td>
+<td align="right">5.5698543</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 9</td>
+<td align="right">755.8369641</td>
+<td align="right">183.3465570</td>
+<td align="right">4.1224497</td>
+<td align="right">0.0000377</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 1</td>
+<td align="right">242.2823463</td>
+<td align="right">187.6080144</td>
+<td align="right">1.2914286</td>
+<td align="right">0.1965785</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 10</td>
+<td align="right">802.4144879</td>
+<td align="right">177.4734652</td>
+<td align="right">4.5213209</td>
+<td align="right">0.0000062</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 11</td>
+<td align="right">341.4387028</td>
+<td align="right">186.2259899</td>
+<td align="right">1.8334643</td>
+<td align="right">0.0667568</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 12</td>
+<td align="right">1073.3371291</td>
+<td align="right">175.7916127</td>
+<td align="right">6.1057357</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 2</td>
+<td align="right">-37.4673862</td>
+<td align="right">237.1577621</td>
+<td align="right">-0.1579851</td>
+<td align="right">0.8744711</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 3</td>
+<td align="right">956.6275000</td>
+<td align="right">183.4478114</td>
+<td align="right">5.2147120</td>
+<td align="right">0.0000002</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 4</td>
+<td align="right">1440.7477319</td>
+<td align="right">174.2344540</td>
+<td align="right">8.2690174</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 5</td>
+<td align="right">1136.5233269</td>
+<td align="right">181.7336130</td>
+<td align="right">6.2537871</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 6</td>
+<td align="right">960.6839918</td>
+<td align="right">180.5099728</td>
+<td align="right">5.3220549</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 7</td>
+<td align="right">902.1842125</td>
+<td align="right">185.5601299</td>
+<td align="right">4.8619507</td>
+<td align="right">0.0000012</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 8</td>
+<td align="right">585.1361230</td>
+<td align="right">184.6066800</td>
+<td align="right">3.1696368</td>
+<td align="right">0.0015299</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 9</td>
+<td align="right">616.6759134</td>
+<td align="right">186.7072582</td>
+<td align="right">3.3029027</td>
+<td align="right">0.0009595</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 1</td>
+<td align="right">673.5115873</td>
+<td align="right">183.1296650</td>
+<td align="right">3.6777853</td>
+<td align="right">0.0002362</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 10</td>
+<td align="right">1705.4732277</td>
+<td align="right">182.0424333</td>
+<td align="right">9.3685477</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 11</td>
+<td align="right">2008.7474817</td>
+<td align="right">182.0669080</td>
+<td align="right">11.0330180</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 12</td>
+<td align="right">1772.7776993</td>
+<td align="right">179.0529653</td>
+<td align="right">9.9008564</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 2</td>
+<td align="right">1523.8018187</td>
+<td align="right">176.7974376</td>
+<td align="right">8.6189135</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 3</td>
+<td align="right">2172.5220727</td>
+<td align="right">169.2099515</td>
+<td align="right">12.8392098</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 4</td>
+<td align="right">1144.0158931</td>
+<td align="right">175.9093698</td>
+<td align="right">6.5034392</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 5</td>
+<td align="right">955.1161060</td>
+<td align="right">181.3376233</td>
+<td align="right">5.2670598</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 6</td>
+<td align="right">1085.9294504</td>
+<td align="right">177.1175286</td>
+<td align="right">6.1311235</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 7</td>
+<td align="right">1363.7700047</td>
+<td align="right">178.8398391</td>
+<td align="right">7.6256499</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 8</td>
+<td align="right">1766.8242455</td>
+<td align="right">183.7722979</td>
+<td align="right">9.6142034</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 9</td>
+<td align="right">1968.2199343</td>
+<td align="right">178.6312780</td>
+<td align="right">11.0183388</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 1</td>
+<td align="right">2421.4848090</td>
+<td align="right">179.1239927</td>
+<td align="right">13.5184839</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 10</td>
+<td align="right">3007.1856353</td>
+<td align="right">180.3368261</td>
+<td align="right">16.6753830</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 11</td>
+<td align="right">3309.1882791</td>
+<td align="right">181.8741495</td>
+<td align="right">18.1949347</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 12</td>
+<td align="right">2833.8618472</td>
+<td align="right">179.9883159</td>
+<td align="right">15.7446989</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 2</td>
+<td align="right">2807.8020939</td>
+<td align="right">183.3768841</td>
+<td align="right">15.3116469</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 3</td>
+<td align="right">2463.6991396</td>
+<td align="right">177.4906599</td>
+<td align="right">13.8807256</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 4</td>
+<td align="right">2716.3302693</td>
+<td align="right">180.0245407</td>
+<td align="right">15.0886666</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 5</td>
+<td align="right">2477.5306726</td>
+<td align="right">174.2475433</td>
+<td align="right">14.2184540</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 6</td>
+<td align="right">2937.7489448</td>
+<td align="right">181.4379149</td>
+<td align="right">16.1914832</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 7</td>
+<td align="right">2086.6382362</td>
+<td align="right">183.2967507</td>
+<td align="right">11.3839347</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 8</td>
+<td align="right">3083.3937837</td>
+<td align="right">181.4581474</td>
+<td align="right">16.9923138</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 9</td>
+<td align="right">2807.1783071</td>
+<td align="right">186.1547550</td>
+<td align="right">15.0798098</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 1</td>
+<td align="right">2507.8101532</td>
+<td align="right">186.3195286</td>
+<td align="right">13.4597279</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 10</td>
+<td align="right">2654.9939990</td>
+<td align="right">172.9294540</td>
+<td align="right">15.3530468</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 11</td>
+<td align="right">2485.7155372</td>
+<td align="right">175.3138401</td>
+<td align="right">14.1786612</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 12</td>
+<td align="right">3629.1631924</td>
+<td align="right">172.1867342</td>
+<td align="right">21.0769036</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 2</td>
+<td align="right">2709.6581000</td>
+<td align="right">179.1217747</td>
+<td align="right">15.1274635</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 3</td>
+<td align="right">3056.8772255</td>
+<td align="right">171.0130383</td>
+<td align="right">17.8751121</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 4</td>
+<td align="right">3025.7140158</td>
+<td align="right">172.1799213</td>
+<td align="right">17.5729783</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 5</td>
+<td align="right">2942.2037518</td>
+<td align="right">178.8724461</td>
+<td align="right">16.4486136</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 6</td>
+<td align="right">3542.3467401</td>
+<td align="right">180.9310886</td>
+<td align="right">19.5784305</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 7</td>
+<td align="right">2701.2452432</td>
+<td align="right">185.2372373</td>
+<td align="right">14.5826254</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 8</td>
+<td align="right">2692.4956653</td>
+<td align="right">181.9258670</td>
+<td align="right">14.7999606</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 9</td>
+<td align="right">2419.2432729</td>
+<td align="right">179.5985137</td>
+<td align="right">13.4702856</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 1</td>
+<td align="right">3141.3636032</td>
+<td align="right">174.3141535</td>
+<td align="right">18.0212768</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 10</td>
+<td align="right">2164.9920692</td>
+<td align="right">173.0967370</td>
+<td align="right">12.5074112</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 11</td>
+<td align="right">2267.8719191</td>
+<td align="right">177.7822164</td>
+<td align="right">12.7564611</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 12</td>
+<td align="right">3226.1005785</td>
+<td align="right">171.2822803</td>
+<td align="right">18.8349932</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 2</td>
+<td align="right">2715.7468841</td>
+<td align="right">173.0461048</td>
+<td align="right">15.6937764</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 3</td>
+<td align="right">3654.7849063</td>
+<td align="right">171.2018709</td>
+<td align="right">21.3478094</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 4</td>
+<td align="right">3964.9586975</td>
+<td align="right">172.6129113</td>
+<td align="right">22.9702325</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 5</td>
+<td align="right">2644.1215259</td>
+<td align="right">172.8666237</td>
+<td align="right">15.2957319</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 6</td>
+<td align="right">2925.7657762</td>
+<td align="right">177.5054363</td>
+<td align="right">16.4826827</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 7</td>
+<td align="right">1869.2359828</td>
+<td align="right">183.1929106</td>
+<td align="right">10.2036480</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 8</td>
+<td align="right">2449.0797237</td>
+<td align="right">178.8327459</td>
+<td align="right">13.6948058</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 9</td>
+<td align="right">2597.1695708</td>
+<td align="right">178.3293427</td>
+<td align="right">14.5638936</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 1</td>
+<td align="right">-394.7777727</td>
+<td align="right">192.4613846</td>
+<td align="right">-2.0512051</td>
+<td align="right">0.0402673</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 10</td>
+<td align="right">-1034.9517392</td>
+<td align="right">181.8150080</td>
+<td align="right">-5.6923339</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 11</td>
+<td align="right">-869.4435832</td>
+<td align="right">179.9050757</td>
+<td align="right">-4.8327907</td>
+<td align="right">0.0000014</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 12</td>
+<td align="right">-586.1042226</td>
+<td align="right">176.8022940</td>
+<td align="right">-3.3150261</td>
+<td align="right">0.0009189</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 2</td>
+<td align="right">1629.0039567</td>
+<td align="right">173.0617183</td>
+<td align="right">9.4128498</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 3</td>
+<td align="right">548.6398417</td>
+<td align="right">203.9007492</td>
+<td align="right">2.6907201</td>
+<td align="right">0.0071391</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 4</td>
+<td align="right">-3029.4582385</td>
+<td align="right">745.0035419</td>
+<td align="right">-4.0663676</td>
+<td align="right">0.0000480</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 5</td>
+<td align="right">-1635.7715893</td>
+<td align="right">225.1569622</td>
+<td align="right">-7.2650278</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 6</td>
+<td align="right">-795.7463634</td>
+<td align="right">186.9927358</td>
+<td align="right">-4.2554935</td>
+<td align="right">0.0000210</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 7</td>
+<td align="right">-486.1217500</td>
+<td align="right">190.2198067</td>
+<td align="right">-2.5555790</td>
+<td align="right">0.0106126</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 8</td>
+<td align="right">-324.4577380</td>
+<td align="right">190.8714380</td>
+<td align="right">-1.6998758</td>
+<td align="right">0.0891787</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 9</td>
+<td align="right">-12.8456324</td>
+<td align="right">182.4534446</td>
+<td align="right">-0.0704050</td>
+<td align="right">0.9438724</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 1</td>
+<td align="right">-755.9314366</td>
+<td align="right">177.8839169</td>
+<td align="right">-4.2495772</td>
+<td align="right">0.0000216</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 10</td>
+<td align="right">-1157.5540724</td>
+<td align="right">181.9355984</td>
+<td align="right">-6.3624386</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 11</td>
+<td align="right">442.0903133</td>
+<td align="right">172.9102139</td>
+<td align="right">2.5567623</td>
+<td align="right">0.0105766</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 12</td>
+<td align="right">439.5693959</td>
+<td align="right">173.2233573</td>
+<td align="right">2.5375873</td>
+<td align="right">0.0111737</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 2</td>
+<td align="right">-1143.7986211</td>
+<td align="right">200.8889257</td>
+<td align="right">-5.6936868</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 3</td>
+<td align="right">-350.0087735</td>
+<td align="right">172.1065896</td>
+<td align="right">-2.0336744</td>
+<td align="right">0.0420051</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 4</td>
+<td align="right">45.4616539</td>
+<td align="right">174.4211148</td>
+<td align="right">0.2606431</td>
+<td align="right">0.7943720</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 5</td>
+<td align="right">548.1962933</td>
+<td align="right">175.6645539</td>
+<td align="right">3.1206995</td>
+<td align="right">0.0018082</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 6</td>
+<td align="right">950.6968656</td>
+<td align="right">181.5532325</td>
+<td align="right">5.2364634</td>
+<td align="right">0.0000002</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 7</td>
+<td align="right">1737.7191525</td>
+<td align="right">186.4816836</td>
+<td align="right">9.3184441</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 8</td>
+<td align="right">2246.7714760</td>
+<td align="right">188.0312807</td>
+<td align="right">11.9489240</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 9</td>
+<td align="right">-477.9129250</td>
+<td align="right">184.7850077</td>
+<td align="right">-2.5863187</td>
+<td align="right">0.0097117</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughBrooklyn</td>
+<td align="right">-145.8215829</td>
+<td align="right">34.6024031</td>
+<td align="right">-4.2142039</td>
+<td align="right">0.0000252</td>
+</tr>
+<tr class="even">
+<td align="left">boroughManhattan</td>
+<td align="right">256.7677789</td>
+<td align="right">34.0055171</td>
+<td align="right">7.5507683</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughQueens</td>
+<td align="right">-3095.4662869</td>
+<td align="right">35.3519704</td>
+<td align="right">-87.5613509</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">boroughStaten Island</td>
+<td align="right">-3983.9733227</td>
+<td align="right">37.0965809</td>
+<td align="right">-107.3946232</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">snow</td>
+<td align="right">0.1953173</td>
+<td align="right">1.0529879</td>
+<td align="right">0.1854887</td>
+<td align="right">0.8528487</td>
+</tr>
+<tr class="even">
+<td align="left">prcp</td>
+<td align="right">0.7961015</td>
+<td align="right">1.2034846</td>
+<td align="right">0.6614970</td>
+<td align="right">0.5083056</td>
+</tr>
+<tr class="odd">
+<td align="left">snwd</td>
+<td align="right">-0.2192653</td>
+<td align="right">0.4927868</td>
+<td align="right">-0.4449497</td>
+<td align="right">0.6563637</td>
+</tr>
+<tr class="even">
+<td align="left">tmin</td>
+<td align="right">-1.4755006</td>
+<td align="right">5.3138494</td>
+<td align="right">-0.2776708</td>
+<td align="right">0.7812696</td>
+</tr>
+<tr class="odd">
+<td align="left">tmax</td>
+<td align="right">1.9247068</td>
+<td align="right">4.3885960</td>
+<td align="right">0.4385701</td>
+<td align="right">0.6609805</td>
+</tr>
+<tr class="even">
+<td align="left">snwd:tmin</td>
+<td align="right">0.0450099</td>
+<td align="right">0.0624955</td>
+<td align="right">0.7202101</td>
+<td align="right">0.4714088</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>step_lm = step(model_interact, direction = &quot;backward&quot;)</code></pre>
+<pre><code>FALSE Start:  AIC=184423.9
+FALSE borough_month_cases ~ inspection_ym + borough + snow + prcp + 
+FALSE     snwd + tmin + tmax + tmin * snwd
+FALSE 
+FALSE                  Df  Sum of Sq        RSS    AIC
+FALSE - snow            1 5.5589e+04 2.0619e+10 184422
+FALSE - tmax            1 3.1076e+05 2.0620e+10 184422
+FALSE - prcp            1 7.0698e+05 2.0620e+10 184422
+FALSE - snwd:tmin       1 8.3806e+05 2.0620e+10 184422
+FALSE &lt;none&gt;                         2.0619e+10 184424
+FALSE - inspection_ym 119 1.9352e+10 3.9971e+10 192720
+FALSE - borough         4 3.8002e+10 5.8621e+10 197886
+FALSE 
+FALSE Step:  AIC=184421.9
+FALSE borough_month_cases ~ inspection_ym + borough + prcp + snwd + 
+FALSE     tmin + tmax + snwd:tmin
+FALSE 
+FALSE                  Df  Sum of Sq        RSS    AIC
+FALSE - tmax            1 3.0451e+05 2.0620e+10 184420
+FALSE - prcp            1 7.7607e+05 2.0620e+10 184420
+FALSE - snwd:tmin       1 8.3671e+05 2.0620e+10 184420
+FALSE &lt;none&gt;                         2.0619e+10 184422
+FALSE - inspection_ym 119 1.9352e+10 3.9972e+10 192718
+FALSE - borough         4 3.8007e+10 5.8626e+10 197885
+FALSE 
+FALSE Step:  AIC=184420.1
+FALSE borough_month_cases ~ inspection_ym + borough + prcp + snwd + 
+FALSE     tmin + snwd:tmin
+FALSE 
+FALSE                  Df  Sum of Sq        RSS    AIC
+FALSE - prcp            1 6.8470e+05 2.0620e+10 184419
+FALSE - snwd:tmin       1 8.0409e+05 2.0620e+10 184419
+FALSE &lt;none&gt;                         2.0620e+10 184420
+FALSE - inspection_ym 119 1.9373e+10 3.9993e+10 192722
+FALSE - borough         4 3.8009e+10 5.8629e+10 197884
+FALSE 
+FALSE Step:  AIC=184418.5
+FALSE borough_month_cases ~ inspection_ym + borough + snwd + tmin + 
+FALSE     snwd:tmin
+FALSE 
+FALSE                  Df  Sum of Sq        RSS    AIC
+FALSE - snwd:tmin       1 8.0863e+05 2.0621e+10 184417
+FALSE &lt;none&gt;                         2.0620e+10 184419
+FALSE - inspection_ym 119 1.9375e+10 3.9995e+10 192721
+FALSE - borough         4 3.8009e+10 5.8629e+10 197882
+FALSE 
+FALSE Step:  AIC=184417
+FALSE borough_month_cases ~ inspection_ym + borough + snwd + tmin
+FALSE 
+FALSE                  Df  Sum of Sq        RSS    AIC
+FALSE - tmin            1 1.2256e+05 2.0621e+10 184415
+FALSE - snwd            1 8.3189e+05 2.0622e+10 184416
+FALSE &lt;none&gt;                         2.0621e+10 184417
+FALSE - inspection_ym 119 1.9384e+10 4.0006e+10 192723
+FALSE - borough         4 3.8008e+10 5.8629e+10 197880
+FALSE 
+FALSE Step:  AIC=184415.1
+FALSE borough_month_cases ~ inspection_ym + borough + snwd
+FALSE 
+FALSE                  Df  Sum of Sq        RSS    AIC
+FALSE - snwd            1 8.7162e+05 2.0622e+10 184414
+FALSE &lt;none&gt;                         2.0621e+10 184415
+FALSE - inspection_ym 119 1.9384e+10 4.0006e+10 192721
+FALSE - borough         4 3.8011e+10 5.8632e+10 197879
+FALSE 
+FALSE Step:  AIC=184413.7
+FALSE borough_month_cases ~ inspection_ym + borough
+FALSE 
+FALSE                  Df  Sum of Sq        RSS    AIC
+FALSE &lt;none&gt;                         2.0622e+10 184414
+FALSE - inspection_ym 119 2.0044e+10 4.0666e+10 192930
+FALSE - borough         4 3.8015e+10 5.8637e+10 197878</code></pre>
+<pre class="r"><code>broom::tidy(step_lm) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<colgroup>
+<col width="31%" />
+<col width="19%" />
+<col width="14%" />
+<col width="19%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">2857.752529</td>
+<td align="right">128.37443</td>
+<td align="right">22.2610732</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 10</td>
+<td align="right">836.177241</td>
+<td align="right">185.33466</td>
+<td align="right">4.5117154</td>
+<td align="right">0.0000065</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 11</td>
+<td align="right">-326.568289</td>
+<td align="right">198.49675</td>
+<td align="right">-1.6452072</td>
+<td align="right">0.0999517</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 12</td>
+<td align="right">621.468321</td>
+<td align="right">177.54798</td>
+<td align="right">3.5002838</td>
+<td align="right">0.0004663</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 2</td>
+<td align="right">964.210541</td>
+<td align="right">175.52882</td>
+<td align="right">5.4931750</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 3</td>
+<td align="right">2747.095549</td>
+<td align="right">171.94453</td>
+<td align="right">15.9766381</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 4</td>
+<td align="right">2925.442075</td>
+<td align="right">175.14689</td>
+<td align="right">16.7027918</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 5</td>
+<td align="right">2781.689564</td>
+<td align="right">174.02705</td>
+<td align="right">15.9842366</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 6</td>
+<td align="right">2354.880040</td>
+<td align="right">174.76585</td>
+<td align="right">13.4744866</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 7</td>
+<td align="right">1773.462137</td>
+<td align="right">177.97135</td>
+<td align="right">9.9648744</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2012 8</td>
+<td align="right">1257.179233</td>
+<td align="right">174.02884</td>
+<td align="right">7.2239705</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2012 9</td>
+<td align="right">996.891141</td>
+<td align="right">178.40036</td>
+<td align="right">5.5879434</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 1</td>
+<td align="right">644.707548</td>
+<td align="right">178.40233</td>
+<td align="right">3.6137843</td>
+<td align="right">0.0003029</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 10</td>
+<td align="right">1207.917568</td>
+<td align="right">174.39224</td>
+<td align="right">6.9264410</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 11</td>
+<td align="right">798.821852</td>
+<td align="right">183.68625</td>
+<td align="right">4.3488385</td>
+<td align="right">0.0000138</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 12</td>
+<td align="right">-117.903461</td>
+<td align="right">185.90598</td>
+<td align="right">-0.6342101</td>
+<td align="right">0.5259551</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 2</td>
+<td align="right">851.373925</td>
+<td align="right">187.67178</td>
+<td align="right">4.5365047</td>
+<td align="right">0.0000058</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 3</td>
+<td align="right">865.449616</td>
+<td align="right">175.14341</td>
+<td align="right">4.9413770</td>
+<td align="right">0.0000008</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 4</td>
+<td align="right">1066.744790</td>
+<td align="right">174.39228</td>
+<td align="right">6.1169267</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 5</td>
+<td align="right">1120.004834</td>
+<td align="right">175.14411</td>
+<td align="right">6.3947615</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 6</td>
+<td align="right">-103.792384</td>
+<td align="right">179.28927</td>
+<td align="right">-0.5789102</td>
+<td align="right">0.5626600</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 7</td>
+<td align="right">567.998932</td>
+<td align="right">177.12911</td>
+<td align="right">3.2066945</td>
+<td align="right">0.0013460</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2013 8</td>
+<td align="right">382.971184</td>
+<td align="right">176.31552</td>
+<td align="right">2.1720787</td>
+<td align="right">0.0298681</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2013 9</td>
+<td align="right">1003.611959</td>
+<td align="right">177.13052</td>
+<td align="right">5.6659461</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 1</td>
+<td align="right">-464.942500</td>
+<td align="right">190.89253</td>
+<td align="right">-2.4356244</td>
+<td align="right">0.0148797</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 10</td>
+<td align="right">453.153212</td>
+<td align="right">174.02794</td>
+<td align="right">2.6039107</td>
+<td align="right">0.0092273</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 11</td>
+<td align="right">300.565328</td>
+<td align="right">187.06769</td>
+<td align="right">1.6067196</td>
+<td align="right">0.1081406</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 12</td>
+<td align="right">902.082538</td>
+<td align="right">176.71953</td>
+<td align="right">5.1046000</td>
+<td align="right">0.0000003</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 2</td>
+<td align="right">-736.009448</td>
+<td align="right">208.25173</td>
+<td align="right">-3.5342296</td>
+<td align="right">0.0004104</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 3</td>
+<td align="right">1295.227559</td>
+<td align="right">177.13065</td>
+<td align="right">7.3122723</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 4</td>
+<td align="right">2026.411661</td>
+<td align="right">174.39393</td>
+<td align="right">11.6197371</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 5</td>
+<td align="right">1168.465320</td>
+<td align="right">176.72072</td>
+<td align="right">6.6119315</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 6</td>
+<td align="right">960.296532</td>
+<td align="right">177.97124</td>
+<td align="right">5.3957962</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 7</td>
+<td align="right">947.895271</td>
+<td align="right">175.14214</td>
+<td align="right">5.4121484</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2014 8</td>
+<td align="right">1044.356035</td>
+<td align="right">175.14313</td>
+<td align="right">5.9628720</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2014 9</td>
+<td align="right">764.182400</td>
+<td align="right">175.52964</td>
+<td align="right">4.3535803</td>
+<td align="right">0.0000135</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 1</td>
+<td align="right">228.088309</td>
+<td align="right">186.47926</td>
+<td align="right">1.2231297</td>
+<td align="right">0.2213033</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 10</td>
+<td align="right">810.578613</td>
+<td align="right">174.03024</td>
+<td align="right">4.6576884</td>
+<td align="right">0.0000032</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 11</td>
+<td align="right">344.561387</td>
+<td align="right">184.22349</td>
+<td align="right">1.8703445</td>
+<td align="right">0.0614589</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 12</td>
+<td align="right">1076.668382</td>
+<td align="right">174.03469</td>
+<td align="right">6.1865161</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 2</td>
+<td align="right">-182.829787</td>
+<td align="right">190.91636</td>
+<td align="right">-0.9576434</td>
+<td align="right">0.3382608</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 3</td>
+<td align="right">925.016432</td>
+<td align="right">175.92605</td>
+<td align="right">5.2579845</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 4</td>
+<td align="right">1447.455521</td>
+<td align="right">172.27829</td>
+<td align="right">8.4018454</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 5</td>
+<td align="right">1148.836204</td>
+<td align="right">174.77729</td>
+<td align="right">6.5731436</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 6</td>
+<td align="right">971.061158</td>
+<td align="right">171.62033</td>
+<td align="right">5.6581943</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 7</td>
+<td align="right">914.668392</td>
+<td align="right">171.94346</td>
+<td align="right">5.3195883</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2015 8</td>
+<td align="right">597.913023</td>
+<td align="right">171.29380</td>
+<td align="right">3.4905702</td>
+<td align="right">0.0004836</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2015 9</td>
+<td align="right">630.062943</td>
+<td align="right">176.72629</td>
+<td align="right">3.5651909</td>
+<td align="right">0.0003649</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 1</td>
+<td align="right">663.182865</td>
+<td align="right">181.64937</td>
+<td align="right">3.6508955</td>
+<td align="right">0.0002624</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 10</td>
+<td align="right">1711.946084</td>
+<td align="right">178.40770</td>
+<td align="right">9.5956961</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 11</td>
+<td align="right">2014.088338</td>
+<td align="right">180.67345</td>
+<td align="right">11.1476718</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 12</td>
+<td align="right">1770.103366</td>
+<td align="right">178.84187</td>
+<td align="right">9.8975891</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 2</td>
+<td align="right">1526.699431</td>
+<td align="right">176.72613</td>
+<td align="right">8.6387873</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 3</td>
+<td align="right">2179.165618</td>
+<td align="right">168.02008</td>
+<td align="right">12.9696735</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 4</td>
+<td align="right">1151.182036</td>
+<td align="right">174.03141</td>
+<td align="right">6.6147947</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 5</td>
+<td align="right">963.934213</td>
+<td align="right">176.72074</td>
+<td align="right">5.4545620</td>
+<td align="right">0.0000001</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 6</td>
+<td align="right">1097.856735</td>
+<td align="right">168.01444</td>
+<td align="right">6.5342997</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 7</td>
+<td align="right">1378.679282</td>
+<td align="right">165.18889</td>
+<td align="right">8.3460774</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2016 8</td>
+<td align="right">1777.457626</td>
+<td align="right">170.34573</td>
+<td align="right">10.4344125</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2016 9</td>
+<td align="right">1978.134804</td>
+<td align="right">169.15398</td>
+<td align="right">11.6942847</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 1</td>
+<td align="right">2417.690491</td>
+<td align="right">178.84106</td>
+<td align="right">13.5186546</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 10</td>
+<td align="right">3014.822529</td>
+<td align="right">175.53001</td>
+<td align="right">17.1755391</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 11</td>
+<td align="right">3312.400722</td>
+<td align="right">181.15662</td>
+<td align="right">18.2847343</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 12</td>
+<td align="right">2828.518148</td>
+<td align="right">179.74626</td>
+<td align="right">15.7361722</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 2</td>
+<td align="right">2806.171311</td>
+<td align="right">183.16088</td>
+<td align="right">15.3208003</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 3</td>
+<td align="right">2467.181930</td>
+<td align="right">177.12856</td>
+<td align="right">13.9287642</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 4</td>
+<td align="right">2724.425604</td>
+<td align="right">177.12765</td>
+<td align="right">15.3811425</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 5</td>
+<td align="right">2487.563071</td>
+<td align="right">169.74020</td>
+<td align="right">14.6551208</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 6</td>
+<td align="right">2948.382333</td>
+<td align="right">172.28214</td>
+<td align="right">17.1136853</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 7</td>
+<td align="right">2097.945063</td>
+<td align="right">170.97337</td>
+<td align="right">12.2705953</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2017 8</td>
+<td align="right">3093.919041</td>
+<td align="right">170.65794</td>
+<td align="right">18.1293594</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2017 9</td>
+<td align="right">2815.514957</td>
+<td align="right">177.54495</td>
+<td align="right">15.8580405</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 1</td>
+<td align="right">2500.411610</td>
+<td align="right">185.90853</td>
+<td align="right">13.4496875</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 10</td>
+<td align="right">2659.078480</td>
+<td align="right">169.44344</td>
+<td align="right">15.6930148</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 11</td>
+<td align="right">2488.356558</td>
+<td align="right">174.39631</td>
+<td align="right">14.2684014</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 12</td>
+<td align="right">3630.036343</td>
+<td align="right">171.95732</td>
+<td align="right">21.1101002</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 2</td>
+<td align="right">2714.798486</td>
+<td align="right">178.84008</td>
+<td align="right">15.1800337</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 3</td>
+<td align="right">3057.664059</td>
+<td align="right">170.65901</td>
+<td align="right">17.9168039</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 4</td>
+<td align="right">3032.801399</td>
+<td align="right">170.97526</td>
+<td align="right">17.7382470</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 5</td>
+<td align="right">2953.984792</td>
+<td align="right">172.28018</td>
+<td align="right">17.1463999</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 6</td>
+<td align="right">3553.386488</td>
+<td align="right">172.27914</td>
+<td align="right">20.6257500</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 7</td>
+<td align="right">2715.367356</td>
+<td align="right">172.62014</td>
+<td align="right">15.7303042</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2018 8</td>
+<td align="right">2704.724105</td>
+<td align="right">168.01486</td>
+<td align="right">16.0981245</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2018 9</td>
+<td align="right">2427.889948</td>
+<td align="right">170.04182</td>
+<td align="right">14.2781929</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 1</td>
+<td align="right">3139.949484</td>
+<td align="right">174.04707</td>
+<td align="right">18.0408065</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 10</td>
+<td align="right">2172.061173</td>
+<td align="right">168.86494</td>
+<td align="right">12.8627128</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 11</td>
+<td align="right">2269.547505</td>
+<td align="right">177.55115</td>
+<td align="right">12.7824994</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 12</td>
+<td align="right">3226.097665</td>
+<td align="right">170.98056</td>
+<td align="right">18.8682134</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 2</td>
+<td align="right">2715.594974</td>
+<td align="right">172.96967</td>
+<td align="right">15.6998334</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 3</td>
+<td align="right">3653.818436</td>
+<td align="right">170.98245</td>
+<td align="right">21.3695529</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 4</td>
+<td align="right">3973.582805</td>
+<td align="right">170.35358</td>
+<td align="right">23.3255024</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 5</td>
+<td align="right">2654.667446</td>
+<td align="right">168.29503</td>
+<td align="right">15.7738914</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 6</td>
+<td align="right">2937.231519</td>
+<td align="right">168.30029</td>
+<td align="right">17.4523257</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 7</td>
+<td align="right">1884.339207</td>
+<td align="right">169.74416</td>
+<td align="right">11.1010546</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2019 8</td>
+<td align="right">2460.051897</td>
+<td align="right">167.20654</td>
+<td align="right">14.7126538</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2019 9</td>
+<td align="right">2606.371783</td>
+<td align="right">170.05342</td>
+<td align="right">15.3267823</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 1</td>
+<td align="right">-397.566005</td>
+<td align="right">192.29331</td>
+<td align="right">-2.0674979</td>
+<td align="right">0.0387074</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 10</td>
+<td align="right">-1029.137930</td>
+<td align="right">177.97303</td>
+<td align="right">-5.7825499</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 11</td>
+<td align="right">-865.187304</td>
+<td align="right">178.40409</td>
+<td align="right">-4.8495933</td>
+<td align="right">0.0000013</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 12</td>
+<td align="right">-588.289058</td>
+<td align="right">176.32211</td>
+<td align="right">-3.3364453</td>
+<td align="right">0.0008510</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 2</td>
+<td align="right">1629.635829</td>
+<td align="right">172.96670</td>
+<td align="right">9.4216740</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 3</td>
+<td align="right">552.520478</td>
+<td align="right">203.05599</td>
+<td align="right">2.7210253</td>
+<td align="right">0.0065168</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 4</td>
+<td align="right">-3027.135812</td>
+<td align="right">744.68603</td>
+<td align="right">-4.0649827</td>
+<td align="right">0.0000483</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 5</td>
+<td align="right">-1625.963457</td>
+<td align="right">221.30666</td>
+<td align="right">-7.3471057</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 6</td>
+<td align="right">-784.348599</td>
+<td align="right">177.16891</td>
+<td align="right">-4.4271233</td>
+<td align="right">0.0000096</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 7</td>
+<td align="right">-471.376401</td>
+<td align="right">176.34478</td>
+<td align="right">-2.6730386</td>
+<td align="right">0.0075263</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2020 8</td>
+<td align="right">-310.865438</td>
+<td align="right">179.30292</td>
+<td align="right">-1.7337444</td>
+<td align="right">0.0829876</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2020 9</td>
+<td align="right">-3.125111</td>
+<td align="right">174.77475</td>
+<td align="right">-0.0178808</td>
+<td align="right">0.9857342</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 1</td>
+<td align="right">-760.762124</td>
+<td align="right">177.55103</td>
+<td align="right">-4.2847520</td>
+<td align="right">0.0000184</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 10</td>
+<td align="right">-1150.864838</td>
+<td align="right">177.16917</td>
+<td align="right">-6.4958527</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 11</td>
+<td align="right">443.346388</td>
+<td align="right">172.28712</td>
+<td align="right">2.5732996</td>
+<td align="right">0.0100846</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 12</td>
+<td align="right">437.651431</td>
+<td align="right">172.62350</td>
+<td align="right">2.5352947</td>
+<td align="right">0.0112471</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 2</td>
+<td align="right">-1195.794824</td>
+<td align="right">187.07760</td>
+<td align="right">-6.3919721</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 3</td>
+<td align="right">-344.508266</td>
+<td align="right">171.61561</td>
+<td align="right">-2.0074414</td>
+<td align="right">0.0447237</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 4</td>
+<td align="right">54.671316</td>
+<td align="right">172.27703</td>
+<td align="right">0.3173454</td>
+<td align="right">0.7509867</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 5</td>
+<td align="right">559.971149</td>
+<td align="right">170.66327</td>
+<td align="right">3.2811462</td>
+<td align="right">0.0010366</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 6</td>
+<td align="right">963.195893</td>
+<td align="right">171.61883</td>
+<td align="right">5.6124137</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 7</td>
+<td align="right">1755.126994</td>
+<td align="right">174.03839</td>
+<td align="right">10.0847119</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_ym2021 8</td>
+<td align="right">2259.336543</td>
+<td align="right">174.77481</td>
+<td align="right">12.9271295</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_ym2021 9</td>
+<td align="right">-462.909006</td>
+<td align="right">175.92561</td>
+<td align="right">-2.6312769</td>
+<td align="right">0.0085167</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughBrooklyn</td>
+<td align="right">-145.499073</td>
+<td align="right">34.59544</td>
+<td align="right">-4.2057295</td>
+<td align="right">0.0000262</td>
+</tr>
+<tr class="even">
+<td align="left">boroughManhattan</td>
+<td align="right">256.574925</td>
+<td align="right">33.99764</td>
+<td align="right">7.5468451</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughQueens</td>
+<td align="right">-3095.182759</td>
+<td align="right">35.34319</td>
+<td align="right">-87.5750717</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">boroughStaten Island</td>
+<td align="right">-3983.482374</td>
+<td align="right">37.08440</td>
+<td align="right">-107.4166451</td>
+<td align="right">0.0000000</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>set.seed(100)
+plot(step_lm)</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-7-1.png" width="672" /><img src="regression_analysis_files/figure-html/unnamed-chunk-7-2.png" width="672" /><img src="regression_analysis_files/figure-html/unnamed-chunk-7-3.png" width="672" /><img src="regression_analysis_files/figure-html/unnamed-chunk-7-4.png" width="672" /></p>
 
 
 
