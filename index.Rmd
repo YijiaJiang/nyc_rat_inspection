@@ -26,13 +26,6 @@ Gaining deeper sights into the pattern of rat inspections in both the temporal a
 
 <img src="pic/outline.jpg">
 
-&nbsp;
-
-### Datasets
-- Rodent inspection data from [NYC Open Data](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj)  
-- NYC daily weather data from [NOAA National Climatic Data Center](https://www.noaa.gov/) 
-- NYC COVID-19 daily case count data from [NYC Open Data](https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3)
-- NYC Boroughs population from [City Population](http://www.citypopulation.de/en/usa/newyorkcity/)
 
 &nbsp;
 
@@ -43,8 +36,8 @@ Gaining deeper sights into the pattern of rat inspections in both the temporal a
 &nbsp;
 
 ### Screencast
-<center><iframe width="910px" height = "512px" src="https://www.youtube.com/embed/6rNvxML07CU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen ></iframe></center>
 
+<center><iframe width="910px" height = "512px" src="https://www.youtube.com/embed/6rNvxML07CU" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen ></iframe></center>
 
 
 &nbsp;

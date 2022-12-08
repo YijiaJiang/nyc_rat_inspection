@@ -3,6 +3,8 @@ output_dir: "."
 navbar:
   title: "NYC RAT INSPECTION"
   right:
+    - text: "Data Preprocessing"
+      href: data_preprocessing.html
     - text: "Exploratory Data Analysis"
       href: exploratory_data_analysis.html
     - text: "Statistical Analysis"
