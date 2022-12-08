@@ -165,6 +165,7 @@ rat %>%
          title = "Number of Rat Inspections by Month") %>%
   hide_legend()
 ```
+
 &nbsp;
 
 &nbsp;
