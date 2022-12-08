@@ -260,7 +260,7 @@ p_area = rat %>%
 p_rat / (p_pop + p_area)
 ```
 
-As for the rat density in terms of population, it turned out that Manhattan that ranked the first with 0.020321 inspections per person. Similarly, when it comes to the density regarding land area, Manhattan, with 1411.6 inspections per square mile far higher than other four boroughs, won again. Undoubtfully, Manhattan was the most "rattiest" borough in New York City. Moreover, Queens and Staten Island were still the boroughs with least rat inspections.
+As for the rat density in terms of population, it turned out that Manhattan ranked the first with 0.020321 inspections per person. Similarly, when it comes to the density regarding land area, Manhattan, with 1411.6 inspections per square mile far higher than other four boroughs, won again. Undoubtfully, Manhattan was the most "rattiest" borough in New York City. Moreover, Queens and Staten Island were still the boroughs with least rat inspections.
 
 ```{r}
 boro = c(1, 2, 3, 4, 5)
@@ -302,7 +302,7 @@ p_density_p + p_density_a
 
 ### Rat Inspections by Month in Each Borough {.tabset}
 
-In order to obtain more demographic information, we analyzed the rat inspections stratified by borough and month. Generally, for all five boroughs, more rats were inspected in late spring and summer in 2021, especially in July and August.  
+In order to obtain more demographic information, we analyzed the rat inspections stratified by borough and month. Generally, for all five boroughs, more rats were inspected in late spring and summer in 2021, especially in July and August. Individually, Bronx, Brooklyn and Manhattan were above the borough average level while Queens and Staten Island were significantly below the average, which was consistent with our previous findings.
 
 #### Bronx
 ```{r, message=FALSE, warning=FALSE}
@@ -405,8 +405,7 @@ rat %>%
             name = "Borough Average") %>%
   layout(xaxis = list(title = "Month"), 
          yaxis = list(title = "Count"),
-         title = "Number of Rat Inspections in Queens in 2021") %>%
-  hide_legend()
+         title = "Number of Rat Inspections in Queens in 2021") 
 ```
 
 #### Staten Island
@@ -433,6 +432,9 @@ rat %>%
          title = "Number of Rat Inspections in Staten Island in 2021") 
 ```
 
+### Overall Top 15 Rat Popular Streets
+
+To be more detailed, we investigated the fifteen streets with most rat inspections in New York City. Among them, Greene Avenue, Brooklyn with 1366 cases, Broadway, Manhattan with 1154 cases and Hart Street, Brooklyn with 1118 cases ranked the top 3.  
 
 ```{r, message=FALSE, warning=FALSE}
 # Overall top 15 streets
@@ -451,7 +453,9 @@ rat %>%
   hide_legend()
 ```
 
-### Top 5 Rat Popular Street{.tabset}
+### Top 5 Rat Popular Streets {.tabset}
+
+Below are the five streets with most rat inspections in each borough, respectively.
 
 #### Bronx
 ```{r, message=FALSE, warning=FALSE}
@@ -543,6 +547,14 @@ rat %>%
   hide_legend()
 ```
 
+# Inspection Types and Results
+
+Inspection type and result were two important attributes, which reflect the motivation, method and result of rat inspections. In addition, some other problem conditions such as garbage (poor containerization of food waste resulting in the feeding of rats), harborage (clutter and dense vegetation promoting the nesting of rats), could be identified during this process.
+
+### Inspection Types
+
+We can easily observed that initial inspection was the most frequent inspection, accounted for 70.3%. It represents inspection conducted in response to a 311 complaint, or a proactive inspection conducted through our neighborhood indexing program. Baiting and compliance (follow-up) inspection followed. It's very rare to see clean-up and stoppage in the inspection process.
+
 ```{r, message=FALSE, warning=FALSE}
 # inspection type
 colors = c("#38C5A3", "#F09968", "#D2959B", "#B499CB", "#EE90BA", "#A8D14F", "#E5D800", "#FCCD4C", "#E2BF96", "#B3B3B3")
@@ -570,6 +582,16 @@ rat %>%
 
 ```
 
+### Inspection Results
+
+The result of passed had the largest proportion, accounting for 61.6%. Particularly, 13.6% of results were rat activity. We would like to mention here that active rat signs include any of six different signs below:  
+
+* fresh tracks
+* fresh droppings
+* active burrows
+* active runways and rub marks
+* fresh gnawing marks
+* live rats
 
 ```{r, message=FALSE, warning=FALSE}
 # inspection results
@@ -594,13 +616,22 @@ rat %>%
 
 # Weather and COVID-19
 
+From previous analysis, we found that weather and COVID-19 were two potential covariates that might affect the rat inspections. As is known to all, rats don't prefer the cold weather but gravitate to temperatures between 30 and 32 degrees Celsius.  
+In March 2020, countries around the world including the U.S. deployed various measures of lockdown that lasted on for over a year. This response to the pandemic dominated people's daily lives: they rarely went outside and basically worked from home. As a result, rats lost their "sweet home" and the number of inspections might become smaller.
+
+### Weather
+
+Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the temperatures were almost above 0 degree Celsius and we could not determine immediately that rats seldom wandered outside when the temperatures were extremely low. 
+
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n = rat %>%
+  filter(inspection_year == 2021) %>%
   group_by(inspection_year, inspection_month, inspection_day) %>%
   summarise(Count = n())
 
 t = rat %>%
+  filter(inspection_year == 2021) %>%
   mutate(`Average Temperature` = (tmin+tmax)/2) %>%
   rename(Date = date) %>%
   distinct(inspection_year, inspection_month, inspection_day, `Average Temperature`, tmax, tmin, Date)
@@ -609,17 +640,20 @@ rat_t = left_join(rat_n, t, by = c("inspection_year", "inspection_month", "inspe
   as.data.frame()
 
 p_weather = rat_t %>% 
-  filter(inspection_year == 2021) %>%
   ggplot(aes(x = Date, y = `Average Temperature`)) + 
   geom_point(aes(size = Count), alpha = .5, color = "#66C2A5") +
   geom_smooth(se = FALSE, color = "#8DA0CB") +
   labs(x = "Month",
        y = "Average Temperature",
-       title = "Assocition Between Number of Rat Inspections and Temperature")
+       title = "Assocition Between Number of Rat Inspections and Temperature in 2021")
 
 ggplotly(p_weather)
 
 ```
+
+### COVID-19
+
+Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000. In April 2021, only 4 cases of rat inspections were recorded.
 
 ```{r, message=FALSE, warning=FALSE}
 # changes before and after Covid-19
@@ -635,8 +669,10 @@ rat %>%
           color = ~inspection_year) %>%
   layout(xaxis = list(title = "Inspection Month"), 
          yaxis = list(title = "Number of Inspections"),
-         title = "Number of Rat Inspections Before and After COVID-19") 
+         title = "Comparison of Rat Inspections Before and After COVID-19") 
 ```
+
+We also explored the association between the number of rat inspections and COVID-ID cases. This plot removed the outliers of extremely high daily confirmed cases to focus on the trend. Generally speaking, as the surge of COVID-19 confirmed cases, the number of rat inspections presented a decreaseing trend. This finding verified our thought that lockdown policy and self-quarantine reduced the inspection chances and made rats lose their survival environment.
 
 ```{r, message=FALSE, warning=FALSE}
 # association with Covid-19
@@ -650,25 +686,20 @@ c = rat_covid %>%
 rat_covid_c = left_join(c, rat_obs, by = "date") %>%
   select(inspection_year, date, Count, total_case_count) %>%
   as.data.frame()
-  
-rat_covid_c %>% 
-  ggplot(aes(x=Count, y = total_case_count)) +
-  geom_point()
-  
-rat_covid_c %>% 
-  filter(total_case_count<=2000) %>%
-  ggplot(aes(x = date)) + 
-  geom_smooth(aes(y = total_case_count), color = "#66C2A5", se = FALSE) +
-  geom_smooth(aes(y = Count), color = "#8DA0CB", se = FALSE) +
-  labs(x = "Month",
-       y = "Number of Cases",
-       title = "Assocition Between Number of Rat Inspections and COVID-19")
 
 p_covid = rat_covid_c %>% 
-  ggplot(aes(x = Count, y = total_case_count)) +
-  geom_point(color = "#66C2A5", alpha = 0.5) +
-  geom_smooth(se=FALSE, color = "#8DA0CB") 
-  
+  filter(total_case_count<=2000) %>%
+  rename(Date = date, 
+         `COVID-19 Cases` = total_case_count,
+         `Rat Inspections` = Count) %>%
+  ggplot(aes(x = Date)) + 
+  geom_smooth(aes(y = `COVID-19 Cases`, color = "COVID-19"), se = FALSE) +
+  geom_smooth(aes(y = `Rat Inspections`, color = "Rat"), se = FALSE) +
+  labs(x = "Month",
+       y = "Number of Cases",
+       title = "Assocition Between Number of Rat Inspections and COVID-19",
+       color = "Type") +
+  scale_color_manual(values = c("Rat" = "#8DA0CB", "COVID-19" = "#66C2A5"))
 
 ggplotly(p_covid)
 
