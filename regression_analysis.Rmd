@@ -1,5 +1,5 @@
 ---
-title: "Regression Analysis"
+title: "Regression"
 output: 
   html_document:
     toc: true

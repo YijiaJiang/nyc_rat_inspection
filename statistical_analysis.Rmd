@@ -1,5 +1,5 @@
 ---
-title: "Statistical Analysis"
+title: "Hypothesis Test"
 output: 
   html_document:
     toc: true
@@ -79,7 +79,7 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   mutate(date = as.Date(date,format = "%Y-%m-%d"))
 ```
 
-## Homogenity among oroughs
+## Homogenity among Boroughs
 
 &nbsp;
 
@@ -155,7 +155,7 @@ We can see from the chi-square test result we should reject the null hypothesis,
 
 &nbsp;
 
-## Association with weather and covid-19
+## Association with Weather and COVID-19
 
 &nbsp;
 
@@ -209,7 +209,7 @@ We can see from the chi-square test result we should reject the null hypothesis,
 
 &nbsp;
 
-### Wilcoxon Rank-sum testing changes of inspection density caused by covid-19
+### Wilcoxon Rank-sum testing changes of inspection density caused by COVID-19
 
 For the rodent inspection across time, we compared mean difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
 
