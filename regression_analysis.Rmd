@@ -116,12 +116,12 @@ broom::tidy(model_linear_original) %>%
   knitr::kable()
 summary(model_linear_original)
 
-model_linear = step(model_linear_original, direction = "backward")
-broom::tidy(model_linear) %>% 
-  knitr::kable()
+#model_linear = step(model_linear_original, direction = "backward")
+#broom::tidy(model_linear) %>% 
+#  knitr::kable()
 
 
-summary(model_linear)
+#summary(model_linear)
 ```
 
 ## Model diagnostics
@@ -129,18 +129,18 @@ summary(model_linear)
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
 set.seed(100)
 par(mfrow=c(2,2))
-plot(model_linear)
-anova(model_linear)
+plot(model_linear_original)
+anova(model_linear_original)
 ```
 
 
 ```{r}
 
-outlierTest(model_linear)
+outlierTest(model_linear_original)
 
-durbinWatsonTest(model_linear)
+durbinWatsonTest(model_linear_original)
 
-vif(model_linear)
+vif(model_linear_original)
 ```
 
 
