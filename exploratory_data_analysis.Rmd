@@ -97,9 +97,13 @@ rat_covid = rat_covid %>%
 
 ```
 
-# Time Visualizations
+## Time Visualizations
+
+&nbsp;
 
 In order to obtain in-depth sights of the rat inspections across time, we used four different levels to analyze. 
+
+&nbsp;
 
 ### Overall Rat Inspections Across Time 
 
@@ -118,6 +122,10 @@ hchart(time_series, name = "Rat Inspections") %>%
   hc_legend(enabled = TRUE)
 ```
 
+&nbsp;
+
+&nbsp;
+
 ### Rat Inspections by Year
 
 To be more specific, we compared the rat inspections year by year. The number was roughly around 150,000 in 2012-2016. There was a surge of rat inspections in 2017 which had 247,985 cases. After staying at the peak in 2018-2019, the number of inspections rapidly dropped to 71,770 in 2020. Whether this drop was associated with COVID-19 will be analyzed in the following section.
@@ -132,6 +140,10 @@ rat %>%
          yaxis = list(title = "Count"),
          title = "Number of Rat Inspections by Year") 
 ```
+
+&nbsp;
+
+&nbsp;
 
 ### Rat Inspections by Month
 
@@ -151,6 +163,9 @@ rat %>%
          title = "Number of Rat Inspections by Month") %>%
   hide_legend()
 ```
+&nbsp;
+
+&nbsp;
 
 ### Rat Inspections Througout a Day
 
@@ -183,9 +198,15 @@ rat_2021 %>%
 
 &nbsp;
 
-# Borough Visualizations
+&nbsp;
+
+## Borough Visualizations
+
+&nbsp;
 
 In this section, we explored the demographic characteristics of the rat inspections to find whether there exists some potential spatial patterns or not. 
+
+&nbsp;
 
 ### Overall Rat Inspections by Borough
 
@@ -204,6 +225,10 @@ rat %>%
          title = "Number of Rat Inspections by Borough") %>%
   hide_legend()
 ```
+
+&nbsp;
+
+&nbsp;
 
 ### Rat Inspections VS. Population
 
@@ -297,6 +322,10 @@ p_density_a = df %>%
 
 p_density_p + p_density_a
 ```
+
+&nbsp;
+
+&nbsp;
 
 ### Rat Inspections by Month in Each Borough {.tabset}
 
@@ -430,6 +459,10 @@ rat %>%
          title = "Number of Rat Inspections in Staten Island in 2021") 
 ```
 
+&nbsp;
+
+&nbsp;
+
 ### Overall Top 15 Rat Popular Streets
 
 To be more detailed, we investigated the fifteen streets with most rat inspections in New York City. Among them, Greene Avenue, Brooklyn with 1366 cases, Broadway, Manhattan with 1154 cases and Hart Street, Brooklyn with 1118 cases ranked the top 3.  
@@ -450,6 +483,10 @@ rat %>%
          title = "Top 15 Rat Popular Streets in 2021") %>%
   hide_legend()
 ```
+
+&nbsp;
+
+&nbsp;
 
 ### Top 5 Rat Popular Streets {.tabset}
 
@@ -545,9 +582,17 @@ rat %>%
   hide_legend()
 ```
 
-# Inspection Types and Results
+&nbsp;
+
+&nbsp;
+
+## Inspection Types and Results
+
+&nbsp;
 
 Inspection type and result were two important attributes, which reflect the motivation, method and result of rat inspections. In addition, some other problem conditions such as garbage (poor containerization of food waste resulting in the feeding of rats), harborage (clutter and dense vegetation promoting the nesting of rats), could be identified during this process.
+
+&nbsp;
 
 ### Inspection Types
 
@@ -579,6 +624,10 @@ rat %>%
 
 
 ```
+
+&nbsp;
+
+&nbsp;
 
 ### Inspection Results
 
@@ -612,10 +661,18 @@ rat %>%
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 ```
 
-# Weather and COVID-19
+&nbsp;
+
+&nbsp;
+
+## Weather and COVID-19
+
+&nbsp;
 
 From previous analysis, we found that weather and COVID-19 were two potential covariates that might affect the rat inspections. As is known to all, rats don't prefer the cold weather but gravitate to temperatures between 30 and 32 degrees Celsius.  
 In March 2020, countries around the world including the U.S. deployed various measures of lockdown that lasted on for over a year. This response to the pandemic dominated people's daily lives: they rarely went outside and basically worked from home. As a result, rats lost their "sweet home" and the number of inspections might become smaller.
+
+&nbsp;
 
 ### Weather
 
@@ -648,6 +705,10 @@ p_weather = rat_t %>%
 ggplotly(p_weather)
 
 ```
+
+&nbsp;
+
+&nbsp;
 
 ### COVID-19
 
