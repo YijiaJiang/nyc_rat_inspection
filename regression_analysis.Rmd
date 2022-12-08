@@ -12,6 +12,7 @@ output:
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 library(readxl)
+library(car)
 ```
 
 
@@ -103,12 +104,26 @@ broom::tidy(model_linear) %>%
 #broom::tidy(model_interact) %>% knitr::kable()
 ```
 
+## Model diagnostics
 
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
 set.seed(100)
+par(mfrow=c(2,2))
 plot(model_linear)
 anova(model_linear)
 ```
+
+
+```{r}
+
+outlierTest(model_linear)
+
+durbinWatsonTest(model_linear)
+
+vif(model_linear)
+```
+
+
 
 ## Logistic Regression Model
 
@@ -136,16 +151,48 @@ rat_binary = rat %>%
 
 
 ```{r}
+model_logit_original = glm(inspection_result ~ inspection_month + borough + inspection_daytime + prcp + snow + snwd + tmin + tmax, data = rat_binary, family="binomial")
 
-model_logit = glm(inspection_result ~ inspection_month + borough + inspection_daytime + prcp + snow + snwd + tmin + tmax, data = rat_binary, family="binomial")
+model_logit = step(model_logit_original, direction = "backward")
+broom::tidy(model_linear) %>% 
+  knitr::kable()
 
 summary(model_logit)
 anova(model_logit)
-
 ```
 
 
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
-model_logit_new = glm(inspection_result ~ borough + inspection_daytime + prcp + snwd, data = rat_binary, family="binomial")
-summary(model_logit_new)
+set.seed(100)
+par(mfrow=c(2,2))
+plot(model_logit)
+anova(model_logit)
+
+```
+## Merge with Covid-19
+
+
+```{r}
+
+url_covid = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_weather_covid.csv"
+rat_covid = read_csv(url_covid)
+
+
+rat_covid = rat_covid %>%
+  mutate(inspection_month_n = recode(inspection_month, 
+                                   "Jan" = 1,
+                                   "Feb" = 2,
+                                   "Mar" = 3,
+                                   "Apr" = 4,
+                                   "May" = 5,
+                                   "Jun" = 6,
+                                   "Jul" = 7,
+                                   "Aug" = 8,
+                                   "Sep" = 9,
+                                   "Oct" = 10,
+                                   "Nov" = 11,
+                                   "Dec" = 12)) %>%
+  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
+  mutate(date = as.Date(date,format = "%Y-%m-%d"))
+
 ```
