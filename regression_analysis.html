@@ -11,7 +11,7 @@
 
 
 
-<title>Regression</title>
+<title>Regression Analysis</title>
 
 <script src="site_libs/header-attrs-2.16/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -395,79 +395,27 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Regression</h1>
+<h1 class="title toc-ignore">Regression Analysis</h1>
 
 </div>
 
 
 <h1>
-<strong>REGRESSION</strong>
+<strong>REGRESSION ANALYSIS</strong>
 </h1>
+<p> </p>
 <p>In this section, we are intended to construct a linear model to
 generate the monthly number of rats observed using a variety of
-potential predictors potential predictors, as well as a logistic model
-to predict the chance of seeing a rat. These two models will be further
-utilized in the Shiny App for rat activity prediction.</p>
+potential predictors potential predictors, together with its diagnostics
+and validation. This regression model will be further utilized in the
+Shiny App for rat activity prediction.</p>
 <p> </p>
 <p> </p>
-<pre class="r"><code># tidy the data
-rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %&gt;%
-  select(-...1) %&gt;%
-  mutate(inspection_month_n = case_when(inspection_month == &quot;Jan&quot; ~ 1,
-                                        inspection_month == &quot;Feb&quot; ~ 2,
-                                        inspection_month == &quot;Mar&quot; ~ 3,
-                                        inspection_month == &quot;Apr&quot; ~ 4,
-                                        inspection_month == &quot;May&quot; ~ 5,
-                                        inspection_month == &quot;Jun&quot; ~ 6,
-                                        inspection_month == &quot;Jul&quot; ~ 7,
-                                        inspection_month == &quot;Aug&quot; ~ 8,
-                                        inspection_month == &quot;Sep&quot; ~ 9,
-                                        inspection_month == &quot;Oct&quot; ~ 10,
-                                        inspection_month == &quot;Nov&quot; ~ 11,
-                                        inspection_month == &quot;Dec&quot; ~ 12)) %&gt;%
-  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = &quot;-&quot;)) %&gt;%
-  mutate(date = as.Date(date,format = &quot;%Y-%m-%d&quot;)) %&gt;% 
-  mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = &quot;-&quot;)) %&gt;%
-  mutate(covid_yn = case_when(date &lt; &quot;2020-02-29&quot; ~ 0,
-                              TRUE ~ 1)) %&gt;%
-  mutate(covid_yn = as.factor(covid_yn)) %&gt;%
-  separate(inspection_time, into = c(&quot;hour&quot;, &quot;minute&quot;, &quot;second&quot;)) %&gt;%
-  mutate(hour = as.numeric(hour)) %&gt;%
-  mutate(inspection_daytime = case_when(
-      hour &lt; 6 | hour &gt;= 18 ~ &quot;Night&quot;,
-      hour &gt;= 6 &amp; hour &lt; 12 ~ &quot;Morning&quot;,
-      hour &gt;= 12 &amp; hour &lt; 18 ~ &quot;Afternoon&quot;))</code></pre>
 <div id="linear-regression-model" class="section level2">
 <h2>Linear Regression Model</h2>
 <div id="exploratory-statistical-analyses" class="section level3">
 <h3>Exploratory Statistical Analyses</h3>
-<pre class="r"><code>cases = rat %&gt;% 
-  select(inspection_ym, borough, inspection_month_n) %&gt;% 
-  group_by(inspection_ym, borough) %&gt;% 
-  add_count(borough, inspection_ym, name = &quot;borough_monthly_cases&quot;) %&gt;%
-  distinct()
-
-rat_tidy = rat %&gt;%
-  dplyr::select(boro_code, borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %&gt;%
-  mutate(borough = as.factor(borough),
-         inspection_month = as.factor(inspection_month)) %&gt;%
-  group_by(inspection_ym, borough) %&gt;% 
-  summarise(avg_prcp = mean(prcp), 
-            avg_snow = mean(snow), 
-            avg_snwd = mean(snwd),
-            avg_tmin = mean(tmin),
-            avg_tmax = mean(tmax)) %&gt;%
-  mutate(avg_temp = (avg_tmin + avg_tmax)/2) %&gt;% 
-  mutate(covid_yn = case_when(inspection_ym &lt; &quot;2020-02&quot; ~ 0, TRUE ~ 1)) %&gt;% 
-  mutate(boro_code = case_when(borough == &quot;Manhattan&quot; ~ 1,
-                               borough == &quot;Bronx&quot; ~ 2,
-                               borough == &quot;Brooklyn&quot; ~ 1,
-                               borough == &quot;Queens&quot; ~ 4,
-                               borough == &quot;Staten Island&quot; ~ 5))
-
-cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c(&quot;inspection_ym&quot;, &quot;borough&quot;)) 
-
-# correlation between key predictors
+<pre class="r"><code># correlation between key predictors
 cases_borough_monthly %&gt;%
   dplyr::select(borough, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn) %&gt;% 
   mutate(inspection_month_n = as.factor(inspection_month_n),
@@ -487,7 +435,7 @@ cases_borough_monthly %&gt;%
     title = &quot;Correlations Between Key Outcomes&quot;
   ) + 
   scale_fill_discrete()</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-4-1.png" width="1536" /></p>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-5-1.png" width="1536" /></p>
 <pre class="r"><code># correlation between predictors and outcome
 cases_borough_monthly %&gt;% 
   dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %&gt;%
@@ -513,290 +461,11 @@ cases_borough_monthly %&gt;%
   labs(x = &quot;Outcome Variable&quot;, y = &quot;Predictor Variables&quot;,
     title = &quot;Correlation Matrix between Predictors and Outcome&quot;,
     fill = &quot;Correlation&quot;)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-5-1.png" width="768" /></p>
-<pre class="r"><code># variable overview
-skimr::skim(cases_borough_monthly)</code></pre>
-<table>
-<caption>Data summary</caption>
-<tbody>
-<tr class="odd">
-<td align="left">Name</td>
-<td align="left">cases_borough_monthly</td>
-</tr>
-<tr class="even">
-<td align="left">Number of rows</td>
-<td align="left">597</td>
-</tr>
-<tr class="odd">
-<td align="left">Number of columns</td>
-<td align="left">12</td>
-</tr>
-<tr class="even">
-<td align="left">_______________________</td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
-<td align="left">Column type frequency:</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">character</td>
-<td align="left">1</td>
-</tr>
-<tr class="odd">
-<td align="left">factor</td>
-<td align="left">1</td>
-</tr>
-<tr class="even">
-<td align="left">numeric</td>
-<td align="left">10</td>
-</tr>
-<tr class="odd">
-<td align="left">________________________</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">Group variables</td>
-<td align="left">None</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: character</strong></p>
-<table>
-<colgroup>
-<col width="19%" />
-<col width="13%" />
-<col width="19%" />
-<col width="5%" />
-<col width="5%" />
-<col width="8%" />
-<col width="12%" />
-<col width="15%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">min</th>
-<th align="right">max</th>
-<th align="right">empty</th>
-<th align="right">n_unique</th>
-<th align="right">whitespace</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">inspection_ym</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">6</td>
-<td align="right">7</td>
-<td align="right">0</td>
-<td align="right">120</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: factor</strong></p>
-<table>
-<colgroup>
-<col width="14%" />
-<col width="10%" />
-<col width="14%" />
-<col width="8%" />
-<col width="9%" />
-<col width="41%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="left">ordered</th>
-<th align="right">n_unique</th>
-<th align="left">top_counts</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">borough</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="left">FALSE</td>
-<td align="right">5</td>
-<td align="left">Bro: 120, Man: 120, Bro: 119, Que: 119</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Variable type: numeric</strong></p>
-<table style="width:100%;">
-<colgroup>
-<col width="20%" />
-<col width="9%" />
-<col width="13%" />
-<col width="7%" />
-<col width="7%" />
-<col width="5%" />
-<col width="6%" />
-<col width="7%" />
-<col width="7%" />
-<col width="8%" />
-<col width="5%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">skim_variable</th>
-<th align="right">n_missing</th>
-<th align="right">complete_rate</th>
-<th align="right">mean</th>
-<th align="right">sd</th>
-<th align="right">p0</th>
-<th align="right">p25</th>
-<th align="right">p50</th>
-<th align="right">p75</th>
-<th align="right">p100</th>
-<th align="left">hist</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">avg_prcp</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">3.15</td>
-<td align="right">2.48</td>
-<td align="right">0.00</td>
-<td align="right">1.52</td>
-<td align="right">2.70</td>
-<td align="right">4.09</td>
-<td align="right">23.20</td>
-<td align="left">▇▂▁▁▁</td>
-</tr>
-<tr class="even">
-<td align="left">avg_snow</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.79</td>
-<td align="right">2.17</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.21</td>
-<td align="right">15.80</td>
-<td align="left">▇▁▁▁▁</td>
-</tr>
-<tr class="odd">
-<td align="left">avg_snwd</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">7.02</td>
-<td align="right">32.46</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">268.14</td>
-<td align="left">▇▁▁▁▁</td>
-</tr>
-<tr class="even">
-<td align="left">avg_tmin</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">9.87</td>
-<td align="right">8.30</td>
-<td align="right">-8.32</td>
-<td align="right">2.01</td>
-<td align="right">10.12</td>
-<td align="right">17.86</td>
-<td align="right">23.82</td>
-<td align="left">▂▇▅▆▇</td>
-</tr>
-<tr class="odd">
-<td align="left">avg_tmax</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">17.66</td>
-<td align="right">8.81</td>
-<td align="right">1.25</td>
-<td align="right">9.05</td>
-<td align="right">17.97</td>
-<td align="right">25.78</td>
-<td align="right">31.86</td>
-<td align="left">▅▆▆▆▇</td>
-</tr>
-<tr class="even">
-<td align="left">avg_temp</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">13.77</td>
-<td align="right">8.53</td>
-<td align="right">-3.41</td>
-<td align="right">5.52</td>
-<td align="right">14.39</td>
-<td align="right">21.82</td>
-<td align="right">27.84</td>
-<td align="left">▃▇▆▆▇</td>
-</tr>
-<tr class="odd">
-<td align="left">covid_yn</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0.20</td>
-<td align="right">0.40</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">0.00</td>
-<td align="right">1.00</td>
-<td align="left">▇▁▁▁▂</td>
-</tr>
-<tr class="even">
-<td align="left">boro_code</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">2.60</td>
-<td align="right">1.62</td>
-<td align="right">1.00</td>
-<td align="right">1.00</td>
-<td align="right">2.00</td>
-<td align="right">4.00</td>
-<td align="right">5.00</td>
-<td align="left">▇▅▁▃▃</td>
-</tr>
-<tr class="odd">
-<td align="left">inspection_month_n</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">6.51</td>
-<td align="right">3.46</td>
-<td align="right">1.00</td>
-<td align="right">3.00</td>
-<td align="right">7.00</td>
-<td align="right">10.00</td>
-<td align="right">12.00</td>
-<td align="left">▇▅▅▅▇</td>
-</tr>
-<tr class="even">
-<td align="left">borough_monthly_cases</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">2813.53</td>
-<td align="right">2433.77</td>
-<td align="right">1.00</td>
-<td align="right">748.00</td>
-<td align="right">1949.00</td>
-<td align="right">4737.00</td>
-<td align="right">10645.00</td>
-<td align="left">▇▃▂▂▁</td>
-</tr>
-</tbody>
-</table>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
 <p> </p>
 </div>
-</div>
-<div id="model-fitting" class="section level2">
-<h2>Model Fitting</h2>
+<div id="model-fitting" class="section level3">
+<h3>Model Fitting</h3>
 <pre class="r"><code># full model
 cases_borough_monthly = cases_borough_monthly %&gt;% 
   mutate(inspection_month = month.abb[inspection_month_n],
@@ -1641,12 +1310,13 @@ broom::tidy(model_linear_log) %&gt;%
 <p>Stepwise model with log transformation: log(borough_monthly_cases) ~
 inspection_month + borough + covid_yn + avg_prcp + avg_snwd +
 avg_temp</p>
+</div>
 <div id="model-diagnostics" class="section level3">
 <h3>Model Diagnostics</h3>
 <pre class="r"><code>set.seed(100)
 par(mfrow = c(2,2))
 plot(model_linear)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
 <pre class="r"><code>anova(model_linear)</code></pre>
 <pre><code>## Analysis of Variance Table
 ## 
@@ -1662,7 +1332,7 @@ plot(model_linear)</code></pre>
 <pre class="r"><code>set.seed(100)
 par(mfrow = c(2,2))
 plot(model_linear_log)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
 <pre class="r"><code>anova(model_linear_log)</code></pre>
 <pre><code>## Analysis of Variance Table
 ## 
@@ -1726,222 +1396,71 @@ plot(model_linear_log)</code></pre>
 <h3>Cross-validation</h3>
 <p>The final model is log(borough_monthly_cases) ~ inspection_month +
 borough + covid_yn + avg_prcp + avg_snwd + avg_temp</p>
-<p>     </p>
+<pre class="r"><code># cross-validation 
+set.seed(2022)
+
+# without log
+cv_df_1 = 
+  crossv_mc(cases_borough_monthly, 100) %&gt;% 
+    mutate(
+        train = map(train, as_tibble),
+        test = map(test,as_tibble)
+    )  %&gt;%
+  mutate(
+    model_fit1  = map(train, ~lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = .x)),
+    model_fit2  = map(train, ~lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = .x))) %&gt;% 
+  mutate(
+    rmse_1 = map2_dbl(model_fit1, test, ~rmse(model = .x, data = .y)),
+    rmse_2 = map2_dbl(model_fit2, test, ~rmse(model = .x, data = .y))) 
+
+p_cv_1 = cv_df_1 %&gt;% 
+  select(starts_with(&quot;rmse&quot;)) %&gt;% 
+  pivot_longer(
+    everything(),
+    names_to = &quot;model&quot;, 
+    values_to = &quot;rmse&quot;,
+    names_prefix = &quot;rmse_&quot;) %&gt;% 
+  mutate(model = fct_inorder(model)) %&gt;% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin() +
+  labs(title = &quot;Comparison of the Cross-Validated Prediction Error&quot;, 
+       x = &quot;Models&quot;, 
+       y = &quot;Root Mean Square Error (RMSE)&quot;)  +
+  scale_x_discrete(labels = c(&quot;Full Model&quot;, &quot;Stepwise Model&quot;)) 
+
+# log
+cv_df_2 = 
+  crossv_mc(cases_borough_monthly, 100) %&gt;% 
+    mutate(
+        train = map(train, as_tibble),
+        test = map(test,as_tibble)
+    )  %&gt;%
+  mutate(
+    model_fit3  = map(train, ~lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = .x)),
+    model_fit4  = map(train, ~lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = .x))) %&gt;% 
+  mutate(
+    rmse_3 = map2_dbl(model_fit3, test, ~rmse(model = .x, data = .y)),
+    rmse_4 = map2_dbl(model_fit4, test, ~rmse(model = .x, data = .y))) 
+
+p_cv_2 = cv_df_2 %&gt;% 
+  select(starts_with(&quot;rmse&quot;)) %&gt;% 
+  pivot_longer(
+    everything(),
+    names_to = &quot;model&quot;, 
+    values_to = &quot;rmse&quot;,
+    names_prefix = &quot;rmse_&quot;) %&gt;% 
+  mutate(model = fct_inorder(model)) %&gt;% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin() +
+  labs(title = &quot;Comparison of the Cross-Validated Prediction Error&quot;, 
+       x = &quot;Models&quot;, 
+       y = &quot;Root Mean Square Error (RMSE)&quot;)  +
+  scale_x_discrete(labels = c(&quot;Full Model (Log)&quot;, &quot;Stepwise Model (Log)&quot;)) 
+
+
+p_cv_1 / p_cv_2</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
 </div>
-</div>
-<div id="logistic-regression-model" class="section level2">
-<h2>Logistic Regression Model</h2>
-<p>We set the Result variable as the binary outcome. Passed(0) means
-none was inspected.</p>
-<pre class="r"><code>rat_binary = rat %&gt;% 
-  select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %&gt;%
-  mutate(inspection_result = case_when(
-    result == &quot;Passed&quot; ~ 0, 
-    result == &quot;Rat Activity&quot; ~ 1)) %&gt;% 
-  drop_na(inspection_result) %&gt;%
-  mutate(inspection_result = as.factor(inspection_result), 
-         borough = as.factor(borough),
-         covid_yn = as.factor(covid_yn),
-         inspection_month = as.factor(inspection_month), 
-         inspection_daytime = as.factor(inspection_daytime)) %&gt;%
-  mutate(Average_Temperature = (tmin + tmax)/2) %&gt;% 
-  mutate(feeling = as.character(Average_Temperature)) %&gt;% 
-  mutate(feeling = case_when(
-      Average_Temperature &lt;= 0 ~ &#39;Frozen&#39;,
-      Average_Temperature &lt;= 10 ~ &#39;Cold&#39;,
-      Average_Temperature &lt;= 20 ~ &#39;Cool&#39;,
-      Average_Temperature &lt;= 30 ~ &#39;Warm&#39;,
-      Average_Temperature &lt;= 40 ~ &#39;Hot&#39;)) %&gt;% 
-  distinct()</code></pre>
-<pre class="r"><code>model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + feeling, data = rat_binary, family=&quot;binomial&quot;)
-
-model_logit = step(model_logit_original, direction = &quot;backward&quot;)</code></pre>
-<pre><code>## Start:  AIC=54235.26
-## inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + 
-##     prcp + snow + snwd + feeling
-## 
-##                      Df Deviance   AIC
-## - inspection_month   11    54187 54217
-## - feeling             4    54185 54229
-## - snow                1    54184 54234
-## - prcp                1    54184 54234
-## - covid_yn            1    54185 54235
-## &lt;none&gt;                     54183 54235
-## - snwd                1    54188 54238
-## - inspection_daytime  2    54326 54374
-## - borough             4    54969 55013
-## 
-## Step:  AIC=54217.21
-## inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     prcp + snow + snwd + feeling
-## 
-##                      Df Deviance   AIC
-## - feeling             4    54189 54211
-## - snow                1    54188 54216
-## - prcp                1    54188 54216
-## - covid_yn            1    54189 54217
-## &lt;none&gt;                     54187 54217
-## - snwd                1    54191 54219
-## - inspection_daytime  2    54330 54356
-## - borough             4    54973 54995
-## 
-## Step:  AIC=54211.14
-## inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     prcp + snow + snwd
-## 
-##                      Df Deviance   AIC
-## - snow                1    54190 54210
-## - prcp                1    54190 54210
-## - covid_yn            1    54190 54210
-## &lt;none&gt;                     54189 54211
-## - snwd                1    54192 54212
-## - inspection_daytime  2    54333 54351
-## - borough             4    54974 54988
-## 
-## Step:  AIC=54209.65
-## inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     prcp + snwd
-## 
-##                      Df Deviance   AIC
-## - prcp                1    54191 54209
-## - covid_yn            1    54191 54209
-## &lt;none&gt;                     54190 54210
-## - snwd                1    54193 54211
-## - inspection_daytime  2    54333 54349
-## - borough             4    54975 54987
-## 
-## Step:  AIC=54208.61
-## inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     snwd
-## 
-##                      Df Deviance   AIC
-## - covid_yn            1    54192 54208
-## &lt;none&gt;                     54191 54209
-## - snwd                1    54194 54210
-## - inspection_daytime  2    54334 54348
-## - borough             4    54975 54985
-## 
-## Step:  AIC=54207.92
-## inspection_result ~ borough + inspection_daytime + snwd
-## 
-##                      Df Deviance   AIC
-## &lt;none&gt;                     54192 54208
-## - snwd                1    54195 54209
-## - inspection_daytime  2    54336 54348
-## - borough             4    54979 54987</code></pre>
-<pre class="r"><code>#broom::tidy(model_logit) %&gt;% 
-#  knitr::kable()
-
-summary(model_logit_original)</code></pre>
-<pre><code>## 
-## Call:
-## glm(formula = inspection_result ~ inspection_month + borough + 
-##     covid_yn + inspection_daytime + prcp + snow + snwd + feeling, 
-##     family = &quot;binomial&quot;, data = rat_binary)
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -1.2295  -1.1735  -0.8172   1.1767   1.9513  
-## 
-## Coefficients:
-##                             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                0.0613405  0.0479004   1.281    0.200    
-## inspection_monthAug       -0.0386828  0.0608935  -0.635    0.525    
-## inspection_monthDec       -0.0366460  0.0536078  -0.684    0.494    
-## inspection_monthFeb        0.0231908  0.0568979   0.408    0.684    
-## inspection_monthJan       -0.0305798  0.0576983  -0.530    0.596    
-## inspection_monthJul       -0.0084547  0.0614143  -0.138    0.891    
-## inspection_monthJun        0.0037473  0.0557761   0.067    0.946    
-## inspection_monthMar       -0.0042194  0.0513901  -0.082    0.935    
-## inspection_monthMay        0.0256107  0.0509317   0.503    0.615    
-## inspection_monthNov       -0.0368601  0.0524613  -0.703    0.482    
-## inspection_monthOct        0.0043108  0.0505127   0.085    0.932    
-## inspection_monthSep       -0.0176809  0.0551629  -0.321    0.749    
-## boroughBrooklyn           -0.0281957  0.0295032  -0.956    0.339    
-## boroughManhattan          -0.0209660  0.0296720  -0.707    0.480    
-## boroughQueens             -0.2300569  0.0315935  -7.282 3.29e-13 ***
-## boroughStaten Island      -0.9482961  0.0390044 -24.313  &lt; 2e-16 ***
-## covid_yn1                  0.0372497  0.0278365   1.338    0.181    
-## inspection_daytimeMorning -0.0015926  0.0205883  -0.077    0.938    
-## inspection_daytimeNight   -0.7604350  0.0666666 -11.407  &lt; 2e-16 ***
-## prcp                      -0.0008809  0.0010585  -0.832    0.405    
-## snow                      -0.0007876  0.0010643  -0.740    0.459    
-## snwd                      -0.0006605  0.0003167  -2.085    0.037 *  
-## feelingCool               -0.0337096  0.0363922  -0.926    0.354    
-## feelingFrozen             -0.0189549  0.0469729  -0.404    0.687    
-## feelingHot                -0.1185074  0.1340712  -0.884    0.377    
-## feelingWarm               -0.0336682  0.0509965  -0.660    0.509    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 55090  on 39902  degrees of freedom
-## Residual deviance: 54183  on 39877  degrees of freedom
-## AIC: 54235
-## 
-## Number of Fisher Scoring iterations: 4</code></pre>
-<pre class="r"><code>anova(model_logit_original)</code></pre>
-<pre><code>## Analysis of Deviance Table
-## 
-## Model: binomial, link: logit
-## 
-## Response: inspection_result
-## 
-## Terms added sequentially (first to last)
-## 
-## 
-##                    Df Deviance Resid. Df Resid. Dev
-## NULL                               39902      55090
-## inspection_month   11     3.83     39891      55087
-## borough             4   751.03     39887      54336
-## covid_yn            1     2.68     39886      54333
-## inspection_daytime  2   142.01     39884      54191
-## prcp                1     0.79     39883      54190
-## snow                1     0.78     39882      54189
-## snwd                1     4.69     39881      54185
-## feeling             4     1.43     39877      54183</code></pre>
-<pre class="r"><code>set.seed(100)
-par(mfrow=c(2,2))
-plot(model_logit)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
-<pre class="r"><code>anova(model_logit)</code></pre>
-<pre><code>## Analysis of Deviance Table
-## 
-## Model: binomial, link: logit
-## 
-## Response: inspection_result
-## 
-## Terms added sequentially (first to last)
-## 
-## 
-##                    Df Deviance Resid. Df Resid. Dev
-## NULL                               39902      55090
-## borough             4   751.36     39898      54339
-## inspection_daytime  2   143.78     39896      54195
-## snwd                1     3.44     39895      54192</code></pre>
-</div>
-<div id="merge-with-covid-19" class="section level2">
-<h2>Merge with Covid-19</h2>
-<pre class="r"><code>url_covid = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_weather_covid.csv&quot;
-rat_covid = read_csv(url_covid)
-
-
-rat_covid = rat_covid %&gt;%
-  mutate(inspection_month_n = case_when(inspection_month == &quot;Jan&quot; ~ 1,
-                                   inspection_month == &quot;Feb&quot; ~ 2,
-                                   inspection_month == &quot;Mar&quot; ~ 3,
-                                   inspection_month == &quot;Apr&quot; ~ 4,
-                                   inspection_month == &quot;May&quot; ~ 5,
-                                   inspection_month == &quot;Jun&quot; ~ 6,
-                                   inspection_month == &quot;Jul&quot; ~ 7,
-                                   inspection_month == &quot;Aug&quot; ~ 8,
-                                   inspection_month == &quot;Sep&quot; ~ 9,
-                                   inspection_month == &quot;Oct&quot; ~ 10,
-                                   inspection_month == &quot;Nov&quot; ~ 11,
-                                   inspection_month == &quot;Dec&quot; ~ 12)) %&gt;%
-  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = &quot;-&quot;))%&gt;%
-  mutate(date = as.Date(date,format = &quot;%Y-%m-%d&quot;))</code></pre>
 </div>
 
 
