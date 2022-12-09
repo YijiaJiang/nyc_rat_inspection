@@ -26,6 +26,7 @@ library(car)
 library(ggplot2)
 library(GGally)
 library(rstatix)
+library(modelr)
 ```
 
 
@@ -273,6 +274,73 @@ performance::check_collinearity(model_linear_log)
 
 
 The final model is log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp
+
+```{r, message=FALSE, warning=FALSE, fig.height=6}
+# cross-validation 
+set.seed(2022)
+
+# without log
+cv_df_1 = 
+  crossv_mc(cases_borough_monthly, 100) %>% 
+    mutate(
+        train = map(train, as_tibble),
+        test = map(test,as_tibble)
+    )  %>%
+  mutate(
+    model_fit1  = map(train, ~lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = .x)),
+    model_fit2  = map(train, ~lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = .x))) %>% 
+  mutate(
+    rmse_1 = map2_dbl(model_fit1, test, ~rmse(model = .x, data = .y)),
+    rmse_2 = map2_dbl(model_fit2, test, ~rmse(model = .x, data = .y))) 
+
+p_cv_1 = cv_df_1 %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin() +
+  labs(title = "Comparison of the Cross-Validated Prediction Error", 
+       x = "Models", 
+       y = "Root Mean Square Error (RMSE)")  +
+  scale_x_discrete(labels = c("Full Model", "Stepwise Model")) 
+
+# log
+cv_df_2 = 
+  crossv_mc(cases_borough_monthly, 100) %>% 
+    mutate(
+        train = map(train, as_tibble),
+        test = map(test,as_tibble)
+    )  %>%
+  mutate(
+    model_fit3  = map(train, ~lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = .x)),
+    model_fit4  = map(train, ~lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = .x))) %>% 
+  mutate(
+    rmse_3 = map2_dbl(model_fit3, test, ~rmse(model = .x, data = .y)),
+    rmse_4 = map2_dbl(model_fit4, test, ~rmse(model = .x, data = .y))) 
+
+p_cv_2 = cv_df_2 %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin() +
+  labs(title = "Comparison of the Cross-Validated Prediction Error", 
+       x = "Models", 
+       y = "Root Mean Square Error (RMSE)")  +
+  scale_x_discrete(labels = c("Full Model (Log)", "Stepwise Model (Log)")) 
+
+
+p_cv_1 / p_cv_2
+
+```
 
 &nbsp;
 &nbsp;
