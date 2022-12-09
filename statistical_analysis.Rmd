@@ -11,8 +11,13 @@ output:
 
 <h1><strong>HYPOTHESIS TEST</strong></h1>
 
+
 &nbsp;
 
+In this section, we would like to explore the pattern and characteristics of rat inspections through statistical analysis by using several hypothesis testing and analyze the association between the number inspections and various potential covariates, including climatic, geographical factors.
+
+
+&nbsp;
 
 ```{r, message = FALSE, warning=FALSE, echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
