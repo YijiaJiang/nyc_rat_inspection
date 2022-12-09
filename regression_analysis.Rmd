@@ -11,6 +11,8 @@ output:
 
 <h1><strong>REGRESSION</strong></h1>
 
+&nbsp;
+
 In this section, we are intended to construct a linear model to generate the monthly number of rats observed using a variety of potential predictors potential predictors, as well as a logistic model to predict the chance of seeing a rat. These two models will be further utilized in the Shiny App for rat activity prediction. 
 
 
@@ -172,7 +174,7 @@ skimr::skim(cases_borough_monthly)
 &nbsp;
 
 
-## Model Fitting
+### Model Fitting
 
 ```{r, message = FALSE, warning = FALSE}
 # full model
@@ -281,12 +283,12 @@ The final model is log(borough_monthly_cases) ~ inspection_month + borough + cov
 
 ## Logistic Regression Model
 
-We set the Result variable as the binary outcome. Passed(0) means none was inspected.
 
-```{r, message = FALSE, warning = FALSE,comment = FALSE}
+We set the Result variable as the binary outcome. Passed(0) means none was inspected. 
 
+```{r, message = FALSE, warning = FALSE}
 rat_binary = rat %>% 
-  select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
+  dplyr::select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
     result == "Passed" ~ 0, 
     result == "Rat Activity" ~ 1)) %>% 
@@ -296,34 +298,89 @@ rat_binary = rat %>%
          covid_yn = as.factor(covid_yn),
          inspection_month = as.factor(inspection_month), 
          inspection_daytime = as.factor(inspection_daytime)) %>%
-  mutate(Average_Temperature = (tmin + tmax)/2) %>% 
-  mutate(feeling = as.character(Average_Temperature)) %>% 
+  mutate(avg_temp = (tmin + tmax)/2) %>% 
+  mutate(feeling = as.character(avg_temp)) %>% 
   mutate(feeling = case_when(
-      Average_Temperature <= 0 ~ 'Frozen',
-      Average_Temperature <= 10 ~ 'Cold',
-      Average_Temperature <= 20 ~ 'Cool',
-      Average_Temperature <= 30 ~ 'Warm',
-      Average_Temperature <= 40 ~ 'Hot')) %>% 
+      avg_temp <= 0 ~ 'Frozen',
+      avg_temp <= 10 ~ 'Cold',
+      avg_temp <= 20 ~ 'Cool',
+      avg_temp <= 30 ~ 'Warm',
+      avg_temp <= 40 ~ 'Hot')) %>% 
   distinct()
 ```
 
 
+### Exploratory Statistical Analyses
+```{r, message = FALSE, warning = FALSE}
+# correlation between key predictors
+rat_binary %>%
+  dplyr::select(inspection_month, borough, covid_yn, inspection_daytime, prcp, snow, snwd, feeling) %>% 
+  mutate(inspection_month_n = as.factor(inspection_month_n),
+         covid_yn = as.factor(covid_yn)) %>% 
+  rename(
+    "Borough" = borough,
+    "Month" = inspection_month_n,
+    "Average Precipitation" = avg_prcp,
+    "Average Snowfall" = avg_snow,
+    "Average Snow Depth" = avg_snwd,
+    "Average Tmin" = avg_tmin,
+    "Average Tmax" = avg_tmax,
+    "Average Temperature" = avg_temp,
+    "COVID" = covid_yn
+  ) %>% 
+  ggpairs(
+    title = "Correlations Between Key Outcomes"
+  ) + 
+  scale_fill_discrete()
+
+# correlation between predictors and outcome
+cases_borough_monthly %>% 
+  dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %>%
+  rename(
+    "Borough" = boro_code,
+    "Month" = inspection_month_n,
+    "Average Precipitation" = avg_prcp,
+    "Average Snowfall" = avg_snow,
+    "Average Snow Depth" = avg_snwd,
+    "Average Tmin" = avg_tmin,
+    "Average Tmax" = avg_tmax,
+    "Average Temperature" = avg_temp,
+    "COVID" = covid_yn
+  ) %>% 
+  cor_mat() %>%
+  cor_gather() %>%
+  filter(var1 %in% "borough_monthly_cases") %>%
+  filter(!var2 %in% "borough_monthly_cases") %>%
+  ggplot(aes(x = var1, y = var2, fill = cor, label = cor)) + 
+  geom_tile(color = "white") +   
+  geom_text(color = "white",size = 4) + 
+  scale_x_discrete(labels = c("Borough Monthly cases")) + 
+  labs(x = "Outcome Variable", y = "Predictor Variables",
+    title = "Correlation Matrix between Predictors and Outcome",
+    fill = "Correlation")
+
+# variable overview
+skimr::skim(cases_borough_monthly)
+```
+
+### Model Fitting
 
 ```{r, message = FALSE, warning = FALSE}
-model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + feeling, data = rat_binary, family="binomial")
+model_logit_full = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + feeling, data = rat_binary, family = "binomial")
 
-model_logit = step(model_logit_original, direction = "backward")
-#broom::tidy(model_logit) %>% 
-#  knitr::kable()
+step(model_logit_original, direction = "backward")
+broom::tidy(model_logit) %>% 
+  knitr::kable()
 
 summary(model_logit_original)
 anova(model_logit_original)
 ```
 
+### Model Diagnostics
 
 ```{r, message = FALSE, warning = FALSE}
 set.seed(100)
-par(mfrow=c(2,2))
+par(mfrow = c(2,2))
 plot(model_logit)
 anova(model_logit)
 
