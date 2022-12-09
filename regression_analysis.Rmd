@@ -42,66 +42,86 @@ rat_2021 = read_csv(url(url_2021))
 ```{r}
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
-   mutate(inspection_month_n = recode(inspection_month, 
-                                   "Jan" = 1,
-                                   "Feb" = 2,
-                                   "Mar" = 3,
-                                   "Apr" = 4,
-                                   "May" = 5,
-                                   "Jun" = 6,
-                                   "Jul" = 7,
-                                   "Aug" = 8,
-                                   "Sep" = 9,
-                                   "Oct" = 10,
-                                   "Nov" = 11,
-                                   "Dec" = 12)) %>%
+   mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
+                                   inspection_month == "Feb" ~ 2,
+                                   inspection_month == "Mar" ~ 3,
+                                   inspection_month == "Apr" ~ 4,
+                                   inspection_month == "May" ~ 5,
+                                   inspection_month == "Jun" ~ 6,
+                                   inspection_month == "Jul" ~ 7,
+                                   inspection_month == "Aug" ~ 8,
+                                   inspection_month == "Sep" ~ 9,
+                                   inspection_month == "Oct" ~ 10,
+                                   inspection_month == "Nov" ~ 11,
+                                   inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
   mutate(date = as.Date(date,format = "%Y-%m-%d")) %>% 
-  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %>%
+  mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
+  mutate(covid_yn = case_when(date < "2020-02-29" ~ 0,
+                              TRUE ~ 1)) %>%
   separate(inspection_time, into = c("hour", "minute", "second")) %>%
   mutate(hour = as.numeric(hour)) %>%
   mutate(inspection_daytime = case_when(
       hour < 6 | hour >= 18 ~ "Night",
       hour >= 6 & hour < 12 ~ "Morning",
       hour >= 12 & hour < 18 ~ "Afternoon"))
+  
 #%>%  filter(result != "Passed")
 ```
 
 ## Variable selection
  
-```{r}
+```{r, message = FALSE, warning = FALSE,comment = FALSE}
 cases = rat %>% 
-  select(inspection_ym, borough) %>% 
+  select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>% 
   group_by(inspection_ym, borough) %>% 
-  add_count(borough, inspection_ym, name = "borough_month_cases") %>%
-  distinct()
+  add_count(borough, inspection_ym, name = "borough_monthly_cases") %>%
+  select(-prcp, -snow, -snwd, -tmin, -tmax)
+
 
 rat_tidy = rat %>% 
-  select(borough, inspection_ym, inspection_month, inspection_daytime, prcp, snow, snwd, tmin, tmax) %>%
-  mutate(borough = as.factor(borough), inspection_month = as.factor(inspection_month), 
-         inspection_daytime = as.factor(inspection_daytime), prcp = as.numeric(prcp), 
-         snow = as.numeric(snow), snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
+  select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
+  mutate(borough = as.factor(borough), 
+         inspection_month = as.factor(inspection_month), 
+         covid_yn = as.factor(covid_yn),
+         prcp = as.numeric(prcp), 
+         snow = as.numeric(snow), 
+         snwd = as.numeric(snwd),
+         tmin = as.numeric(tmin), 
+         tmax = as.numeric(tmax)) %>% 
+  group_by(inspection_ym, borough) %>% summarise(avg_prcp = mean(prcp),
+                                                 avg_snow = mean(snow),
+                                                 avg_snwd = mean(snwd),
+                                                 avg_tmin = mean(tmin),
+                                                 avg_tmax = mean(tmax))
 
-cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
+
+
+cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
+```
+
+
+```{r, include=FALSE}
+# export the tidied dataset of modelling for shiny
+write.csv(rat_tidy,"./rat_app/www/rat_tidy.csv")
 ```
 
 
 ## Linear Regression Model
 
-```{r}
+```{r, message = FALSE, warning = FALSE,comment = FALSE}
   
-model_linear_original = lm(borough_month_cases ~ inspection_month + borough + inspection_daytime + prcp + snow + snwd + tmin + tmax, data = cases_borough_month) 
+model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
 broom::tidy(model_linear_original) %>% 
   knitr::kable()
+summary(model_linear_original)
 
-model_linear = step(model_linear_original, direction = "backward")
-broom::tidy(model_linear) %>% 
-  knitr::kable()
+#model_linear = step(model_linear_original, direction = "backward")
+#broom::tidy(model_linear) %>% 
+#  knitr::kable()
 
 
-#model_interact = lm(borough_month_cases ~ inspection_month + borough + snow + prcp + snwd + tmin + tmax , data = cases_borough_month) 
-#broom::tidy(model_interact) %>% knitr::kable()
+#summary(model_linear)
 ```
 
 ## Model diagnostics
@@ -109,18 +129,18 @@ broom::tidy(model_linear) %>%
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
 set.seed(100)
 par(mfrow=c(2,2))
-plot(model_linear)
-anova(model_linear)
+plot(model_linear_original)
+anova(model_linear_original)
 ```
 
 
 ```{r}
 
-outlierTest(model_linear)
+outlierTest(model_linear_original)
 
-durbinWatsonTest(model_linear)
+durbinWatsonTest(model_linear_original)
 
-vif(model_linear)
+vif(model_linear_original)
 ```
 
 
@@ -132,12 +152,13 @@ We set the Result variable as the binary outcome. Passed(0) means none was inspe
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
 
 rat_binary = rat %>% 
-  select(result, borough, inspection_month, inspection_daytime, prcp, snow, snwd, tmin, tmax) %>%
+  select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
     result == "Passed" ~ 0, 
     TRUE ~ 1)) %>%
   mutate(inspection_result = as.factor(inspection_result), 
          borough = as.factor(borough),
+         covid_yn = as.factor(covid_yn),
          inspection_month = as.factor(inspection_month), 
          inspection_daytime = as.factor(inspection_daytime), 
          prcp = as.numeric(prcp), 
@@ -151,10 +172,10 @@ rat_binary = rat %>%
 
 
 ```{r}
-model_logit_original = glm(inspection_result ~ inspection_month + borough + inspection_daytime + prcp + snow + snwd + tmin + tmax, data = rat_binary, family="binomial")
+model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + tmin, data = rat_binary, family="binomial")
 
 model_logit = step(model_logit_original, direction = "backward")
-broom::tidy(model_linear) %>% 
+broom::tidy(model_logit) %>% 
   knitr::kable()
 
 summary(model_logit)
@@ -179,19 +200,18 @@ rat_covid = read_csv(url_covid)
 
 
 rat_covid = rat_covid %>%
-  mutate(inspection_month_n = recode(inspection_month, 
-                                   "Jan" = 1,
-                                   "Feb" = 2,
-                                   "Mar" = 3,
-                                   "Apr" = 4,
-                                   "May" = 5,
-                                   "Jun" = 6,
-                                   "Jul" = 7,
-                                   "Aug" = 8,
-                                   "Sep" = 9,
-                                   "Oct" = 10,
-                                   "Nov" = 11,
-                                   "Dec" = 12)) %>%
+  mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
+                                   inspection_month == "Feb" ~ 2,
+                                   inspection_month == "Mar" ~ 3,
+                                   inspection_month == "Apr" ~ 4,
+                                   inspection_month == "May" ~ 5,
+                                   inspection_month == "Jun" ~ 6,
+                                   inspection_month == "Jul" ~ 7,
+                                   inspection_month == "Aug" ~ 8,
+                                   inspection_month == "Sep" ~ 9,
+                                   inspection_month == "Oct" ~ 10,
+                                   inspection_month == "Nov" ~ 11,
+                                   inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
   mutate(date = as.Date(date,format = "%Y-%m-%d"))
 

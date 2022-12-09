@@ -10,33 +10,42 @@ output:
 
 &nbsp;
 
-### Data Sources
+In this section, we would like to introduce the data sources we used in our project and provide the procedure of data preprocessing.
+&nbsp;
+
+&nbsp;
+
+## Data Sources
 
 &nbsp;
 
 
-#### Rodent Inspection Data
+### DOHMH Rodent Inspection Data
 
-The [rodent inspection data](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) contains the information on rat sightings and intervention visits in NYC, which is managed by the New York City Department of Health and Mental Hygiene, Division of Environmental Health. The data source is the Veterinary, Rodent and Vector Surveillance System (VRVSS). It is also available on the [Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page), which is a web-based mapping application where users can view and map rat inspection and intervention data. Users can search results from Health Department inspections for rats at the level of individual properties, and view neighborhood maps. 
+The [rodent inspection data](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) contains the information on rat sightings and intervention visits in NYC from 1918 to 2022, which is managed by the New York City Department of Health and Mental Hygiene, Division of Environmental Health. The data source is the Veterinary, Rodent and Vector Surveillance System (VRVSS). It is also available on the [Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page), which is a web-based mapping application where users can view and map rat inspection and intervention data. Users can search results from Health Department inspections for rats at the level of individual properties, and view neighborhood maps. 
+
+What should to be mentioned is that if a property/taxlot does not appear in the file, which does not indicate an absence of rats - rather just that it has not been inspected. Similarly, neighborhoods with higher numbers properties with active rat signs may not actually have higher rat populations but simply have more inspections.
+
+
 
 
 &nbsp;
 
 
-#### NYC Daily Weather Data
+### NYC Daily Weather Data
 
 The [NYC daily weather data](https://www.noaa.gov/) 
 
 
 &nbsp;
 
-#### NYC COVID-19 Daily Case Count Data
+### NYC COVID-19 Daily Case Count Data
 
 
 The [NYC COVID-19 daily case count data](https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3)
 
 &nbsp;
 
-#### NYC Borough Population Data
+### NYC Borough Population Data
 
 The [NYC borough population data](http://www.citypopulation.de/en/usa/newyorkcity/)
