@@ -12,13 +12,15 @@ output:
 
 &nbsp;
 
-In this section, 
+In this section, we are going to showcase our primary ideas and plans concerning on the rat inspection data analysis project, which clearly conveys and defines the objectives and requirements of our project.
 
+&nbsp;
+
+&nbsp;
 
 ```{r,include=FALSE}
 library(tidyverse)
 ```
-
 
 
 

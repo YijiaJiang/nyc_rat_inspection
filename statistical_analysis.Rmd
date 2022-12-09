@@ -11,8 +11,15 @@ output:
 
 <h1><strong>HYPOTHESIS TEST</strong></h1>
 
+
 &nbsp;
 
+In this section, we would like to explore the pattern and characteristics of rat inspections through statistical analysis by using several hypothesis testing and analyze the association between the number inspections and various potential covariates, including climatic, geographical factors.
+
+
+&nbsp;
+
+&nbsp;
 
 ```{r, message = FALSE, warning=FALSE, echo=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -64,7 +71,7 @@ url_2021 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_dat
 rat_2021 = read_csv(url(url_2021)) 
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
-   mutate(inspection_month_n = recode(inspection_month, 
+   mutate(inspection_month_n = dplyr::recode(inspection_month, 
                                    "Jan" = 1,
                                    "Feb" = 2,
                                    "Mar" = 3,

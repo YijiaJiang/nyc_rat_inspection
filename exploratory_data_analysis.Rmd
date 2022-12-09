@@ -26,6 +26,8 @@ library(rgdal)
 library(leaflet)
 library(leaflet.extras)
 library(patchwork)
+library(GGally)
+library(rstatix)
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
@@ -751,9 +753,9 @@ In March 2020, countries around the world including the U.S. deployed various me
 
 ### Weather {.tabset}
 
-Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the temperatures were almost above 0 degree Celsius and we could not determine immediately whether rats seldom wandered outside when the temperatures were extremely low. 
+Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the pattern was not that obvious and the temperatures were almost above 0 degree Celsius in 2021. We could not immediately determine whether rats seldom wandered outside when the temperatures were extremely low. 
 
-### Inspection
+#### Inspection
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n = rat %>%
@@ -786,7 +788,7 @@ ggplotly(p_weather)
 
 &nbsp;
 
-### Observed
+#### Observed
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n_o = rat %>%
@@ -882,17 +884,9 @@ ggplotly(p_covid)
 
 Based on the comprehensive analyses, we mainly found that:  
 
-* From 2012 to 2018, the number of rat inspections presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19.
-* Brooklyn had the largest number of rat inspections while Manhattan had the highest density of rat inspections, regardless of per-person or per-area.
+* From 2012 to 2019, the number of rat inspections presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19 in 2020.
+* Brooklyn had the largest number of rat inspections while Manhattan had the highest density of rat inspections, regardless of count per-person or per-area.
 * More rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
-
-&nbsp;
-
-&nbsp;
-
-## Exploratory Statistical Analyses
-
-
 
 
 

@@ -28,6 +28,7 @@ rat_theme <- create_theme(
 
 # Data 
 rat_tidy <- read_csv('./www/rat_data.csv')
+rat_binary <- read_csv('./www/rat_binary.csv')
 
 # # Model
 # model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
@@ -52,6 +53,7 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("App Description", tabName = "description", icon = icon("chalkboard-user")),
       menuItem("Rat Population Prediction", tabName = "prediction", icon = icon("arrow-trend-up")),
+      menuItem("Whether Rat Prediction", tabName = "log_pred", icon = icon("arrow-trend-down")),
       menuItem("Interactive Map", tabName = "inter_map", icon = icon("map")),
       menuItem("Reference", tabName = "reference", icon = icon("leanpub"))
     )
@@ -108,6 +110,29 @@ ui <- dashboardPage(
         )
       ),
       tabItem(
+        tabName = "log_pred",
+        fluidRow(
+          box(
+            title = strong("Inputs"), status = "warning", width = 6,
+            p('According to our model, the answer of  question (whether there will be a rat?) is related to borough, daytime, precipitation (tenths of mm),
+              and snow depth (mm). Now make your choices and input the data you interested in to explore.'),
+            selectInput("borough2", "Choose borough:", 
+                        choices = unique(rat_binary$borough),
+                        selected = NULL
+            ),
+            selectInput('daytime2', "Choose daytime:",
+                        choices = unique(rat_binary$inspection_daytime),
+                        selected = NULL),
+            numericInput("prcp2", "Input precipitation (tenths of mm):", ' ', min = 0),
+            numericInput("snwd2", "Input snow depth (mm)", ' ', min = 0)
+          ),
+          box(
+            title = strong("Will there be rats?"), status = "primary", width = 6,
+            h1(strong(htmlOutput("whether_rat")))
+          )
+        )
+      ),
+      tabItem(
         tabName = "reference",
         h3(strong('Reference')),
         p(
@@ -152,6 +177,7 @@ ui <- dashboardPage(
 
 # Server
 server <- function(input, output, session) {
+  
   output$rat_num <- renderText({
     # Model
     model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
@@ -162,6 +188,17 @@ server <- function(input, output, session) {
     pred1 = predict(model_linear_original, 
                     newdata = data.frame(inspection_month = input$month, borough = input$borough1, covid_yn = 0, avg_prcp = input$prcp, avg_snwd = input$snwd, avg_tmax = input$tmax))
     return(round(as.numeric(pred1), digits = 0))
+  })
+  
+  output$whether_rat <- renderText({
+    # Model
+    model_logit = glm(inspection_result ~ borough + factor(covid_yn) + inspection_daytime + prcp + snwd , data = rat_binary, family="binomial")
+
+    req(input$prcp2)
+    req(input$snwd2)
+    pred2 = predict(model_logit, newdata = data.frame(borough = input$borough2, covid_yn = 0, inspection_daytime = input$daytime2, prcp = input$prcp2, snwd = input$snwd2), type = "response")
+    pred3 <- ifelse(pred2 > 0.5, "Oops, Rat!", "Congrat, No Rat!")
+    return(pred3)
   })
 
 }

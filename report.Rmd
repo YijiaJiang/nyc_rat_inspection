@@ -1,15 +1,63 @@
 ---
 title: "Report"
-output: 
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '5'
   html_document:
-    toc: true
-    toc_float: 
-      toc_collapsed: true
+    toc: yes
+    toc_float:
+      toc_collapsed: yes
     toc_depth: 5
 ---
 
+<h1><strong>REPORT</strong></h1>
+
 &nbsp;
 
-### Objective
+## Motivation
+
+
+Motivation: Provide an overview of the project goals and motivation.
+
+&nbsp;
+
+## Related Work
+
+Related work: Anything that inspired you, such as a paper, a web site, or something we discussed in class.
+
+&nbsp;
+
+
+## Research Questions
+
+Initial questions: What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis?
+
+&nbsp;
+
+## Data
+
+Data: Source, scraping method, cleaning, etc.
+
+&nbsp;
+
+## Exploratory Data Analysis
+
+Exploratory analysis: Visualizations, summaries, and exploratory statistical analyses. Justify the steps you took, and show any major changes to your ideas.
+
+&nbsp;
+
+
+## Statistical Analysis
+
+Additional analysis: If you undertake formal statistical analyses, describe these in detail
+
+&nbsp;
+
+## Discussion
+
+Discussion: What were your findings? Are they what you expect? What insights into the data can you make?
+
+
 
 
