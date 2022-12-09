@@ -14,7 +14,7 @@ output:
 
 &nbsp;
 
-In this section, we would like to introduce the data sources we used in our project, including the variable overview, and provide the procedure of data pre-processing.
+In this section, we would like to introduce the data sources we used in our project, including the variable overview, and provide the procedure of data preprocessing.
 
 &nbsp;
 
@@ -169,7 +169,7 @@ rat_weather_covid = rat_tidy %>%
 
 &nbsp;
 
-After cleaning the datasets mentioned above, our tidied and aggregated data has a total of 1,679,675 rows, one for each rat inspection record, and is the basis of our exploratory and statistical analysis. The variables selected, together with its descriptions are as follows:
+After cleaning the datasets mentioned above, our tidied and aggregated data has a total of 1,679,675 rows, one for each rat inspection record, and is the basis of our exploratory and statistical analysis. Altogether 24 variables selected as meaningful and valuable. The specific variable names and their corresponding explanation are listed below:
 
 * `inspection_year`: year of the inspection
 * `inspection_month`: month of the inspection 
