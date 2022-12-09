@@ -77,8 +77,8 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = strong("Inputs"), status = "warning", width = 6,
-            p('According to our model, the monthly observed rat population is related to borough, month, precipitation (tenths of mm),
-              snow depth (mm), and maximum temperature. Now make your choices and input the data you interested in to explore.'),
+            p('According to our model, the monthly observed rat population is related to borough, month, precipitation (mm),
+              snow depth (mm), and maximum temperature(\u00B0C). Now make your choices and input the data you interested in to explore.'),
             selectInput("borough1", "Choose borough:", 
                         choices = unique(rat_tidy$borough),
                         selected = NULL
@@ -86,9 +86,9 @@ ui <- dashboardPage(
             selectInput('month', "Choose month:",
                         choices = unique(rat_tidy$inspection_month),
                         selected = NULL),
-            numericInput("prcp", "Input precipitation (tenths of mm):", ' ', min = 0),
+            numericInput("prcp", "Input precipitation (mm):", ' ', min = 0),
             numericInput("snwd", "Input snow depth (mm)", ' ', min = 0),
-            numericInput("tmax", "Input maximum temperature", ' ', min = 0)
+            numericInput("tmax", "Input maximum temperature (\u00B0C)", ' ', min = 0)
           ),
           box(
             title = strong("The rat population will be..."), status = "primary", width = 6,
@@ -114,7 +114,7 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = strong("Inputs"), status = "warning", width = 6,
-            p('According to our model, the answer of  question (whether there will be a rat?) is related to borough, daytime, precipitation (tenths of mm),
+            p('According to our model, the answer of  question (whether there will be a rat?) is related to borough, daytime, precipitation (mm),
               and snow depth (mm). Now make your choices and input the data you interested in to explore.'),
             selectInput("borough2", "Choose borough:", 
                         choices = unique(rat_binary$borough),
@@ -123,7 +123,7 @@ ui <- dashboardPage(
             selectInput('daytime2', "Choose daytime:",
                         choices = unique(rat_binary$inspection_daytime),
                         selected = NULL),
-            numericInput("prcp2", "Input precipitation (tenths of mm):", ' ', min = 0),
+            numericInput("prcp2", "Input precipitation (mm):", ' ', min = 0),
             numericInput("snwd2", "Input snow depth (mm)", ' ', min = 0)
           ),
           box(
