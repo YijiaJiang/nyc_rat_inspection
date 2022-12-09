@@ -169,7 +169,7 @@ rat_weather_covid = rat_tidy %>%
 
 &nbsp;
 
-After cleaning the datasets mentioned above, our tidied and aggregated data has a total of 1,679,675 rows, one for each rat inspection record, and is the basis of our exploratory and statistical analysis. Altogether 24 variables selected as meaningful and valuable. The specific variable names and their corresponding explanation are listed below:
+After cleaning the datasets mentioned above, our tidied and aggregated data has a total of 1,679,675 rows, one for each rat inspection record, and is the basis of our exploratory and statistical analysis. Altogether 24 variables are selected as meaningful and valuable. The specific variable names and their corresponding explanation are listed below:
 
 * `inspection_year`: year of the inspection
 * `inspection_month`: month of the inspection 
