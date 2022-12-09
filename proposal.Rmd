@@ -8,12 +8,15 @@ output:
     toc_depth: 5
 ---
 
+<h1><strong>EXPLORATORY DATA ANALYSIS</strong></h1>
 
 &nbsp;
 
 ```{r,include=FALSE}
 library(tidyverse)
 ```
+
+
 
 
 ### The Group Members 
