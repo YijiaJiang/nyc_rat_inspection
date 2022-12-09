@@ -197,7 +197,7 @@ server <- function(input, output, session) {
     req(input$prcp2)
     req(input$snwd2)
     pred2 = predict(model_logit, newdata = data.frame(borough = input$borough2, covid_yn = 0, inspection_daytime = input$daytime2, prcp = input$prcp2, snwd = input$snwd2), type = "response")
-    pred3 <- ifelse(pred2 > 0.5, "Oops, Rat!", "Congrat, No Rat!")
+    pred3 <- ifelse(pred2 > 0.75, "Oops, Rat!", ifelse(pred2 < 0.25, "Congrat, no rats!", 'Emmm, not sure...'))
     return(pred3)
   })
 
