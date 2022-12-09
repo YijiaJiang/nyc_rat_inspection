@@ -403,159 +403,133 @@ div.tocify {
 <h1>
 <strong>REGRESSION</strong>
 </h1>
-<p>In this section, we would like to construct a linear model to,
-together with a logistic model to predict. These two models will be
-further utilized in the Shiny App for rat activity prediction.</p>
+<p>In this section, we are intended to construct a linear model to
+generate the monthly number of rats observed using a variety of
+potential predictors potential predictors, as well as a logistic model
+to predict the chance of seeing a rat. These two models will be further
+utilized in the Shiny App for rat activity prediction.</p>
 <p> </p>
 <p> </p>
-<pre class="r"><code>library(tidyverse)
-library(readxl)
-library(car)</code></pre>
-<pre class="r"><code># import dataset
-url_2012 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv&quot;
-rat_2012 = read_csv(url(url_2012)) 
-url_2013 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2013.csv&quot;
-rat_2013 = read_csv(url(url_2013)) 
-url_2014 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2014.csv&quot;
-rat_2014 = read_csv(url(url_2014)) 
-url_2015 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2015.csv&quot;
-rat_2015 = read_csv(url(url_2015)) 
-url_2016 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2016.csv&quot;
-rat_2016 = read_csv(url(url_2016)) 
-url_2017 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2017.csv&quot;
-rat_2017 = read_csv(url(url_2017)) 
-url_2018 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2018.csv&quot;
-rat_2018 = read_csv(url(url_2018)) 
-url_2019 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2019.csv&quot;
-rat_2019 = read_csv(url(url_2019)) 
-url_2020 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2020.csv&quot;
-rat_2020 = read_csv(url(url_2020)) 
-url_2021 = &quot;https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2021.csv&quot;
-rat_2021 = read_csv(url(url_2021)) </code></pre>
-<pre class="r"><code>rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %&gt;%
+<pre class="r"><code># tidy the data
+rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %&gt;%
   select(-...1) %&gt;%
-   mutate(inspection_month_n = case_when(inspection_month == &quot;Jan&quot; ~ 1,
-                                         inspection_month == &quot;Feb&quot; ~ 2,
-                                         inspection_month == &quot;Mar&quot; ~ 3,
-                                         inspection_month == &quot;Apr&quot; ~ 4,
-                                         inspection_month == &quot;May&quot; ~ 5,
-                                         inspection_month == &quot;Jun&quot; ~ 6,
-                                         inspection_month == &quot;Jul&quot; ~ 7,
-                                         inspection_month == &quot;Aug&quot; ~ 8,
-                                         inspection_month == &quot;Sep&quot; ~ 9,
-                                         inspection_month == &quot;Oct&quot; ~ 10,
-                                         inspection_month == &quot;Nov&quot; ~ 11,
-                                         inspection_month == &quot;Dec&quot; ~ 12)) %&gt;%
+  mutate(inspection_month_n = case_when(inspection_month == &quot;Jan&quot; ~ 1,
+                                        inspection_month == &quot;Feb&quot; ~ 2,
+                                        inspection_month == &quot;Mar&quot; ~ 3,
+                                        inspection_month == &quot;Apr&quot; ~ 4,
+                                        inspection_month == &quot;May&quot; ~ 5,
+                                        inspection_month == &quot;Jun&quot; ~ 6,
+                                        inspection_month == &quot;Jul&quot; ~ 7,
+                                        inspection_month == &quot;Aug&quot; ~ 8,
+                                        inspection_month == &quot;Sep&quot; ~ 9,
+                                        inspection_month == &quot;Oct&quot; ~ 10,
+                                        inspection_month == &quot;Nov&quot; ~ 11,
+                                        inspection_month == &quot;Dec&quot; ~ 12)) %&gt;%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = &quot;-&quot;)) %&gt;%
   mutate(date = as.Date(date,format = &quot;%Y-%m-%d&quot;)) %&gt;% 
   mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = &quot;-&quot;)) %&gt;%
   mutate(covid_yn = case_when(date &lt; &quot;2020-02-29&quot; ~ 0,
                               TRUE ~ 1)) %&gt;%
+  mutate(covid_yn = as.factor(covid_yn)) %&gt;%
   separate(inspection_time, into = c(&quot;hour&quot;, &quot;minute&quot;, &quot;second&quot;)) %&gt;%
   mutate(hour = as.numeric(hour)) %&gt;%
   mutate(inspection_daytime = case_when(
       hour &lt; 6 | hour &gt;= 18 ~ &quot;Night&quot;,
       hour &gt;= 6 &amp; hour &lt; 12 ~ &quot;Morning&quot;,
-      hour &gt;= 12 &amp; hour &lt; 18 ~ &quot;Afternoon&quot;))
-  
-#%&gt;%  filter(result != &quot;Passed&quot;)</code></pre>
-<div id="exploratory-statistical-analyses" class="section level2">
-<h2>Exploratory Statistical Analyses</h2>
+      hour &gt;= 12 &amp; hour &lt; 18 ~ &quot;Afternoon&quot;))</code></pre>
+<div id="linear-regression-model" class="section level2">
+<h2>Linear Regression Model</h2>
+<div id="exploratory-statistical-analyses" class="section level3">
+<h3>Exploratory Statistical Analyses</h3>
 <pre class="r"><code>cases = rat %&gt;% 
-  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %&gt;%
-  filter(result != &quot;Passed&quot;) %&gt;%
-  select(inspection_ym, borough) %&gt;% 
+  select(inspection_ym, borough, inspection_month_n) %&gt;% 
   group_by(inspection_ym, borough) %&gt;% 
-  add_count(borough, inspection_ym, name = &quot;borough_month_cases&quot;) %&gt;%
+  add_count(borough, inspection_ym, name = &quot;borough_monthly_cases&quot;) %&gt;%
   distinct()
 
-rat_tidy = rat %&gt;% 
-  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %&gt;%
-  filter(result != &quot;Passed&quot;) %&gt;%
-  select(boro_code, borough, inspection_ym, inspection_month, inspection_month_n, prcp, snow, snwd, tmin, tmax) %&gt;%
-  mutate(borough = as.factor(borough), inspection_month = as.factor(inspection_month), 
-         prcp = as.numeric(prcp), snow = as.numeric(snow), snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
+rat_tidy = rat %&gt;%
+  dplyr::select(boro_code, borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %&gt;%
+  mutate(borough = as.factor(borough),
+         inspection_month = as.factor(inspection_month)) %&gt;%
+  group_by(inspection_ym, borough) %&gt;% 
+  summarise(avg_prcp = mean(prcp), 
+            avg_snow = mean(snow), 
+            avg_snwd = mean(snwd),
+            avg_tmin = mean(tmin),
+            avg_tmax = mean(tmax)) %&gt;%
+  mutate(avg_temp = (avg_tmin + avg_tmax)/2) %&gt;% 
+  mutate(covid_yn = case_when(inspection_ym &lt; &quot;2020-02&quot; ~ 0, TRUE ~ 1)) %&gt;% 
+  mutate(boro_code = case_when(borough == &quot;Manhattan&quot; ~ 1,
+                               borough == &quot;Bronx&quot; ~ 2,
+                               borough == &quot;Brooklyn&quot; ~ 1,
+                               borough == &quot;Queens&quot; ~ 4,
+                               borough == &quot;Staten Island&quot; ~ 5))
 
-cases_borough_month = merge(x = rat_tidy, y = cases, by = c(&quot;inspection_ym&quot;, &quot;borough&quot;)) %&gt;% distinct() 
+cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c(&quot;inspection_ym&quot;, &quot;borough&quot;)) 
 
-
-cases_borough_month %&gt;%
-  select(borough, inspection_month, prcp, snow, snwd, tmin, tmax) %&gt;% 
+# correlation between key predictors
+cases_borough_monthly %&gt;%
+  dplyr::select(borough, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn) %&gt;% 
+  mutate(inspection_month_n = as.factor(inspection_month_n),
+         covid_yn = as.factor(covid_yn)) %&gt;% 
   rename(
     &quot;Borough&quot; = borough,
-    &quot;Month&quot; = inspection_month,
-    &quot;Precipitation&quot; = prcp,
-    &quot;Snowfall&quot; = snow,
-    &quot;Snow Depth&quot; = snwd,
-    &quot;Minimum Temperature&quot; = tmin,
-    &quot;Maximum Temperature&quot; = tmax
+    &quot;Month&quot; = inspection_month_n,
+    &quot;Average Precipitation&quot; = avg_prcp,
+    &quot;Average Snowfall&quot; = avg_snow,
+    &quot;Average Snow Depth&quot; = avg_snwd,
+    &quot;Average Tmin&quot; = avg_tmin,
+    &quot;Average Tmax&quot; = avg_tmax,
+    &quot;Average Temperature&quot; = avg_temp,
+    &quot;COVID&quot; = covid_yn
   ) %&gt;% 
   ggpairs(
     title = &quot;Correlations Between Key Outcomes&quot;
   ) + 
   scale_fill_discrete()</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-4-1.png" width="768" /></p>
-<pre class="r"><code>cases_borough_month %&gt;%
-  select(-inspection_ym, -borough) %&gt;%
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-4-1.png" width="1536" /></p>
+<pre class="r"><code># correlation between predictors and outcome
+cases_borough_monthly %&gt;% 
+  dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %&gt;%
   rename(
     &quot;Borough&quot; = boro_code,
-    &quot;Month&quot; = inspection_month,
-    &quot;Precipitation&quot; = prcp,
-    &quot;Snowfall&quot; = snow,
-    &quot;Snow Depth&quot; = snwd,
-    &quot;Minimum Temperature&quot; = tmin,
-    &quot;Maximum Temperature&quot; = tmax,
-    &quot;Borough Monthly Cases&quot; = borough_month_cases
+    &quot;Month&quot; = inspection_month_n,
+    &quot;Average Precipitation&quot; = avg_prcp,
+    &quot;Average Snowfall&quot; = avg_snow,
+    &quot;Average Snow Depth&quot; = avg_snwd,
+    &quot;Average Tmin&quot; = avg_tmin,
+    &quot;Average Tmax&quot; = avg_tmax,
+    &quot;Average Temperature&quot; = avg_temp,
+    &quot;COVID&quot; = covid_yn
   ) %&gt;% 
-  ggcorr(label = TRUE, hjust = 0.9, layout.exp = 2, label_size = 3, label_round = 2)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<pre class="r"><code>cases_borough_month %&gt;% 
-  select(boro_code, inspection_month_n, tmin, tmax, prcp, snow, snwd, borough_month_cases) %&gt;%
   cor_mat() %&gt;%
   cor_gather() %&gt;%
-  filter(var1 %in% &quot;borough_month_cases&quot;) %&gt;%
-  filter(!var2 %in% &quot;borough_month_cases&quot;) %&gt;%
-  mutate(
-    sig_p = ifelse(p &lt; 0.01, T, F),
-    cor_if_sig = ifelse(p &lt; 0.01, cor, NA)
-    ) %&gt;% 
-  ggplot(aes(
-    x = var1, 
-    y = var2, 
-    fill = cor,
-    label = round(cor_if_sig, 2))) + 
+  filter(var1 %in% &quot;borough_monthly_cases&quot;) %&gt;%
+  filter(!var2 %in% &quot;borough_monthly_cases&quot;) %&gt;%
+  ggplot(aes(x = var1, y = var2, fill = cor, label = cor)) + 
   geom_tile(color = &quot;white&quot;) +   
-  geom_text(
-    color = &quot;white&quot;,
-    size = 4
-  ) + 
-  scale_x_discrete(
-    labels = c(&quot;Borough Monthly cases&quot;)
-  ) + 
-  labs(
-    x = &quot;Outcome Variable&quot;,
-    y = &quot;Predictor Variables&quot;,
+  geom_text(color = &quot;white&quot;,size = 4) + 
+  scale_x_discrete(labels = c(&quot;Borough Monthly cases&quot;)) + 
+  labs(x = &quot;Outcome Variable&quot;, y = &quot;Predictor Variables&quot;,
     title = &quot;Correlation Matrix between Predictors and Outcome&quot;,
-    subtitle = &quot;significant predictors at significance level 0.01&quot;,
-    fill = &quot;Correlation&quot;
-  )</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
-<pre class="r"><code>skimr::skim(cases_borough_month)</code></pre>
+    fill = &quot;Correlation&quot;)</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-5-1.png" width="768" /></p>
+<pre class="r"><code># variable overview
+skimr::skim(cases_borough_monthly)</code></pre>
 <table>
 <caption>Data summary</caption>
 <tbody>
 <tr class="odd">
 <td align="left">Name</td>
-<td align="left">cases_borough_month</td>
+<td align="left">cases_borough_monthly</td>
 </tr>
 <tr class="even">
 <td align="left">Number of rows</td>
-<td align="left">12796</td>
+<td align="left">597</td>
 </tr>
 <tr class="odd">
 <td align="left">Number of columns</td>
-<td align="left">11</td>
+<td align="left">12</td>
 </tr>
 <tr class="even">
 <td align="left">_______________________</td>
@@ -571,11 +545,11 @@ cases_borough_month %&gt;%
 </tr>
 <tr class="odd">
 <td align="left">factor</td>
-<td align="left">2</td>
+<td align="left">1</td>
 </tr>
 <tr class="even">
 <td align="left">numeric</td>
-<td align="left">8</td>
+<td align="left">10</td>
 </tr>
 <tr class="odd">
 <td align="left">________________________</td>
@@ -627,12 +601,12 @@ cases_borough_month %&gt;%
 <p><strong>Variable type: factor</strong></p>
 <table>
 <colgroup>
-<col width="16%" />
-<col width="9%" />
-<col width="13%" />
-<col width="7%" />
+<col width="14%" />
+<col width="10%" />
+<col width="14%" />
 <col width="8%" />
-<col width="42%" />
+<col width="9%" />
+<col width="41%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -651,15 +625,7 @@ cases_borough_month %&gt;%
 <td align="right">1</td>
 <td align="left">FALSE</td>
 <td align="right">5</td>
-<td align="left">Man: 2881, Bro: 2694, Bro: 2690, Que: 2472</td>
-</tr>
-<tr class="even">
-<td align="left">inspection_month</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="left">FALSE</td>
-<td align="right">12</td>
-<td align="left">Aug: 1171, Jul: 1158, Jun: 1151, Sep: 1114</td>
+<td align="left">Bro: 120, Man: 120, Bro: 119, Que: 119</td>
 </tr>
 </tbody>
 </table>
@@ -667,16 +633,16 @@ cases_borough_month %&gt;%
 <table style="width:100%;">
 <colgroup>
 <col width="20%" />
-<col width="10%" />
-<col width="14%" />
+<col width="9%" />
+<col width="13%" />
+<col width="7%" />
+<col width="7%" />
+<col width="5%" />
+<col width="6%" />
+<col width="7%" />
+<col width="7%" />
 <col width="8%" />
-<col width="7%" />
-<col width="6%" />
-<col width="6%" />
-<col width="6%" />
-<col width="7%" />
-<col width="7%" />
-<col width="6%" />
+<col width="5%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -695,145 +661,425 @@ cases_borough_month %&gt;%
 </thead>
 <tbody>
 <tr class="odd">
+<td align="left">avg_prcp</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3.15</td>
+<td align="right">2.48</td>
+<td align="right">0.00</td>
+<td align="right">1.52</td>
+<td align="right">2.70</td>
+<td align="right">4.09</td>
+<td align="right">23.20</td>
+<td align="left">▇▂▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">avg_snow</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.79</td>
+<td align="right">2.17</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.21</td>
+<td align="right">15.80</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">avg_snwd</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">7.02</td>
+<td align="right">32.46</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">268.14</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">avg_tmin</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">9.87</td>
+<td align="right">8.30</td>
+<td align="right">-8.32</td>
+<td align="right">2.01</td>
+<td align="right">10.12</td>
+<td align="right">17.86</td>
+<td align="right">23.82</td>
+<td align="left">▂▇▅▆▇</td>
+</tr>
+<tr class="odd">
+<td align="left">avg_tmax</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">17.66</td>
+<td align="right">8.81</td>
+<td align="right">1.25</td>
+<td align="right">9.05</td>
+<td align="right">17.97</td>
+<td align="right">25.78</td>
+<td align="right">31.86</td>
+<td align="left">▅▆▆▆▇</td>
+</tr>
+<tr class="even">
+<td align="left">avg_temp</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">13.77</td>
+<td align="right">8.53</td>
+<td align="right">-3.41</td>
+<td align="right">5.52</td>
+<td align="right">14.39</td>
+<td align="right">21.82</td>
+<td align="right">27.84</td>
+<td align="left">▃▇▆▆▇</td>
+</tr>
+<tr class="odd">
+<td align="left">covid_yn</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0.20</td>
+<td align="right">0.40</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">1.00</td>
+<td align="left">▇▁▁▁▂</td>
+</tr>
+<tr class="even">
 <td align="left">boro_code</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">2.85</td>
-<td align="right">1.39</td>
-<td align="right">1.0</td>
-<td align="right">2.0</td>
-<td align="right">3.0</td>
-<td align="right">4.0</td>
-<td align="right">5.0</td>
-<td align="left">▇▇▇▇▆</td>
+<td align="right">2.60</td>
+<td align="right">1.62</td>
+<td align="right">1.00</td>
+<td align="right">1.00</td>
+<td align="right">2.00</td>
+<td align="right">4.00</td>
+<td align="right">5.00</td>
+<td align="left">▇▅▁▃▃</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">inspection_month_n</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">6.59</td>
-<td align="right">3.36</td>
-<td align="right">1.0</td>
-<td align="right">4.0</td>
-<td align="right">7.0</td>
-<td align="right">9.0</td>
-<td align="right">12.0</td>
-<td align="left">▇▆▆▆▇</td>
-</tr>
-<tr class="odd">
-<td align="left">prcp</td>
-<td align="right">0</td>
-<td align="right">1</td>
+<td align="right">6.51</td>
 <td align="right">3.46</td>
-<td align="right">9.63</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">1.5</td>
-<td align="right">181.1</td>
-<td align="left">▇▁▁▁▁</td>
+<td align="right">1.00</td>
+<td align="right">3.00</td>
+<td align="right">7.00</td>
+<td align="right">10.00</td>
+<td align="right">12.00</td>
+<td align="left">▇▅▅▅▇</td>
 </tr>
 <tr class="even">
-<td align="left">snow</td>
+<td align="left">borough_monthly_cases</td>
 <td align="right">0</td>
 <td align="right">1</td>
-<td align="right">1.03</td>
-<td align="right">10.60</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">279.0</td>
-<td align="left">▇▁▁▁▁</td>
-</tr>
-<tr class="odd">
-<td align="left">snwd</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">6.45</td>
-<td align="right">37.62</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">0.0</td>
-<td align="right">480.0</td>
-<td align="left">▇▁▁▁▁</td>
-</tr>
-<tr class="even">
-<td align="left">tmin</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">10.30</td>
-<td align="right">9.09</td>
-<td align="right">-18.2</td>
-<td align="right">2.8</td>
-<td align="right">10.6</td>
-<td align="right">18.3</td>
-<td align="right">28.3</td>
-<td align="left">▁▃▇▇▆</td>
-</tr>
-<tr class="odd">
-<td align="left">tmax</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">18.12</td>
-<td align="right">9.85</td>
-<td align="right">-9.3</td>
-<td align="right">10.0</td>
-<td align="right">19.4</td>
-<td align="right">26.7</td>
-<td align="right">37.8</td>
-<td align="left">▁▅▆▇▅</td>
-</tr>
-<tr class="even">
-<td align="left">borough_month_cases</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1186.53</td>
-<td align="right">815.81</td>
-<td align="right">1.0</td>
-<td align="right">515.0</td>
-<td align="right">977.0</td>
-<td align="right">1865.0</td>
-<td align="right">3314.0</td>
-<td align="left">▇▆▅▅▁</td>
+<td align="right">2813.53</td>
+<td align="right">2433.77</td>
+<td align="right">1.00</td>
+<td align="right">748.00</td>
+<td align="right">1949.00</td>
+<td align="right">4737.00</td>
+<td align="right">10645.00</td>
+<td align="left">▇▃▂▂▁</td>
 </tr>
 </tbody>
 </table>
+<p> </p>
 </div>
-<div id="variable-selection" class="section level2">
-<h2>Variable selection</h2>
-<pre class="r"><code>cases = rat %&gt;% 
-  select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %&gt;% 
-  group_by(inspection_ym, borough) %&gt;% 
-  add_count(borough, inspection_ym, name = &quot;borough_monthly_cases&quot;) %&gt;%
-  select(-prcp, -snow, -snwd, -tmin, -tmax)
-
-
-rat_tidy = rat %&gt;% 
-  select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %&gt;%
-  mutate(borough = as.factor(borough), 
-         inspection_month = as.factor(inspection_month), 
-         covid_yn = as.factor(covid_yn),
-         prcp = as.numeric(prcp), 
-         snow = as.numeric(snow), 
-         snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), 
-         tmax = as.numeric(tmax)) %&gt;% 
-  group_by(inspection_ym, borough) %&gt;% summarise(avg_prcp = mean(prcp),
-                                                 avg_snow = mean(snow),
-                                                 avg_snwd = mean(snwd),
-                                                 avg_tmin = mean(tmin),
-                                                 avg_tmax = mean(tmax))
-
-
-
-cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c(&quot;inspection_ym&quot;, &quot;borough&quot;)) %&gt;% distinct() </code></pre>
 </div>
-<div id="linear-regression-model" class="section level2">
-<h2>Linear Regression Model</h2>
-<pre class="r"><code>model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
-broom::tidy(model_linear_original) %&gt;% 
+<div id="model-fitting" class="section level2">
+<h2>Model Fitting</h2>
+<pre class="r"><code># full model
+cases_borough_monthly = cases_borough_monthly %&gt;% 
+  mutate(inspection_month = month.abb[inspection_month_n],
+         covid_yn = as.factor(covid_yn))
+
+
+model_linear_full = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+broom::tidy(model_linear_full) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">4877.56152</td>
+<td align="right">579.615793</td>
+<td align="right">8.4151633</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthAug</td>
+<td align="right">-23.75773</td>
+<td align="right">641.514627</td>
+<td align="right">-0.0370338</td>
+<td align="right">0.9704709</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthDec</td>
+<td align="right">-315.92270</td>
+<td align="right">422.890928</td>
+<td align="right">-0.7470548</td>
+<td align="right">0.4553353</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthFeb</td>
+<td align="right">110.61065</td>
+<td align="right">464.226729</td>
+<td align="right">0.2382686</td>
+<td align="right">0.8117575</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthJan</td>
+<td align="right">-704.79392</td>
+<td align="right">521.621933</td>
+<td align="right">-1.3511585</td>
+<td align="right">0.1771751</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthJul</td>
+<td align="right">-297.34069</td>
+<td align="right">680.360646</td>
+<td align="right">-0.4370339</td>
+<td align="right">0.6622505</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthJun</td>
+<td align="right">-132.07181</td>
+<td align="right">547.714939</td>
+<td align="right">-0.2411324</td>
+<td align="right">0.8095383</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthMar</td>
+<td align="right">213.70290</td>
+<td align="right">378.803232</td>
+<td align="right">0.5641528</td>
+<td align="right">0.5728698</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthMay</td>
+<td align="right">-204.76235</td>
+<td align="right">407.848043</td>
+<td align="right">-0.5020555</td>
+<td align="right">0.6158203</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthNov</td>
+<td align="right">-601.71179</td>
+<td align="right">351.213875</td>
+<td align="right">-1.7132347</td>
+<td align="right">0.0872075</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthOct</td>
+<td align="right">-528.97590</td>
+<td align="right">357.576370</td>
+<td align="right">-1.4793368</td>
+<td align="right">0.1395970</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthSep</td>
+<td align="right">-347.95599</td>
+<td align="right">516.984759</td>
+<td align="right">-0.6730488</td>
+<td align="right">0.5011862</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughBrooklyn</td>
+<td align="right">-202.80772</td>
+<td align="right">205.202472</td>
+<td align="right">-0.9883298</td>
+<td align="right">0.3234061</td>
+</tr>
+<tr class="even">
+<td align="left">boroughManhattan</td>
+<td align="right">234.56147</td>
+<td align="right">204.704306</td>
+<td align="right">1.1458551</td>
+<td align="right">0.2523309</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughQueens</td>
+<td align="right">-3006.29996</td>
+<td align="right">205.573090</td>
+<td align="right">-14.6239956</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">boroughStaten Island</td>
+<td align="right">-3867.04047</td>
+<td align="right">205.489319</td>
+<td align="right">-18.8186933</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">covid_yn1</td>
+<td align="right">-1666.86661</td>
+<td align="right">167.384645</td>
+<td align="right">-9.9583006</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">avg_prcp</td>
+<td align="right">38.26454</td>
+<td align="right">28.695437</td>
+<td align="right">1.3334712</td>
+<td align="right">0.1829043</td>
+</tr>
+<tr class="odd">
+<td align="left">avg_snow</td>
+<td align="right">-51.98910</td>
+<td align="right">35.077476</td>
+<td align="right">-1.4821220</td>
+<td align="right">0.1388547</td>
+</tr>
+<tr class="even">
+<td align="left">avg_snwd</td>
+<td align="right">-10.62638</td>
+<td align="right">2.667413</td>
+<td align="right">-3.9837775</td>
+<td align="right">0.0000765</td>
+</tr>
+<tr class="odd">
+<td align="left">avg_temp</td>
+<td align="right">-10.29318</td>
+<td align="right">42.849578</td>
+<td align="right">-0.2402165</td>
+<td align="right">0.8102479</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>summary(model_linear_full)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = borough_monthly_cases ~ inspection_month + borough + 
+##     covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3893.1  -823.4  -177.3   865.9  6637.1 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           4877.562    579.616   8.415 3.11e-16 ***
+## inspection_monthAug    -23.758    641.515  -0.037   0.9705    
+## inspection_monthDec   -315.923    422.891  -0.747   0.4553    
+## inspection_monthFeb    110.611    464.227   0.238   0.8118    
+## inspection_monthJan   -704.794    521.622  -1.351   0.1772    
+## inspection_monthJul   -297.341    680.361  -0.437   0.6623    
+## inspection_monthJun   -132.072    547.715  -0.241   0.8095    
+## inspection_monthMar    213.703    378.803   0.564   0.5729    
+## inspection_monthMay   -204.762    407.848  -0.502   0.6158    
+## inspection_monthNov   -601.712    351.214  -1.713   0.0872 .  
+## inspection_monthOct   -528.976    357.576  -1.479   0.1396    
+## inspection_monthSep   -347.956    516.985  -0.673   0.5012    
+## boroughBrooklyn       -202.808    205.202  -0.988   0.3234    
+## boroughManhattan       234.561    204.704   1.146   0.2523    
+## boroughQueens        -3006.300    205.573 -14.624  &lt; 2e-16 ***
+## boroughStaten Island -3867.040    205.489 -18.819  &lt; 2e-16 ***
+## covid_yn1            -1666.867    167.385  -9.958  &lt; 2e-16 ***
+## avg_prcp                38.265     28.695   1.333   0.1829    
+## avg_snow               -51.989     35.077  -1.482   0.1389    
+## avg_snwd               -10.626      2.667  -3.984 7.65e-05 ***
+## avg_temp               -10.293     42.850  -0.240   0.8102    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1585 on 576 degrees of freedom
+## Multiple R-squared:  0.5899, Adjusted R-squared:  0.5756 
+## F-statistic: 41.42 on 20 and 576 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Full model: borough_monthly_cases ~ inspection_month + borough +
+covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp</p>
+<pre class="r"><code># stepwise with AIC (full model)
+step(model_linear_full, direction = &quot;both&quot;)</code></pre>
+<pre><code>## Start:  AIC=8818.76
+## borough_monthly_cases ~ inspection_month + borough + covid_yn + 
+##     avg_prcp + avg_snow + avg_snwd + avg_temp
+## 
+##                    Df  Sum of Sq        RSS    AIC
+## - inspection_month 11   41374644 1489241909 8813.6
+## - avg_temp          1     145048 1448012313 8816.8
+## - avg_prcp          1    4469650 1452336915 8818.6
+## &lt;none&gt;                           1447867265 8818.8
+## - avg_snow          1    5521717 1453388982 8819.0
+## - avg_snwd          1   39892974 1487760239 8833.0
+## - covid_yn          1  249273854 1697141119 8911.6
+## - borough           4 1745919405 3193786670 9283.1
+## 
+## Step:  AIC=8813.58
+## borough_monthly_cases ~ borough + covid_yn + avg_prcp + avg_snow + 
+##     avg_snwd + avg_temp
+## 
+##                    Df  Sum of Sq        RSS    AIC
+## - avg_temp          1     645366 1489887275 8811.8
+## - avg_prcp          1    3462718 1492704627 8813.0
+## &lt;none&gt;                           1489241909 8813.6
+## - avg_snow          1    6676451 1495918360 8814.3
+## + inspection_month 11   41374644 1447867265 8818.8
+## - avg_snwd          1   38346768 1527588677 8826.8
+## - covid_yn          1  259704790 1748946698 8907.5
+## - borough           4 1747059666 3236301575 9269.0
+## 
+## Step:  AIC=8811.84
+## borough_monthly_cases ~ borough + covid_yn + avg_prcp + avg_snow + 
+##     avg_snwd
+## 
+##                    Df  Sum of Sq        RSS    AIC
+## - avg_prcp          1    2913533 1492800808 8811.0
+## &lt;none&gt;                           1489887275 8811.8
+## - avg_snow          1    6126822 1496014097 8812.3
+## + avg_temp          1     645366 1489241909 8813.6
+## + inspection_month 11   41874962 1448012313 8816.8
+## - avg_snwd          1   38649953 1528537228 8825.1
+## - covid_yn          1  259622598 1749509873 8905.7
+## - borough           4 1746841348 3236728623 9267.0
+## 
+## Step:  AIC=8811.01
+## borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd
+## 
+##                    Df  Sum of Sq        RSS    AIC
+## &lt;none&gt;                           1492800808 8811.0
+## - avg_snow          1    6041412 1498842220 8811.4
+## + avg_prcp          1    2913533 1489887275 8811.8
+## + avg_temp          1      96181 1492704627 8813.0
+## + inspection_month 11   40305045 1452495763 8816.7
+## - avg_snwd          1   42278134 1535078942 8825.7
+## - covid_yn          1  256710249 1749511057 8903.7
+## - borough           4 1744255398 3237056206 9265.1</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = borough_monthly_cases ~ borough + covid_yn + avg_snow + 
+##     avg_snwd, data = cases_borough_monthly)
+## 
+## Coefficients:
+##          (Intercept)       boroughBrooklyn      boroughManhattan  
+##             4591.358              -200.567               234.745  
+##        boroughQueens  boroughStaten Island             covid_yn1  
+##            -2994.362             -3855.170             -1652.726  
+##             avg_snow              avg_snwd  
+##              -47.282                -8.338</code></pre>
+<pre class="r"><code>model_linear = lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = cases_borough_monthly) 
+
+
+broom::tidy(model_linear) %&gt;% 
   knitr::kable()</code></pre>
 <table>
 <colgroup>
@@ -855,313 +1101,96 @@ broom::tidy(model_linear_original) %&gt;%
 <tbody>
 <tr class="odd">
 <td align="left">(Intercept)</td>
-<td align="right">4912.342411</td>
-<td align="right">690.948650</td>
-<td align="right">7.1095622</td>
+<td align="right">4591.358111</td>
+<td align="right">152.021884</td>
+<td align="right">30.2019550</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
-<td align="left">inspection_monthAug</td>
-<td align="right">-23.708624</td>
-<td align="right">574.662667</td>
-<td align="right">-0.0412566</td>
-<td align="right">0.9671056</td>
-</tr>
-<tr class="odd">
-<td align="left">inspection_monthDec</td>
-<td align="right">-408.948839</td>
-<td align="right">447.000465</td>
-<td align="right">-0.9148734</td>
-<td align="right">0.3606389</td>
-</tr>
-<tr class="even">
-<td align="left">inspection_monthFeb</td>
-<td align="right">-168.250123</td>
-<td align="right">465.504627</td>
-<td align="right">-0.3614360</td>
-<td align="right">0.7179054</td>
-</tr>
-<tr class="odd">
-<td align="left">inspection_monthJan</td>
-<td align="right">-1021.170949</td>
-<td align="right">530.735292</td>
-<td align="right">-1.9240683</td>
-<td align="right">0.0548359</td>
-</tr>
-<tr class="even">
-<td align="left">inspection_monthJul</td>
-<td align="right">-292.080367</td>
-<td align="right">617.836291</td>
-<td align="right">-0.4727472</td>
-<td align="right">0.6365717</td>
-</tr>
-<tr class="odd">
-<td align="left">inspection_monthJun</td>
-<td align="right">-127.480948</td>
-<td align="right">502.936261</td>
-<td align="right">-0.2534734</td>
-<td align="right">0.7999924</td>
-</tr>
-<tr class="even">
-<td align="left">inspection_monthMar</td>
-<td align="right">108.521903</td>
-<td align="right">376.831554</td>
-<td align="right">0.2879852</td>
-<td align="right">0.7734611</td>
-</tr>
-<tr class="odd">
-<td align="left">inspection_monthMay</td>
-<td align="right">-193.266177</td>
-<td align="right">395.555234</td>
-<td align="right">-0.4885947</td>
-<td align="right">0.6253137</td>
-</tr>
-<tr class="even">
-<td align="left">inspection_monthNov</td>
-<td align="right">-650.755314</td>
-<td align="right">361.284008</td>
-<td align="right">-1.8012292</td>
-<td align="right">0.0721869</td>
-</tr>
-<tr class="odd">
-<td align="left">inspection_monthOct</td>
-<td align="right">-527.194309</td>
-<td align="right">338.132663</td>
-<td align="right">-1.5591345</td>
-<td align="right">0.1195109</td>
-</tr>
-<tr class="even">
-<td align="left">inspection_monthSep</td>
-<td align="right">-343.007542</td>
-<td align="right">472.702153</td>
-<td align="right">-0.7256314</td>
-<td align="right">0.4683579</td>
-</tr>
-<tr class="odd">
 <td align="left">boroughBrooklyn</td>
-<td align="right">-198.368456</td>
-<td align="right">204.624897</td>
-<td align="right">-0.9694248</td>
-<td align="right">0.3327380</td>
+<td align="right">-200.567381</td>
+<td align="right">206.009043</td>
+<td align="right">-0.9735853</td>
+<td align="right">0.3306621</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">boroughManhattan</td>
-<td align="right">233.942665</td>
-<td align="right">203.727748</td>
-<td align="right">1.1483103</td>
-<td align="right">0.2513147</td>
+<td align="right">234.744781</td>
+<td align="right">205.536729</td>
+<td align="right">1.1421062</td>
+<td align="right">0.2538739</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">boroughQueens</td>
-<td align="right">-2998.955115</td>
-<td align="right">204.860151</td>
-<td align="right">-14.6390359</td>
+<td align="right">-2994.362259</td>
+<td align="right">206.069683</td>
+<td align="right">-14.5308238</td>
 <td align="right">0.0000000</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">boroughStaten Island</td>
-<td align="right">-3859.731482</td>
-<td align="right">204.772334</td>
-<td align="right">-18.8488914</td>
-<td align="right">0.0000000</td>
-</tr>
-<tr class="odd">
-<td align="left">covid_yn</td>
-<td align="right">-1719.833539</td>
-<td align="right">171.610234</td>
-<td align="right">-10.0217423</td>
+<td align="right">-3855.169862</td>
+<td align="right">206.046700</td>
+<td align="right">-18.7101753</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
-<td align="left">avg_prcp</td>
-<td align="right">36.227201</td>
-<td align="right">28.719671</td>
-<td align="right">1.2614072</td>
-<td align="right">0.2076701</td>
+<td align="left">covid_yn1</td>
+<td align="right">-1652.726053</td>
+<td align="right">164.218678</td>
+<td align="right">-10.0641783</td>
+<td align="right">0.0000000</td>
 </tr>
 <tr class="odd">
+<td align="left">avg_snow</td>
+<td align="right">-47.282100</td>
+<td align="right">30.624628</td>
+<td align="right">-1.5439241</td>
+<td align="right">0.1231438</td>
+</tr>
+<tr class="even">
 <td align="left">avg_snwd</td>
-<td align="right">-9.809817</td>
-<td align="right">2.585363</td>
-<td align="right">-3.7943671</td>
-<td align="right">0.0001636</td>
-</tr>
-<tr class="even">
-<td align="left">avg_tmax</td>
-<td align="right">-9.622663</td>
-<td align="right">38.201008</td>
-<td align="right">-0.2518955</td>
-<td align="right">0.8012112</td>
+<td align="right">-8.338283</td>
+<td align="right">2.041559</td>
+<td align="right">-4.0842717</td>
+<td align="right">0.0000503</td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>summary(model_linear_original)</code></pre>
-<pre><code>FALSE 
-FALSE Call:
-FALSE lm(formula = borough_monthly_cases ~ inspection_month + borough + 
-FALSE     covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly)
-FALSE 
-FALSE Residuals:
-FALSE     Min      1Q  Median      3Q     Max 
-FALSE -3616.5  -832.7  -181.4   865.6  6683.1 
-FALSE 
-FALSE Coefficients:
-FALSE                       Estimate Std. Error t value Pr(&gt;|t|)    
-FALSE (Intercept)           4912.342    690.949   7.110 3.44e-12 ***
-FALSE inspection_monthAug    -23.709    574.663  -0.041 0.967106    
-FALSE inspection_monthDec   -408.949    447.000  -0.915 0.360639    
-FALSE inspection_monthFeb   -168.250    465.505  -0.361 0.717905    
-FALSE inspection_monthJan  -1021.171    530.735  -1.924 0.054836 .  
-FALSE inspection_monthJul   -292.080    617.836  -0.473 0.636572    
-FALSE inspection_monthJun   -127.481    502.936  -0.253 0.799992    
-FALSE inspection_monthMar    108.522    376.832   0.288 0.773461    
-FALSE inspection_monthMay   -193.266    395.555  -0.489 0.625314    
-FALSE inspection_monthNov   -650.755    361.284  -1.801 0.072187 .  
-FALSE inspection_monthOct   -527.194    338.133  -1.559 0.119511    
-FALSE inspection_monthSep   -343.008    472.702  -0.726 0.468358    
-FALSE boroughBrooklyn       -198.368    204.625  -0.969 0.332738    
-FALSE boroughManhattan       233.943    203.728   1.148 0.251315    
-FALSE boroughQueens        -2998.955    204.860 -14.639  &lt; 2e-16 ***
-FALSE boroughStaten Island -3859.731    204.772 -18.849  &lt; 2e-16 ***
-FALSE covid_yn             -1719.834    171.610 -10.022  &lt; 2e-16 ***
-FALSE avg_prcp                36.227     28.720   1.261 0.207670    
-FALSE avg_snwd                -9.810      2.585  -3.794 0.000164 ***
-FALSE avg_tmax                -9.623     38.201  -0.252 0.801211    
-FALSE ---
-FALSE Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-FALSE 
-FALSE Residual standard error: 1585 on 579 degrees of freedom
-FALSE Multiple R-squared:  0.5883,  Adjusted R-squared:  0.5747 
-FALSE F-statistic: 43.54 on 19 and 579 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>#model_linear = step(model_linear_original, direction = &quot;backward&quot;)
-#broom::tidy(model_linear) %&gt;% 
-#  knitr::kable()
+<pre class="r"><code>summary(model_linear)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = borough_monthly_cases ~ borough + covid_yn + avg_snow + 
+##     avg_snwd, data = cases_borough_monthly)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -3834.0  -783.9  -226.7   932.6  6254.2 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           4591.358    152.022  30.202  &lt; 2e-16 ***
+## boroughBrooklyn       -200.567    206.009  -0.974    0.331    
+## boroughManhattan       234.745    205.537   1.142    0.254    
+## boroughQueens        -2994.362    206.070 -14.531  &lt; 2e-16 ***
+## boroughStaten Island -3855.170    206.047 -18.710  &lt; 2e-16 ***
+## covid_yn1            -1652.726    164.219 -10.064  &lt; 2e-16 ***
+## avg_snow               -47.282     30.625  -1.544    0.123    
+## avg_snwd                -8.338      2.042  -4.084 5.03e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1592 on 589 degrees of freedom
+## Multiple R-squared:  0.5771, Adjusted R-squared:  0.5721 
+## F-statistic: 114.8 on 7 and 589 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Stepwise model: borough_monthly_cases ~ borough + covid_yn + avg_snow
++ avg_snwd</p>
+<pre class="r"><code># full model with log transformation
+model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
-
-#summary(model_linear)</code></pre>
-</div>
-<div id="model-diagnostics" class="section level2">
-<h2>Model diagnostics</h2>
-<pre class="r"><code>set.seed(100)
-par(mfrow=c(2,2))
-plot(model_linear_original)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<pre class="r"><code>anova(model_linear_original)</code></pre>
-<pre><code>FALSE Analysis of Variance Table
-FALSE 
-FALSE Response: borough_monthly_cases
-FALSE                   Df     Sum Sq   Mean Sq  F value    Pr(&gt;F)    
-FALSE inspection_month  11   41484669   3771334   1.5020    0.1264    
-FALSE borough            4 1726619254 431654814 171.9096 &lt; 2.2e-16 ***
-FALSE covid_yn           1  260013862 260013862 103.5524 &lt; 2.2e-16 ***
-FALSE avg_prcp           1    6558968   6558968   2.6122    0.1066    
-FALSE avg_snwd           1   42272292  42272292  16.8352 4.662e-05 ***
-FALSE avg_tmax           1     159323    159323   0.0635    0.8012    
-FALSE Residuals        579 1453834829   2510941                       
-FALSE ---
-FALSE Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code>outlierTest(model_linear_original)</code></pre>
-<pre><code>##     rstudent unadjusted p-value Bonferroni p
-## 312 4.345301         1.6431e-05    0.0098424</code></pre>
-<pre class="r"><code>durbinWatsonTest(model_linear_original)</code></pre>
-<pre><code>##  lag Autocorrelation D-W Statistic p-value
-##    1       0.3309326      1.335503       0
-##  Alternative hypothesis: rho != 0</code></pre>
-<pre class="r"><code>vif(model_linear_original)</code></pre>
-<pre><code>##                       GVIF Df GVIF^(1/(2*Df))
-## inspection_month 34.855515 11        1.175177
-## borough           1.005925  4        1.000739
-## covid_yn          1.045793  1        1.022640
-## avg_prcp          1.202117  1        1.096411
-## avg_snwd          1.672248  1        1.293154
-## avg_tmax         26.955318  1        5.191851</code></pre>
-</div>
-<div id="logistic-regression-model" class="section level2">
-<h2>Logistic Regression Model</h2>
-<p>We set the Result variable as the binary outcome. Passed(0) means
-none was inspected.</p>
-<pre class="r"><code>rat_binary = rat %&gt;% 
-  select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %&gt;%
-  mutate(inspection_result = case_when(
-    result == &quot;Passed&quot; ~ 0, 
-    TRUE ~ 1)) %&gt;%
-  mutate(inspection_result = as.factor(inspection_result), 
-         borough = as.factor(borough),
-         covid_yn = as.factor(covid_yn),
-         inspection_month = as.factor(inspection_month), 
-         inspection_daytime = as.factor(inspection_daytime), 
-         prcp = as.numeric(prcp), 
-         snow = as.numeric(snow), 
-         snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), 
-         tmax = as.numeric(tmax)) %&gt;%
-  distinct()</code></pre>
-<pre class="r"><code>model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + tmin, data = rat_binary, family=&quot;binomial&quot;)
-
-model_logit = step(model_logit_original, direction = &quot;backward&quot;)</code></pre>
-<pre><code>## Start:  AIC=97187.13
-## inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + 
-##     prcp + snow + snwd + tmin
-## 
-##                      Df Deviance   AIC
-## - inspection_month   11    97156 97180
-## - tmin                1    97141 97185
-## - snow                1    97142 97186
-## &lt;none&gt;                     97141 97187
-## - prcp                1    97146 97190
-## - snwd                1    97155 97199
-## - inspection_daytime  2    97166 97208
-## - covid_yn            1    97183 97227
-## - borough             4    97993 98031
-## 
-## Step:  AIC=97180.32
-## inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     prcp + snow + snwd + tmin
-## 
-##                      Df Deviance   AIC
-## - tmin                1    97158 97180
-## - snow                1    97158 97180
-## &lt;none&gt;                     97156 97180
-## - prcp                1    97161 97183
-## - snwd                1    97170 97192
-## - inspection_daytime  2    97181 97201
-## - covid_yn            1    97196 97218
-## - borough             4    98007 98023
-## 
-## Step:  AIC=97179.83
-## inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     prcp + snow + snwd
-## 
-##                      Df Deviance   AIC
-## - snow                1    97159 97179
-## &lt;none&gt;                     97158 97180
-## - prcp                1    97163 97183
-## - snwd                1    97171 97191
-## - inspection_daytime  2    97182 97200
-## - covid_yn            1    97199 97219
-## - borough             4    98009 98023
-## 
-## Step:  AIC=97179.01
-## inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     prcp + snwd
-## 
-##                      Df Deviance   AIC
-## &lt;none&gt;                     97159 97179
-## - prcp                1    97165 97183
-## - snwd                1    97173 97191
-## - inspection_daytime  2    97184 97200
-## - covid_yn            1    97200 97218
-## - borough             4    98010 98022</code></pre>
-<pre class="r"><code>broom::tidy(model_logit) %&gt;% 
+broom::tidy(model_linear_full_log) %&gt;% 
   knitr::kable()</code></pre>
-<table style="width:100%;">
-<colgroup>
-<col width="37%" />
-<col width="15%" />
-<col width="14%" />
-<col width="17%" />
-<col width="14%" />
-</colgroup>
+<table>
 <thead>
 <tr class="header">
 <th align="left">term</th>
@@ -1174,108 +1203,708 @@ model_logit = step(model_logit_original, direction = &quot;backward&quot;)</code
 <tbody>
 <tr class="odd">
 <td align="left">(Intercept)</td>
-<td align="right">1.2790394</td>
-<td align="right">0.0193928</td>
-<td align="right">65.9545046</td>
+<td align="right">7.6477113</td>
+<td align="right">0.2539622</td>
+<td align="right">30.1135775</td>
 <td align="right">0.0000000</td>
 </tr>
 <tr class="even">
+<td align="left">inspection_monthAug</td>
+<td align="right">-0.3615819</td>
+<td align="right">0.2810836</td>
+<td align="right">-1.2863857</td>
+<td align="right">0.1988253</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthDec</td>
+<td align="right">0.4088321</td>
+<td align="right">0.1852923</td>
+<td align="right">2.2064177</td>
+<td align="right">0.0277486</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthFeb</td>
+<td align="right">0.7266223</td>
+<td align="right">0.2034038</td>
+<td align="right">3.5723141</td>
+<td align="right">0.0003834</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthJan</td>
+<td align="right">0.4531600</td>
+<td align="right">0.2285519</td>
+<td align="right">1.9827449</td>
+<td align="right">0.0478705</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthJul</td>
+<td align="right">-0.5593521</td>
+<td align="right">0.2981042</td>
+<td align="right">-1.8763644</td>
+<td align="right">0.0611106</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthJun</td>
+<td align="right">-0.3652389</td>
+<td align="right">0.2399847</td>
+<td align="right">-1.5219258</td>
+<td align="right">0.1285764</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthMar</td>
+<td align="right">0.6400278</td>
+<td align="right">0.1659750</td>
+<td align="right">3.8561705</td>
+<td align="right">0.0001282</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthMay</td>
+<td align="right">-0.2591338</td>
+<td align="right">0.1787011</td>
+<td align="right">-1.4500961</td>
+<td align="right">0.1475760</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthNov</td>
+<td align="right">0.1890598</td>
+<td align="right">0.1538865</td>
+<td align="right">1.2285663</td>
+<td align="right">0.2197362</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthOct</td>
+<td align="right">-0.2114703</td>
+<td align="right">0.1566743</td>
+<td align="right">-1.3497451</td>
+<td align="right">0.1776280</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthSep</td>
+<td align="right">-0.3436626</td>
+<td align="right">0.2265201</td>
+<td align="right">-1.5171400</td>
+<td align="right">0.1297800</td>
+</tr>
+<tr class="odd">
 <td align="left">boroughBrooklyn</td>
-<td align="right">-0.0051652</td>
-<td align="right">0.0234838</td>
-<td align="right">-0.2199475</td>
-<td align="right">0.8259120</td>
+<td align="right">-0.0834743</td>
+<td align="right">0.0899107</td>
+<td align="right">-0.9284128</td>
+<td align="right">0.3535823</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">boroughManhattan</td>
-<td align="right">-0.0487682</td>
-<td align="right">0.0236494</td>
-<td align="right">-2.0621370</td>
-<td align="right">0.0391947</td>
+<td align="right">0.0131220</td>
+<td align="right">0.0896925</td>
+<td align="right">0.1462998</td>
+<td align="right">0.8837359</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">boroughQueens</td>
-<td align="right">-0.2777292</td>
-<td align="right">0.0249150</td>
-<td align="right">-11.1470549</td>
+<td align="right">-1.2875829</td>
+<td align="right">0.0900731</td>
+<td align="right">-14.2948631</td>
 <td align="right">0.0000000</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">boroughStaten Island</td>
-<td align="right">-0.7026702</td>
-<td align="right">0.0276150</td>
-<td align="right">-25.4452509</td>
+<td align="right">-2.5866328</td>
+<td align="right">0.0900364</td>
+<td align="right">-28.7287423</td>
 <td align="right">0.0000000</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">covid_yn1</td>
-<td align="right">-0.1415041</td>
-<td align="right">0.0219299</td>
-<td align="right">-6.4525569</td>
+<td align="right">-1.0490882</td>
+<td align="right">0.0733406</td>
+<td align="right">-14.3043274</td>
 <td align="right">0.0000000</td>
 </tr>
-<tr class="odd">
-<td align="left">inspection_daytimeMorning</td>
-<td align="right">0.0797766</td>
-<td align="right">0.0161027</td>
-<td align="right">4.9542491</td>
-<td align="right">0.0000007</td>
-</tr>
 <tr class="even">
-<td align="left">inspection_daytimeNight</td>
-<td align="right">0.0416545</td>
-<td align="right">0.0426857</td>
-<td align="right">0.9758404</td>
-<td align="right">0.3291435</td>
+<td align="left">avg_prcp</td>
+<td align="right">0.0320634</td>
+<td align="right">0.0125731</td>
+<td align="right">2.5501635</td>
+<td align="right">0.0110250</td>
 </tr>
 <tr class="odd">
-<td align="left">prcp</td>
-<td align="right">-0.0019379</td>
-<td align="right">0.0008026</td>
-<td align="right">-2.4144076</td>
-<td align="right">0.0157608</td>
+<td align="left">avg_snow</td>
+<td align="right">-0.0204332</td>
+<td align="right">0.0153694</td>
+<td align="right">-1.3294727</td>
+<td align="right">0.1842184</td>
 </tr>
 <tr class="even">
-<td align="left">snwd</td>
-<td align="right">-0.0008454</td>
-<td align="right">0.0002263</td>
-<td align="right">-3.7364405</td>
-<td align="right">0.0001866</td>
+<td align="left">avg_snwd</td>
+<td align="right">-0.0050600</td>
+<td align="right">0.0011687</td>
+<td align="right">-4.3294482</td>
+<td align="right">0.0000176</td>
+</tr>
+<tr class="odd">
+<td align="left">avg_temp</td>
+<td align="right">0.0460598</td>
+<td align="right">0.0187748</td>
+<td align="right">2.4532764</td>
+<td align="right">0.0144514</td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>summary(model_logit)</code></pre>
+<pre class="r"><code>summary(model_linear_full_log)</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = inspection_result ~ borough + covid_yn + inspection_daytime + 
-##     prcp + snwd, family = &quot;binomial&quot;, data = rat_binary)
+## lm(formula = log(borough_monthly_cases) ~ inspection_month + 
+##     borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, 
+##     data = cases_borough_monthly)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -6.9049 -0.3207  0.0346  0.3924  1.4965 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           7.647711   0.253962  30.114  &lt; 2e-16 ***
+## inspection_monthAug  -0.361582   0.281084  -1.286 0.198825    
+## inspection_monthDec   0.408832   0.185292   2.206 0.027749 *  
+## inspection_monthFeb   0.726622   0.203404   3.572 0.000383 ***
+## inspection_monthJan   0.453160   0.228552   1.983 0.047871 *  
+## inspection_monthJul  -0.559352   0.298104  -1.876 0.061111 .  
+## inspection_monthJun  -0.365239   0.239985  -1.522 0.128576    
+## inspection_monthMar   0.640028   0.165975   3.856 0.000128 ***
+## inspection_monthMay  -0.259134   0.178701  -1.450 0.147576    
+## inspection_monthNov   0.189060   0.153887   1.229 0.219736    
+## inspection_monthOct  -0.211470   0.156674  -1.350 0.177628    
+## inspection_monthSep  -0.343663   0.226520  -1.517 0.129780    
+## boroughBrooklyn      -0.083474   0.089911  -0.928 0.353582    
+## boroughManhattan      0.013122   0.089692   0.146 0.883736    
+## boroughQueens        -1.287583   0.090073 -14.295  &lt; 2e-16 ***
+## boroughStaten Island -2.586633   0.090036 -28.729  &lt; 2e-16 ***
+## covid_yn1            -1.049088   0.073341 -14.304  &lt; 2e-16 ***
+## avg_prcp              0.032063   0.012573   2.550 0.011025 *  
+## avg_snow             -0.020433   0.015369  -1.329 0.184218    
+## avg_snwd             -0.005060   0.001169  -4.329 1.76e-05 ***
+## avg_temp              0.046060   0.018775   2.453 0.014451 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.6947 on 576 degrees of freedom
+## Multiple R-squared:  0.7284, Adjusted R-squared:  0.7189 
+## F-statistic: 77.23 on 20 and 576 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Full model with transformation: log(borough_monthly_cases) ~
+inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd +
+avg_temp</p>
+<pre class="r"><code># stepwise with AIC
+step(model_linear_full_log, direction = &quot;both&quot;)</code></pre>
+<pre><code>## Start:  AIC=-414.36
+## log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + 
+##     avg_prcp + avg_snow + avg_snwd + avg_temp
+## 
+##                    Df Sum of Sq    RSS     AIC
+## - avg_snow          1      0.85 278.82 -414.54
+## &lt;none&gt;                          277.96 -414.36
+## - avg_temp          1      2.90 280.87 -410.16
+## - avg_prcp          1      3.14 281.10 -409.66
+## - inspection_month 11     14.44 292.41 -406.12
+## - avg_snwd          1      9.05 287.01 -397.25
+## - covid_yn          1     98.74 376.70 -234.89
+## - borough           4    622.04 900.00  279.06
+## 
+## Step:  AIC=-414.54
+## log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + 
+##     avg_prcp + avg_snwd + avg_temp
+## 
+##                    Df Sum of Sq    RSS     AIC
+## &lt;none&gt;                          278.82 -414.54
+## + avg_snow          1      0.85 277.96 -414.36
+## - avg_prcp          1      2.83 281.65 -410.50
+## - avg_temp          1      3.93 282.74 -408.18
+## - inspection_month 11     14.63 293.44 -406.01
+## - avg_snwd          1      9.01 287.83 -397.54
+## - covid_yn          1     98.67 377.49 -235.65
+## - borough           4    621.21 900.02  277.07</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log(borough_monthly_cases) ~ inspection_month + 
+##     borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly)
+## 
+## Coefficients:
+##          (Intercept)   inspection_monthAug   inspection_monthDec  
+##             7.574500             -0.434376              0.415971  
+##  inspection_monthFeb   inspection_monthJan   inspection_monthJul  
+##             0.753343              0.458721             -0.633112  
+##  inspection_monthJun   inspection_monthMar   inspection_monthMay  
+##            -0.422089              0.630920             -0.289106  
+##  inspection_monthNov   inspection_monthOct   inspection_monthSep  
+##             0.191523             -0.229212             -0.392961  
+##      boroughBrooklyn      boroughManhattan         boroughQueens  
+##            -0.080494              0.014658             -1.282208  
+## boroughStaten Island             covid_yn1              avg_prcp  
+##            -2.581666             -1.048722              0.030293  
+##             avg_snwd              avg_temp  
+##            -0.005051              0.052016</code></pre>
+<pre class="r"><code>model_linear_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+
+broom::tidy(model_linear_log) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">7.5745005</td>
+<td align="right">0.2480849</td>
+<td align="right">30.5318842</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthAug</td>
+<td align="right">-0.4343765</td>
+<td align="right">0.2758823</td>
+<td align="right">-1.5744994</td>
+<td align="right">0.1159202</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthDec</td>
+<td align="right">0.4159713</td>
+<td align="right">0.1853376</td>
+<td align="right">2.2443983</td>
+<td align="right">0.0251850</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthFeb</td>
+<td align="right">0.7533430</td>
+<td align="right">0.2025429</td>
+<td align="right">3.7194235</td>
+<td align="right">0.0002192</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthJan</td>
+<td align="right">0.4587210</td>
+<td align="right">0.2286655</td>
+<td align="right">2.0060786</td>
+<td align="right">0.0453141</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthJul</td>
+<td align="right">-0.6331118</td>
+<td align="right">0.2930907</td>
+<td align="right">-2.1601225</td>
+<td align="right">0.0311743</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthJun</td>
+<td align="right">-0.4220892</td>
+<td align="right">0.2363012</td>
+<td align="right">-1.7862338</td>
+<td align="right">0.0745864</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthMar</td>
+<td align="right">0.6309198</td>
+<td align="right">0.1659438</td>
+<td align="right">3.8020096</td>
+<td align="right">0.0001588</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthMay</td>
+<td align="right">-0.2891064</td>
+<td align="right">0.1773912</td>
+<td align="right">-1.6297677</td>
+<td align="right">0.1036963</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthNov</td>
+<td align="right">0.1915228</td>
+<td align="right">0.1539777</td>
+<td align="right">1.2438347</td>
+<td align="right">0.2140655</td>
+</tr>
+<tr class="odd">
+<td align="left">inspection_monthOct</td>
+<td align="right">-0.2292118</td>
+<td align="right">0.1562087</td>
+<td align="right">-1.4673432</td>
+<td align="right">0.1428276</td>
+</tr>
+<tr class="even">
+<td align="left">inspection_monthSep</td>
+<td align="right">-0.3929611</td>
+<td align="right">0.2236129</td>
+<td align="right">-1.7573275</td>
+<td align="right">0.0793923</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughBrooklyn</td>
+<td align="right">-0.0804943</td>
+<td align="right">0.0899425</td>
+<td align="right">-0.8949529</td>
+<td align="right">0.3711855</td>
+</tr>
+<tr class="even">
+<td align="left">boroughManhattan</td>
+<td align="right">0.0146582</td>
+<td align="right">0.0897446</td>
+<td align="right">0.1633318</td>
+<td align="right">0.8703144</td>
+</tr>
+<tr class="odd">
+<td align="left">boroughQueens</td>
+<td align="right">-1.2822084</td>
+<td align="right">0.0900422</td>
+<td align="right">-14.2400861</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">boroughStaten Island</td>
+<td align="right">-2.5816659</td>
+<td align="right">0.0900187</td>
+<td align="right">-28.6792259</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">covid_yn1</td>
+<td align="right">-1.0487221</td>
+<td align="right">0.0733889</td>
+<td align="right">-14.2899364</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">avg_prcp</td>
+<td align="right">0.0302926</td>
+<td align="right">0.0125106</td>
+<td align="right">2.4213463</td>
+<td align="right">0.0157705</td>
+</tr>
+<tr class="odd">
+<td align="left">avg_snwd</td>
+<td align="right">-0.0050514</td>
+<td align="right">0.0011695</td>
+<td align="right">-4.3192825</td>
+<td align="right">0.0000184</td>
+</tr>
+<tr class="even">
+<td align="left">avg_temp</td>
+<td align="right">0.0520163</td>
+<td align="right">0.0182445</td>
+<td align="right">2.8510664</td>
+<td align="right">0.0045132</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>summary(model_linear_log)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log(borough_monthly_cases) ~ inspection_month + 
+##     borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -6.8717 -0.3149  0.0366  0.4010  1.4905 
+## 
+## Coefficients:
+##                       Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           7.574500   0.248085  30.532  &lt; 2e-16 ***
+## inspection_monthAug  -0.434376   0.275882  -1.574 0.115920    
+## inspection_monthDec   0.415971   0.185338   2.244 0.025185 *  
+## inspection_monthFeb   0.753343   0.202543   3.719 0.000219 ***
+## inspection_monthJan   0.458721   0.228666   2.006 0.045314 *  
+## inspection_monthJul  -0.633112   0.293091  -2.160 0.031174 *  
+## inspection_monthJun  -0.422089   0.236301  -1.786 0.074586 .  
+## inspection_monthMar   0.630920   0.165944   3.802 0.000159 ***
+## inspection_monthMay  -0.289106   0.177391  -1.630 0.103696    
+## inspection_monthNov   0.191523   0.153978   1.244 0.214065    
+## inspection_monthOct  -0.229212   0.156209  -1.467 0.142828    
+## inspection_monthSep  -0.392961   0.223613  -1.757 0.079392 .  
+## boroughBrooklyn      -0.080494   0.089943  -0.895 0.371185    
+## boroughManhattan      0.014658   0.089745   0.163 0.870314    
+## boroughQueens        -1.282208   0.090042 -14.240  &lt; 2e-16 ***
+## boroughStaten Island -2.581666   0.090019 -28.679  &lt; 2e-16 ***
+## covid_yn1            -1.048722   0.073389 -14.290  &lt; 2e-16 ***
+## avg_prcp              0.030293   0.012511   2.421 0.015771 *  
+## avg_snwd             -0.005051   0.001170  -4.319 1.84e-05 ***
+## avg_temp              0.052016   0.018245   2.851 0.004513 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.6951 on 577 degrees of freedom
+## Multiple R-squared:  0.7275, Adjusted R-squared:  0.7186 
+## F-statistic: 81.09 on 19 and 577 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Stepwise model with log transformation: log(borough_monthly_cases) ~
+inspection_month + borough + covid_yn + avg_prcp + avg_snwd +
+avg_temp</p>
+<div id="model-diagnostics" class="section level3">
+<h3>Model Diagnostics</h3>
+<pre class="r"><code>set.seed(100)
+par(mfrow = c(2,2))
+plot(model_linear)</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>anova(model_linear)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: borough_monthly_cases
+##            Df     Sum Sq   Mean Sq  F value    Pr(&gt;F)    
+## borough     4 1729087485 432271871 170.5573 &lt; 2.2e-16 ***
+## covid_yn    1  252595724 252595724  99.6643 &lt; 2.2e-16 ***
+## avg_snow    1   13473585  13473585   5.3161   0.02148 *  
+## avg_snwd    1   42278134  42278134  16.6813 5.033e-05 ***
+## Residuals 589 1492800808   2534467                       
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>set.seed(100)
+par(mfrow = c(2,2))
+plot(model_linear_log)</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<pre class="r"><code>anova(model_linear_log)</code></pre>
+<pre><code>## Analysis of Variance Table
+## 
+## Response: log(borough_monthly_cases)
+##                   Df Sum Sq Mean Sq  F value    Pr(&gt;F)    
+## inspection_month  11   8.46   0.769   1.5910  0.097283 .  
+## borough            4 616.80 154.200 319.1120 &lt; 2.2e-16 ***
+## covid_yn           1  91.25  91.248 188.8357 &lt; 2.2e-16 ***
+## avg_prcp           1   3.72   3.718   7.6939  0.005720 ** 
+## avg_snwd           1  20.37  20.367  42.1479 1.826e-10 ***
+## avg_temp           1   3.93   3.928   8.1286  0.004513 ** 
+## Residuals        577 278.82   0.483                       
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>outlierTest(model_linear)</code></pre>
+<pre><code>##     rstudent unadjusted p-value Bonferroni p
+## 312 3.996286         7.2521e-05     0.043295</code></pre>
+<pre class="r"><code>durbinWatsonTest(model_linear)</code></pre>
+<pre><code>##  lag Autocorrelation D-W Statistic p-value
+##    1       0.3459615      1.303431       0
+##  Alternative hypothesis: rho != 0</code></pre>
+<pre class="r"><code>performance::check_collinearity(model_linear)</code></pre>
+<pre><code>## # Check for Multicollinearity
+## 
+## Low Correlation
+## 
+##      Term  VIF       VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+##   borough 1.00 [1.00,      Inf]         1.00      1.00     [0.00, 1.00]
+##  covid_yn 1.00 [1.00,      Inf]         1.00      1.00     [0.00, 1.00]
+##  avg_snow 1.03 [1.00,     1.39]         1.02      0.97     [0.72, 1.00]
+##  avg_snwd 1.03 [1.00,     1.42]         1.02      0.97     [0.70, 1.00]</code></pre>
+<pre class="r"><code>outlierTest(model_linear_log)</code></pre>
+<pre><code>##       rstudent unadjusted p-value Bonferroni p
+## 511 -11.273391         8.9597e-27   5.3490e-24
+## 512 -10.281643         7.0283e-23   4.1959e-20
+## 516  -4.750129         2.5695e-06   1.5340e-03
+## 517  -4.614038         4.8712e-06   2.9081e-03</code></pre>
+<pre class="r"><code>durbinWatsonTest(model_linear_log)</code></pre>
+<pre><code>##  lag Autocorrelation D-W Statistic p-value
+##    1       0.3899955      1.218201       0
+##  Alternative hypothesis: rho != 0</code></pre>
+<pre class="r"><code>performance::check_collinearity(model_linear_log)</code></pre>
+<pre><code>## # Check for Multicollinearity
+## 
+## Low Correlation
+## 
+##              Term   VIF      VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+##          covid_yn  1.05 [1.01,    1.28]         1.02      0.95     [0.78, 0.99]
+##          avg_prcp  1.19 [1.10,    1.33]         1.09      0.84     [0.75, 0.91]
+##          avg_snwd  1.78 [1.60,    2.00]         1.33      0.56     [0.50, 0.62]
+##  inspection_month 38.48  [33.05, 44.82]         6.20      0.03     [0.02, 0.03]
+## 
+## High Correlation
+## 
+##      Term   VIF      VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+##   borough  1.01 [1.00, 7390.92]         1.00      0.99     [0.00, 1.00]
+##  avg_temp 29.89  [25.69, 34.81]         5.47      0.03     [0.03, 0.04]</code></pre>
+<p> </p>
+</div>
+<div id="cross-validation" class="section level3">
+<h3>Cross-validation</h3>
+<p>The final model is log(borough_monthly_cases) ~ inspection_month +
+borough + covid_yn + avg_prcp + avg_snwd + avg_temp</p>
+<p>     </p>
+</div>
+</div>
+<div id="logistic-regression-model" class="section level2">
+<h2>Logistic Regression Model</h2>
+<p>We set the Result variable as the binary outcome. Passed(0) means
+none was inspected.</p>
+<pre class="r"><code>rat_binary = rat %&gt;% 
+  select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %&gt;%
+  mutate(inspection_result = case_when(
+    result == &quot;Passed&quot; ~ 0, 
+    result == &quot;Rat Activity&quot; ~ 1)) %&gt;% 
+  drop_na(inspection_result) %&gt;%
+  mutate(inspection_result = as.factor(inspection_result), 
+         borough = as.factor(borough),
+         covid_yn = as.factor(covid_yn),
+         inspection_month = as.factor(inspection_month), 
+         inspection_daytime = as.factor(inspection_daytime)) %&gt;%
+  mutate(Average_Temperature = (tmin + tmax)/2) %&gt;% 
+  mutate(feeling = as.character(Average_Temperature)) %&gt;% 
+  mutate(feeling = case_when(
+      Average_Temperature &lt;= 0 ~ &#39;Frozen&#39;,
+      Average_Temperature &lt;= 10 ~ &#39;Cold&#39;,
+      Average_Temperature &lt;= 20 ~ &#39;Cool&#39;,
+      Average_Temperature &lt;= 30 ~ &#39;Warm&#39;,
+      Average_Temperature &lt;= 40 ~ &#39;Hot&#39;)) %&gt;% 
+  distinct()</code></pre>
+<pre class="r"><code>model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + feeling, data = rat_binary, family=&quot;binomial&quot;)
+
+model_logit = step(model_logit_original, direction = &quot;backward&quot;)</code></pre>
+<pre><code>## Start:  AIC=54235.26
+## inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + 
+##     prcp + snow + snwd + feeling
+## 
+##                      Df Deviance   AIC
+## - inspection_month   11    54187 54217
+## - feeling             4    54185 54229
+## - snow                1    54184 54234
+## - prcp                1    54184 54234
+## - covid_yn            1    54185 54235
+## &lt;none&gt;                     54183 54235
+## - snwd                1    54188 54238
+## - inspection_daytime  2    54326 54374
+## - borough             4    54969 55013
+## 
+## Step:  AIC=54217.21
+## inspection_result ~ borough + covid_yn + inspection_daytime + 
+##     prcp + snow + snwd + feeling
+## 
+##                      Df Deviance   AIC
+## - feeling             4    54189 54211
+## - snow                1    54188 54216
+## - prcp                1    54188 54216
+## - covid_yn            1    54189 54217
+## &lt;none&gt;                     54187 54217
+## - snwd                1    54191 54219
+## - inspection_daytime  2    54330 54356
+## - borough             4    54973 54995
+## 
+## Step:  AIC=54211.14
+## inspection_result ~ borough + covid_yn + inspection_daytime + 
+##     prcp + snow + snwd
+## 
+##                      Df Deviance   AIC
+## - snow                1    54190 54210
+## - prcp                1    54190 54210
+## - covid_yn            1    54190 54210
+## &lt;none&gt;                     54189 54211
+## - snwd                1    54192 54212
+## - inspection_daytime  2    54333 54351
+## - borough             4    54974 54988
+## 
+## Step:  AIC=54209.65
+## inspection_result ~ borough + covid_yn + inspection_daytime + 
+##     prcp + snwd
+## 
+##                      Df Deviance   AIC
+## - prcp                1    54191 54209
+## - covid_yn            1    54191 54209
+## &lt;none&gt;                     54190 54210
+## - snwd                1    54193 54211
+## - inspection_daytime  2    54333 54349
+## - borough             4    54975 54987
+## 
+## Step:  AIC=54208.61
+## inspection_result ~ borough + covid_yn + inspection_daytime + 
+##     snwd
+## 
+##                      Df Deviance   AIC
+## - covid_yn            1    54192 54208
+## &lt;none&gt;                     54191 54209
+## - snwd                1    54194 54210
+## - inspection_daytime  2    54334 54348
+## - borough             4    54975 54985
+## 
+## Step:  AIC=54207.92
+## inspection_result ~ borough + inspection_daytime + snwd
+## 
+##                      Df Deviance   AIC
+## &lt;none&gt;                     54192 54208
+## - snwd                1    54195 54209
+## - inspection_daytime  2    54336 54348
+## - borough             4    54979 54987</code></pre>
+<pre class="r"><code>#broom::tidy(model_logit) %&gt;% 
+#  knitr::kable()
+
+summary(model_logit_original)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = inspection_result ~ inspection_month + borough + 
+##     covid_yn + inspection_daytime + prcp + snow + snwd + feeling, 
+##     family = &quot;binomial&quot;, data = rat_binary)
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -1.7819   0.6763   0.7008   0.7357   1.1420  
+## -1.2295  -1.1735  -0.8172   1.1767   1.9513  
 ## 
 ## Coefficients:
 ##                             Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                1.2790394  0.0193928  65.955  &lt; 2e-16 ***
-## boroughBrooklyn           -0.0051652  0.0234838  -0.220 0.825912    
-## boroughManhattan          -0.0487682  0.0236494  -2.062 0.039195 *  
-## boroughQueens             -0.2777292  0.0249150 -11.147  &lt; 2e-16 ***
-## boroughStaten Island      -0.7026702  0.0276150 -25.445  &lt; 2e-16 ***
-## covid_yn1                 -0.1415041  0.0219299  -6.453 1.10e-10 ***
-## inspection_daytimeMorning  0.0797766  0.0161027   4.954 7.26e-07 ***
-## inspection_daytimeNight    0.0416545  0.0426857   0.976 0.329144    
-## prcp                      -0.0019379  0.0008026  -2.414 0.015761 *  
-## snwd                      -0.0008454  0.0002263  -3.736 0.000187 ***
+## (Intercept)                0.0613405  0.0479004   1.281    0.200    
+## inspection_monthAug       -0.0386828  0.0608935  -0.635    0.525    
+## inspection_monthDec       -0.0366460  0.0536078  -0.684    0.494    
+## inspection_monthFeb        0.0231908  0.0568979   0.408    0.684    
+## inspection_monthJan       -0.0305798  0.0576983  -0.530    0.596    
+## inspection_monthJul       -0.0084547  0.0614143  -0.138    0.891    
+## inspection_monthJun        0.0037473  0.0557761   0.067    0.946    
+## inspection_monthMar       -0.0042194  0.0513901  -0.082    0.935    
+## inspection_monthMay        0.0256107  0.0509317   0.503    0.615    
+## inspection_monthNov       -0.0368601  0.0524613  -0.703    0.482    
+## inspection_monthOct        0.0043108  0.0505127   0.085    0.932    
+## inspection_monthSep       -0.0176809  0.0551629  -0.321    0.749    
+## boroughBrooklyn           -0.0281957  0.0295032  -0.956    0.339    
+## boroughManhattan          -0.0209660  0.0296720  -0.707    0.480    
+## boroughQueens             -0.2300569  0.0315935  -7.282 3.29e-13 ***
+## boroughStaten Island      -0.9482961  0.0390044 -24.313  &lt; 2e-16 ***
+## covid_yn1                  0.0372497  0.0278365   1.338    0.181    
+## inspection_daytimeMorning -0.0015926  0.0205883  -0.077    0.938    
+## inspection_daytimeNight   -0.7604350  0.0666666 -11.407  &lt; 2e-16 ***
+## prcp                      -0.0008809  0.0010585  -0.832    0.405    
+## snow                      -0.0007876  0.0010643  -0.740    0.459    
+## snwd                      -0.0006605  0.0003167  -2.085    0.037 *  
+## feelingCool               -0.0337096  0.0363922  -0.926    0.354    
+## feelingFrozen             -0.0189549  0.0469729  -0.404    0.687    
+## feelingHot                -0.1185074  0.1340712  -0.884    0.377    
+## feelingWarm               -0.0336682  0.0509965  -0.660    0.509    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 98083  on 88587  degrees of freedom
-## Residual deviance: 97159  on 88578  degrees of freedom
-## AIC: 97179
+##     Null deviance: 55090  on 39902  degrees of freedom
+## Residual deviance: 54183  on 39877  degrees of freedom
+## AIC: 54235
 ## 
 ## Number of Fisher Scoring iterations: 4</code></pre>
+<pre class="r"><code>anova(model_logit_original)</code></pre>
+<pre><code>## Analysis of Deviance Table
+## 
+## Model: binomial, link: logit
+## 
+## Response: inspection_result
+## 
+## Terms added sequentially (first to last)
+## 
+## 
+##                    Df Deviance Resid. Df Resid. Dev
+## NULL                               39902      55090
+## inspection_month   11     3.83     39891      55087
+## borough             4   751.03     39887      54336
+## covid_yn            1     2.68     39886      54333
+## inspection_daytime  2   142.01     39884      54191
+## prcp                1     0.79     39883      54190
+## snow                1     0.78     39882      54189
+## snwd                1     4.69     39881      54185
+## feeling             4     1.43     39877      54183</code></pre>
+<pre class="r"><code>set.seed(100)
+par(mfrow=c(2,2))
+plot(model_logit)</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <pre class="r"><code>anova(model_logit)</code></pre>
 <pre><code>## Analysis of Deviance Table
 ## 
@@ -1287,33 +1916,10 @@ model_logit = step(model_logit_original, direction = &quot;backward&quot;)</code
 ## 
 ## 
 ##                    Df Deviance Resid. Df Resid. Dev
-## NULL                               88587      98083
-## borough             4   842.19     88583      97241
-## covid_yn            1    38.23     88582      97202
-## inspection_daytime  2    24.51     88580      97178
-## prcp                1     5.34     88579      97173
-## snwd                1    13.51     88578      97159</code></pre>
-<pre class="r"><code>set.seed(100)
-par(mfrow=c(2,2))
-plot(model_logit)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
-<pre class="r"><code>anova(model_logit)</code></pre>
-<pre><code>FALSE Analysis of Deviance Table
-FALSE 
-FALSE Model: binomial, link: logit
-FALSE 
-FALSE Response: inspection_result
-FALSE 
-FALSE Terms added sequentially (first to last)
-FALSE 
-FALSE 
-FALSE                    Df Deviance Resid. Df Resid. Dev
-FALSE NULL                               88587      98083
-FALSE borough             4   842.19     88583      97241
-FALSE covid_yn            1    38.23     88582      97202
-FALSE inspection_daytime  2    24.51     88580      97178
-FALSE prcp                1     5.34     88579      97173
-FALSE snwd                1    13.51     88578      97159</code></pre>
+## NULL                               39902      55090
+## borough             4   751.36     39898      54339
+## inspection_daytime  2   143.78     39896      54195
+## snwd                1     3.44     39895      54192</code></pre>
 </div>
 <div id="merge-with-covid-19" class="section level2">
 <h2>Merge with Covid-19</h2>

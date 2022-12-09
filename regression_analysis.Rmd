@@ -11,21 +11,26 @@ output:
 
 <h1><strong>REGRESSION</strong></h1>
 
-In this section, we would like to construct a linear model to, together with a logistic model to predict. These two models will be further utilized in the Shiny App for rat activity prediction.
+In this section, we are intended to construct a linear model to generate the monthly number of rats observed using a variety of potential predictors potential predictors, as well as a logistic model to predict the chance of seeing a rat. These two models will be further utilized in the Shiny App for rat activity prediction. 
+
+
 
 &nbsp;
 
 &nbsp;
 
-```{r, message = FALSE, warning = FALSE}
+```{r, include=FALSE, message = FALSE, warning = FALSE}
 library(tidyverse)
 library(readxl)
 library(car)
+library(ggplot2)
+library(GGally)
+library(rstatix)
 ```
 
 
-```{r, message = FALSE, warning = FALSE}
-# import dataset
+```{r, include = FALSE, message = FALSE, warning = FALSE}
+# import the rat dataset
 url_2012 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv"
 rat_2012 = read_csv(url(url_2012)) 
 url_2013 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2013.csv"
@@ -50,20 +55,21 @@ rat_2021 = read_csv(url(url_2021))
 
 
 ```{r, message = FALSE, warning = FALSE}
+# tidy the data
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
-   mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
-                                         inspection_month == "Feb" ~ 2,
-                                         inspection_month == "Mar" ~ 3,
-                                         inspection_month == "Apr" ~ 4,
-                                         inspection_month == "May" ~ 5,
-                                         inspection_month == "Jun" ~ 6,
-                                         inspection_month == "Jul" ~ 7,
-                                         inspection_month == "Aug" ~ 8,
-                                         inspection_month == "Sep" ~ 9,
-                                         inspection_month == "Oct" ~ 10,
-                                         inspection_month == "Nov" ~ 11,
-                                         inspection_month == "Dec" ~ 12)) %>%
+  mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
+                                        inspection_month == "Feb" ~ 2,
+                                        inspection_month == "Mar" ~ 3,
+                                        inspection_month == "Apr" ~ 4,
+                                        inspection_month == "May" ~ 5,
+                                        inspection_month == "Jun" ~ 6,
+                                        inspection_month == "Jul" ~ 7,
+                                        inspection_month == "Aug" ~ 8,
+                                        inspection_month == "Sep" ~ 9,
+                                        inspection_month == "Oct" ~ 10,
+                                        inspection_month == "Nov" ~ 11,
+                                        inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
   mutate(date = as.Date(date,format = "%Y-%m-%d")) %>% 
   mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
@@ -76,46 +82,54 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
       hour < 6 | hour >= 18 ~ "Night",
       hour >= 6 & hour < 12 ~ "Morning",
       hour >= 12 & hour < 18 ~ "Afternoon"))
-  
-#%>%  filter(result != "Passed")
-
-
 ```
 
+## Linear Regression Model
 
+### Exploratory Statistical Analyses
 
-## Exploratory Statistical Analyses
-
-```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=8}
+```{r, message=FALSE, warning=FALSE, fig.height=16, fig.width=16}
 cases = rat %>% 
-  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %>%
-  filter(result != "Passed") %>%
-  select(inspection_ym, borough) %>% 
+  select(inspection_ym, borough, inspection_month_n) %>% 
   group_by(inspection_ym, borough) %>% 
-  add_count(borough, inspection_ym, name = "borough_month_cases") %>%
+  add_count(borough, inspection_ym, name = "borough_monthly_cases") %>%
   distinct()
 
-rat_tidy = rat %>% 
-  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %>%
-  filter(result != "Passed") %>%
-  select(boro_code, borough, inspection_ym, inspection_month, inspection_month_n, prcp, snow, snwd, tmin, tmax) %>%
-  mutate(borough = as.factor(borough), inspection_month = as.factor(inspection_month), 
-         prcp = as.numeric(prcp), snow = as.numeric(snow), snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
+rat_tidy = rat %>%
+  dplyr::select(boro_code, borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
+  mutate(borough = as.factor(borough),
+         inspection_month = as.factor(inspection_month)) %>%
+  group_by(inspection_ym, borough) %>% 
+  summarise(avg_prcp = mean(prcp), 
+            avg_snow = mean(snow), 
+            avg_snwd = mean(snwd),
+            avg_tmin = mean(tmin),
+            avg_tmax = mean(tmax)) %>%
+  mutate(avg_temp = (avg_tmin + avg_tmax)/2) %>% 
+  mutate(covid_yn = case_when(inspection_ym < "2020-02" ~ 0, TRUE ~ 1)) %>% 
+  mutate(boro_code = case_when(borough == "Manhattan" ~ 1,
+                               borough == "Bronx" ~ 2,
+                               borough == "Brooklyn" ~ 1,
+                               borough == "Queens" ~ 4,
+                               borough == "Staten Island" ~ 5))
 
-cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
+cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) 
 
-
-cases_borough_month %>%
-  select(borough, inspection_month, prcp, snow, snwd, tmin, tmax) %>% 
+# correlation between key predictors
+cases_borough_monthly %>%
+  dplyr::select(borough, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn) %>% 
+  mutate(inspection_month_n = as.factor(inspection_month_n),
+         covid_yn = as.factor(covid_yn)) %>% 
   rename(
     "Borough" = borough,
-    "Month" = inspection_month,
-    "Precipitation" = prcp,
-    "Snowfall" = snow,
-    "Snow Depth" = snwd,
-    "Minimum Temperature" = tmin,
-    "Maximum Temperature" = tmax
+    "Month" = inspection_month_n,
+    "Average Precipitation" = avg_prcp,
+    "Average Snowfall" = avg_snow,
+    "Average Snow Depth" = avg_snwd,
+    "Average Tmin" = avg_tmin,
+    "Average Tmax" = avg_tmax,
+    "Average Temperature" = avg_temp,
+    "COVID" = covid_yn
   ) %>% 
   ggpairs(
     title = "Correlations Between Key Outcomes"
@@ -124,132 +138,145 @@ cases_borough_month %>%
 ```
 
 
-```{r, message=FALSE, warning=FALSE}
-cases_borough_month %>%
-  select(-inspection_ym, -borough) %>%
+```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=8}
+# correlation between predictors and outcome
+cases_borough_monthly %>% 
+  dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %>%
   rename(
     "Borough" = boro_code,
-    "Month" = inspection_month,
-    "Precipitation" = prcp,
-    "Snowfall" = snow,
-    "Snow Depth" = snwd,
-    "Minimum Temperature" = tmin,
-    "Maximum Temperature" = tmax,
-    "Borough Monthly Cases" = borough_month_cases
+    "Month" = inspection_month_n,
+    "Average Precipitation" = avg_prcp,
+    "Average Snowfall" = avg_snow,
+    "Average Snow Depth" = avg_snwd,
+    "Average Tmin" = avg_tmin,
+    "Average Tmax" = avg_tmax,
+    "Average Temperature" = avg_temp,
+    "COVID" = covid_yn
   ) %>% 
-  ggcorr(label = TRUE, hjust = 0.9, layout.exp = 2, label_size = 3, label_round = 2)
-
-
-cases_borough_month %>% 
-  select(boro_code, inspection_month_n, tmin, tmax, prcp, snow, snwd, borough_month_cases) %>%
   cor_mat() %>%
   cor_gather() %>%
-  filter(var1 %in% "borough_month_cases") %>%
-  filter(!var2 %in% "borough_month_cases") %>%
-  mutate(
-    sig_p = ifelse(p < 0.01, T, F),
-    cor_if_sig = ifelse(p < 0.01, cor, NA)
-    ) %>% 
-  ggplot(aes(
-    x = var1, 
-    y = var2, 
-    fill = cor,
-    label = round(cor_if_sig, 2))) + 
+  filter(var1 %in% "borough_monthly_cases") %>%
+  filter(!var2 %in% "borough_monthly_cases") %>%
+  ggplot(aes(x = var1, y = var2, fill = cor, label = cor)) + 
   geom_tile(color = "white") +   
-  geom_text(
-    color = "white",
-    size = 4
-  ) + 
-  scale_x_discrete(
-    labels = c("Borough Monthly cases")
-  ) + 
-  labs(
-    x = "Outcome Variable",
-    y = "Predictor Variables",
+  geom_text(color = "white",size = 4) + 
+  scale_x_discrete(labels = c("Borough Monthly cases")) + 
+  labs(x = "Outcome Variable", y = "Predictor Variables",
     title = "Correlation Matrix between Predictors and Outcome",
-    subtitle = "significant predictors at significance level 0.01",
-    fill = "Correlation"
-  )
+    fill = "Correlation")
 
-
-skimr::skim(cases_borough_month)
+# variable overview
+skimr::skim(cases_borough_monthly)
 ```
 
+&nbsp;
 
 
-## Variable selection
- 
-```{r, message = FALSE, warning = FALSE,comment = FALSE}
-cases = rat %>% 
-  select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>% 
-  group_by(inspection_ym, borough) %>% 
-  add_count(borough, inspection_ym, name = "borough_monthly_cases") %>%
-  select(-prcp, -snow, -snwd, -tmin, -tmax) %>% distinct()
+## Model Fitting
 
-# 
- rat_tidy = rat %>%
-   select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
-   mutate(borough = as.factor(borough),
-          inspection_month = as.factor(inspection_month),
-          covid_yn = as.factor(covid_yn)) %>%
-   group_by(inspection_ym, borough) %>% 
-   summarise(avg_prcp = mean(prcp), 
-             avg_snow = mean(snow), 
-             avg_snwd = mean(snwd),
-             avg_tmin = mean(tmin),
-             avg_tmax = mean(tmax)) %>%
-  mutate(avg_temp = (avg_tmin + avg_tmax)/2) %>% 
-  mutate(Feeling = as.character(avg_temp)) %>% 
-  mutate(Feeling = case_when(
-      avg_temp <= 0 ~ 'Frozen',
-      avg_temp <= 10 ~ 'Cold',
-      avg_temp <= 20 ~ 'Cool',
-      avg_temp <= 30 ~ 'Warm',
-      avg_temp <= 40 ~ 'Hot')) 
+```{r, message = FALSE, warning = FALSE}
+# full model
+cases_borough_monthly = cases_borough_monthly %>% 
+  mutate(inspection_month = month.abb[inspection_month_n],
+         covid_yn = as.factor(covid_yn))
 
 
-cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
+model_linear_full = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+broom::tidy(model_linear_full) %>% 
+  knitr::kable()
+
+summary(model_linear_full)
 ```
 
-## Linear Regression Model
+Full model: borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp
 
-```{r, message = FALSE, warning = FALSE,comment = FALSE}
-  
-model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
-broom::tidy(model_linear_original) %>% 
+
+```{r, message = FALSE, warning = FALSE}
+# stepwise with AIC (full model)
+step(model_linear_full, direction = "both")
+
+model_linear = lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = cases_borough_monthly) 
+
+
+broom::tidy(model_linear) %>% 
   knitr::kable()
-summary(model_linear_original)
-
-model_linear = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
-broom::tidy(model_linear_original) %>% 
-  knitr::kable()
-
-#broom::tidy(model_linear) %>% 
-#  knitr::kable()
-
 
 summary(model_linear)
 ```
 
-## Model diagnostics
 
-```{r, message = FALSE, warning = FALSE,comment = FALSE}
+Stepwise model: borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd
+
+
+```{r, message = FALSE, warning = FALSE}
+# full model with log transformation
+model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+broom::tidy(model_linear_full_log) %>% 
+  knitr::kable()
+
+summary(model_linear_full_log)
+```
+
+Full model with transformation: log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp
+
+
+```{r, message = FALSE, warning = FALSE}
+# stepwise with AIC
+step(model_linear_full_log, direction = "both")
+
+model_linear_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+
+broom::tidy(model_linear_log) %>% 
+  knitr::kable()
+
+summary(model_linear_log)
+```
+
+Stepwise model with log transformation: log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp
+
+
+### Model Diagnostics
+
+```{r, message = FALSE, warning = FALSE}
 set.seed(100)
-par(mfrow=c(2,2))
-plot(model_linear_original)
-anova(model_linear_original)
+par(mfrow = c(2,2))
+plot(model_linear)
+anova(model_linear)
+
+
+set.seed(100)
+par(mfrow = c(2,2))
+plot(model_linear_log)
+anova(model_linear_log)
 ```
 
 
 ```{r, message = FALSE, warning = FALSE}
+outlierTest(model_linear)
+durbinWatsonTest(model_linear)
+performance::check_collinearity(model_linear)
 
-outlierTest(model_linear_original)
-
-durbinWatsonTest(model_linear_original)
-
-vif(model_linear_original)
+outlierTest(model_linear_log)
+durbinWatsonTest(model_linear_log)
+performance::check_collinearity(model_linear_log)
 ```
 
+
+&nbsp;
+
+
+
+### Cross-validation
+
+
+The final model is log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp
+
+&nbsp;
+&nbsp;
+&nbsp;
 
 
 ## Logistic Regression Model
@@ -270,23 +297,20 @@ rat_binary = rat %>%
          inspection_month = as.factor(inspection_month), 
          inspection_daytime = as.factor(inspection_daytime)) %>%
   mutate(Average_Temperature = (tmin + tmax)/2) %>% 
-  mutate(Feeling = as.character(Average_Temperature)) %>% 
-  mutate(Feeling = case_when(
+  mutate(feeling = as.character(Average_Temperature)) %>% 
+  mutate(feeling = case_when(
       Average_Temperature <= 0 ~ 'Frozen',
       Average_Temperature <= 10 ~ 'Cold',
       Average_Temperature <= 20 ~ 'Cool',
       Average_Temperature <= 30 ~ 'Warm',
       Average_Temperature <= 40 ~ 'Hot')) %>% 
   distinct()
-
-
-
 ```
 
 
 
 ```{r, message = FALSE, warning = FALSE}
-model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + Feeling, data = rat_binary, family="binomial")
+model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + feeling, data = rat_binary, family="binomial")
 
 model_logit = step(model_logit_original, direction = "backward")
 #broom::tidy(model_logit) %>% 
@@ -297,7 +321,7 @@ anova(model_logit_original)
 ```
 
 
-```{r, message = FALSE, warning = FALSE,comment = FALSE}
+```{r, message = FALSE, warning = FALSE}
 set.seed(100)
 par(mfrow=c(2,2))
 plot(model_logit)

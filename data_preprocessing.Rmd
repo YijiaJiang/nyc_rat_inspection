@@ -14,7 +14,7 @@ output:
 
 &nbsp;
 
-In this section, we would like to introduce the data sources we used in our project, including the variable overview, and provide the procedure of data preprocessing.
+In this section, we are going to introduce the data sources we used in our project, including the variable overview, and provide the procedure of data preprocessing.
 
 &nbsp;
 
