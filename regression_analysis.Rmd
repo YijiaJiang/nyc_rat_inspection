@@ -258,7 +258,7 @@ rat_binary = rat %>%
   select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
     result == "Passed" ~ 0, 
-    result == "Rat Activity" ~ 1)) %>%
+    result == "Rat Activity" ~ 1)) %>% drop_na(inspection_result) %>%
   mutate(inspection_result = as.factor(inspection_result), 
          borough = as.factor(borough),
          covid_yn = as.factor(covid_yn),
