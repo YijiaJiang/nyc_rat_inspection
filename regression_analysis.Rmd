@@ -77,6 +77,8 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
       hour >= 12 & hour < 18 ~ "Afternoon"))
   
 #%>%  filter(result != "Passed")
+
+
 ```
 
 
@@ -181,25 +183,28 @@ cases = rat %>%
   select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>% 
   group_by(inspection_ym, borough) %>% 
   add_count(borough, inspection_ym, name = "borough_monthly_cases") %>%
-  select(-prcp, -snow, -snwd, -tmin, -tmax)
+  select(-prcp, -snow, -snwd, -tmin, -tmax) %>% distinct()
 
-
-rat_tidy = rat %>% 
-  select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
-  mutate(borough = as.factor(borough), 
-         inspection_month = as.factor(inspection_month), 
-         covid_yn = as.factor(covid_yn),
-         prcp = as.numeric(prcp), 
-         snow = as.numeric(snow), 
-         snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), 
-         tmax = as.numeric(tmax)) %>% 
-  group_by(inspection_ym, borough) %>% summarise(avg_prcp = mean(prcp),
-                                                 avg_snow = mean(snow),
-                                                 avg_snwd = mean(snwd),
-                                                 avg_tmin = mean(tmin),
-                                                 avg_tmax = mean(tmax))
-
+# 
+ rat_tidy = rat %>%
+   select(borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
+   mutate(borough = as.factor(borough),
+          inspection_month = as.factor(inspection_month),
+          covid_yn = as.factor(covid_yn)) %>%
+   group_by(inspection_ym, borough) %>% 
+   summarise(avg_prcp = mean(prcp), 
+             avg_snow = mean(snow), 
+             avg_snwd = mean(snwd),
+             avg_tmin = mean(tmin),
+             avg_tmax = mean(tmax)) %>%
+  mutate(avg_temp = (avg_tmin + avg_tmax)/2) %>% 
+  mutate(Feeling = as.character(avg_temp)) %>% 
+  mutate(Feeling = case_when(
+      avg_temp <= 0 ~ 'Frozen',
+      avg_temp <= 10 ~ 'Cold',
+      avg_temp <= 20 ~ 'Cool',
+      avg_temp <= 30 ~ 'Warm',
+      avg_temp <= 40 ~ 'Hot')) 
 
 
 cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
@@ -209,7 +214,7 @@ cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "
 
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
   
-model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
+model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + Feeling, data = cases_borough_monthly) 
 broom::tidy(model_linear_original) %>% 
   knitr::kable()
 summary(model_linear_original)
