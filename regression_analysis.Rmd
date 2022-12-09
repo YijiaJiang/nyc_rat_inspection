@@ -258,31 +258,37 @@ rat_binary = rat %>%
   select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
     result == "Passed" ~ 0, 
-    TRUE ~ 1)) %>%
+    result == "Rat Activity" ~ 1)) %>%
   mutate(inspection_result = as.factor(inspection_result), 
          borough = as.factor(borough),
          covid_yn = as.factor(covid_yn),
          inspection_month = as.factor(inspection_month), 
-         inspection_daytime = as.factor(inspection_daytime), 
-         prcp = as.numeric(prcp), 
-         snow = as.numeric(snow), 
-         snwd = as.numeric(snwd),
-         tmin = as.numeric(tmin), 
-         tmax = as.numeric(tmax)) %>%
+         inspection_daytime = as.factor(inspection_daytime)) %>%
+  mutate(Average_Temperature = (tmin + tmax)/2) %>% 
+  mutate(Feeling = as.character(Average_Temperature)) %>% 
+  mutate(Feeling = case_when(
+      Average_Temperature <= 0 ~ 'Frozen',
+      Average_Temperature <= 10 ~ 'Cold',
+      Average_Temperature <= 20 ~ 'Cool',
+      Average_Temperature <= 30 ~ 'Warm',
+      Average_Temperature <= 40 ~ 'Hot')) %>% 
   distinct()
+
+
+
 ```
 
 
 
 ```{r, message = FALSE, warning = FALSE}
-model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + tmin, data = rat_binary, family="binomial")
+model_logit_original = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + Feeling, data = rat_binary, family="binomial")
 
 model_logit = step(model_logit_original, direction = "backward")
-broom::tidy(model_logit) %>% 
-  knitr::kable()
+#broom::tidy(model_logit) %>% 
+#  knitr::kable()
 
-summary(model_logit)
-anova(model_logit)
+summary(model_logit_original)
+anova(model_logit_original)
 ```
 
 
