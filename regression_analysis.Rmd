@@ -69,6 +69,7 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
   mutate(covid_yn = case_when(date < "2020-02-29" ~ 0,
                               TRUE ~ 1)) %>%
+  mutate(covid_yn = as.factor(covid_yn)) %>%
   separate(inspection_time, into = c("hour", "minute", "second")) %>%
   mutate(hour = as.numeric(hour)) %>%
   mutate(inspection_daytime = case_when(
@@ -214,17 +215,20 @@ cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "
 
 ```{r, message = FALSE, warning = FALSE,comment = FALSE}
   
-model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + Feeling, data = cases_borough_monthly) 
+model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
 broom::tidy(model_linear_original) %>% 
   knitr::kable()
 summary(model_linear_original)
 
-#model_linear = step(model_linear_original, direction = "backward")
+model_linear = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = cases_borough_monthly) 
+broom::tidy(model_linear_original) %>% 
+  knitr::kable()
+
 #broom::tidy(model_linear) %>% 
 #  knitr::kable()
 
 
-#summary(model_linear)
+summary(model_linear)
 ```
 
 ## Model diagnostics
@@ -258,7 +262,8 @@ rat_binary = rat %>%
   select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
     result == "Passed" ~ 0, 
-    result == "Rat Activity" ~ 1)) %>% drop_na(inspection_result) %>%
+    result == "Rat Activity" ~ 1)) %>% 
+  drop_na(inspection_result) %>%
   mutate(inspection_result = as.factor(inspection_result), 
          borough = as.factor(borough),
          covid_yn = as.factor(covid_yn),
