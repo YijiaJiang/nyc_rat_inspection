@@ -1,5 +1,5 @@
 ---
-title: "Regression"
+title: "Regression Analysis"
 output: 
   html_document:
     toc: true
@@ -9,11 +9,11 @@ output:
     code_folding: hide
 ---
 
-<h1><strong>REGRESSION</strong></h1>
+<h1><strong>REGRESSION ANALYSIS</strong></h1>
 
 &nbsp;
 
-In this section, we are intended to construct a linear model to generate the monthly number of rats observed using a variety of potential predictors potential predictors, as well as a logistic model to predict the chance of seeing a rat. These two models will be further utilized in the Shiny App for rat activity prediction. 
+In this section, we are intended to construct a linear model to generate the monthly number of rats observed using a variety of potential predictors potential predictors, together with its diagnostics and validation. This regression model will be further utilized in the Shiny App for rat activity prediction. 
 
 
 
@@ -29,6 +29,9 @@ library(ggplot2)
 library(GGally)
 library(rstatix)
 library(modelr)
+library(patchwork)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
 
@@ -57,7 +60,7 @@ rat_2021 = read_csv(url(url_2021))
 ```
 
 
-```{r, message = FALSE, warning = FALSE}
+```{r, include = FALSE, message = FALSE, warning = FALSE}
 # tidy the data
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
@@ -91,7 +94,7 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
 
 ### Exploratory Statistical Analyses
 
-```{r, message=FALSE, warning=FALSE, fig.height=16, fig.width=16}
+```{r, include = FALSE, message=FALSE, warning=FALSE}
 cases = rat %>% 
   select(inspection_ym, borough, inspection_month_n) %>% 
   group_by(inspection_ym, borough) %>% 
@@ -117,7 +120,10 @@ rat_tidy = rat %>%
                                borough == "Staten Island" ~ 5))
 
 cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) 
+```
 
+
+```{r, message=FALSE, warning=FALSE, fig.height=16, fig.width=16}
 # correlation between key predictors
 cases_borough_monthly %>%
   dplyr::select(borough, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn) %>% 
@@ -274,7 +280,7 @@ performance::check_collinearity(model_linear_log)
 
 The final model is log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp
 
-```{r, message=FALSE, warning=FALSE, fig.height=6}
+```{r, message=FALSE, warning=FALSE, fig.height = 6}
 # cross-validation 
 set.seed(2022)
 
@@ -341,17 +347,12 @@ p_cv_1 / p_cv_2
 
 ```
 
-&nbsp;
-&nbsp;
-&nbsp;
 
 
+
+```{r, eval = FALSE, include=FALSE, message = FALSE, warning = FALSE}
 ## Logistic Regression Model
-
-
-We set the Result variable as the binary outcome. Passed(0) means none was inspected. 
-
-```{r, message = FALSE, warning = FALSE}
+## We set the Result variable as the binary outcome. Passed(0) means none was inspected. 
 rat_binary = rat %>% 
   dplyr::select(result, borough, inspection_month, inspection_year, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
@@ -375,23 +376,15 @@ rat_binary = rat %>%
          snow_yn = ifelse(snow == 0,0,1),
          snwd_yn = ifelse(snwd == 0,0,1)) %>% 
   mutate(across(.cols = c(prcp_yn, snow_yn, snwd_yn, feeling), as.factor)) %>% 
+  filter(inspection_year == 2021) %>% 
   distinct()
-
-
-# without covid
-rat_covid = rat_binary %>% 
-  filter(inspection_year == 2021)
-
-model_logit_2021 = glm(inspection_result ~ borough + inspection_daytime + prcp_yn + snow_yn + snwd_yn + feeling, data = rat_binary, family = "binomial")
-summary(model_logit_2021)
-step(model_logit_2021, direction = "both", k = 2)
-step()
 ```
 
 
-### Model Fitting
 
-```{r, message = FALSE, warning = FALSE}
+
+```{r, eval = FALSE, include=FALSE, message = FALSE, warning = FALSE}
+### Model Fitting
 model_logit_full = glm(inspection_result ~ borough + inspection_daytime + covid_yn + prcp_yn + snow_yn + snwd_yn + feeling, data = rat_binary, family = "binomial")
 
 broom::tidy(model_logit_full) %>% 
@@ -399,51 +392,13 @@ broom::tidy(model_logit_full) %>%
 
 summary(model_logit_full)
 ```
-```{r, message=FALSE, warning=FALSE}
-# stepwise for AIC
-step(model_logit_full, direction = "both", k = 2)
 
-model_logit = glm(inspection_result ~ borough + inspection_daytime + covid_yn + prcp_yn + snow_yn + snwd_yn + feeling, data = rat_binary, family = "binomial")
 
-broom::tidy(model_logit) %>% 
-  knitr::kable()
-
-summary(model_logit)
-
-```
-
+```{r, eval = FALSE, include=FALSE, message = FALSE, warning = FALSE}
 ### Model Diagnostics
-
-```{r, message = FALSE, warning = FALSE}
 set.seed(100)
 par(mfrow = c(2,2))
 plot(model_logit)
 anova(model_logit)
-
 ```
-## Merge with Covid-19
 
-
-```{r, message = FALSE, warning = FALSE}
-
-url_covid = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_weather_covid.csv"
-rat_covid = read_csv(url_covid)
-
-
-rat_covid = rat_covid %>%
-  mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
-                                   inspection_month == "Feb" ~ 2,
-                                   inspection_month == "Mar" ~ 3,
-                                   inspection_month == "Apr" ~ 4,
-                                   inspection_month == "May" ~ 5,
-                                   inspection_month == "Jun" ~ 6,
-                                   inspection_month == "Jul" ~ 7,
-                                   inspection_month == "Aug" ~ 8,
-                                   inspection_month == "Sep" ~ 9,
-                                   inspection_month == "Oct" ~ 10,
-                                   inspection_month == "Nov" ~ 11,
-                                   inspection_month == "Dec" ~ 12)) %>%
-  mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-"))%>%
-  mutate(date = as.Date(date,format = "%Y-%m-%d"))
-
-```
