@@ -167,9 +167,6 @@ cases_borough_monthly %>%
   labs(x = "Outcome Variable", y = "Predictor Variables",
     title = "Correlation Matrix between Predictors and Outcome",
     fill = "Correlation")
-
-# variable overview
-skimr::skim(cases_borough_monthly)
 ```
 
 &nbsp;
@@ -356,7 +353,7 @@ We set the Result variable as the binary outcome. Passed(0) means none was inspe
 
 ```{r, message = FALSE, warning = FALSE}
 rat_binary = rat %>% 
-  dplyr::select(result, borough, inspection_month, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
+  dplyr::select(result, borough, inspection_month, inspection_year, inspection_daytime, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(inspection_result = case_when(
     result == "Passed" ~ 0, 
     result == "Rat Activity" ~ 1)) %>% 
@@ -374,74 +371,45 @@ rat_binary = rat %>%
       avg_temp <= 20 ~ 'Cool',
       avg_temp <= 30 ~ 'Warm',
       avg_temp <= 40 ~ 'Hot')) %>% 
+  mutate(prcp_yn = ifelse(prcp == 0,0,1),
+         snow_yn = ifelse(snow == 0,0,1),
+         snwd_yn = ifelse(snwd == 0,0,1)) %>% 
+  mutate(across(.cols = c(prcp_yn, snow_yn, snwd_yn, feeling), as.factor)) %>% 
   distinct()
+
+
+# without covid
+rat_covid = rat_binary %>% 
+  filter(inspection_year == 2021)
+
+model_logit_2021 = glm(inspection_result ~ borough + inspection_daytime + prcp_yn + snow_yn + snwd_yn + feeling, data = rat_binary, family = "binomial")
+summary(model_logit_2021)
+step(model_logit_2021, direction = "both", k = 2)
+step()
 ```
 
-
-### Exploratory Statistical Analyses
-```{r, message = FALSE, warning = FALSE}
-# correlation between key predictors
-rat_binary %>%
-  dplyr::select(inspection_month, borough, covid_yn, inspection_daytime, prcp, snow, snwd, feeling) %>% 
-  mutate(inspection_month_n = as.factor(inspection_month_n),
-         covid_yn = as.factor(covid_yn)) %>% 
-  rename(
-    "Borough" = borough,
-    "Month" = inspection_month_n,
-    "Average Precipitation" = avg_prcp,
-    "Average Snowfall" = avg_snow,
-    "Average Snow Depth" = avg_snwd,
-    "Average Tmin" = avg_tmin,
-    "Average Tmax" = avg_tmax,
-    "Average Temperature" = avg_temp,
-    "COVID" = covid_yn
-  ) %>% 
-  ggpairs(
-    title = "Correlations Between Key Outcomes"
-  ) + 
-  scale_fill_discrete()
-
-# correlation between predictors and outcome
-cases_borough_monthly %>% 
-  dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %>%
-  rename(
-    "Borough" = boro_code,
-    "Month" = inspection_month_n,
-    "Average Precipitation" = avg_prcp,
-    "Average Snowfall" = avg_snow,
-    "Average Snow Depth" = avg_snwd,
-    "Average Tmin" = avg_tmin,
-    "Average Tmax" = avg_tmax,
-    "Average Temperature" = avg_temp,
-    "COVID" = covid_yn
-  ) %>% 
-  cor_mat() %>%
-  cor_gather() %>%
-  filter(var1 %in% "borough_monthly_cases") %>%
-  filter(!var2 %in% "borough_monthly_cases") %>%
-  ggplot(aes(x = var1, y = var2, fill = cor, label = cor)) + 
-  geom_tile(color = "white") +   
-  geom_text(color = "white",size = 4) + 
-  scale_x_discrete(labels = c("Borough Monthly cases")) + 
-  labs(x = "Outcome Variable", y = "Predictor Variables",
-    title = "Correlation Matrix between Predictors and Outcome",
-    fill = "Correlation")
-
-# variable overview
-skimr::skim(cases_borough_monthly)
-```
 
 ### Model Fitting
 
 ```{r, message = FALSE, warning = FALSE}
-model_logit_full = glm(inspection_result ~ inspection_month + borough + covid_yn + inspection_daytime + prcp + snow + snwd + feeling, data = rat_binary, family = "binomial")
+model_logit_full = glm(inspection_result ~ borough + inspection_daytime + covid_yn + prcp_yn + snow_yn + snwd_yn + feeling, data = rat_binary, family = "binomial")
 
-step(model_logit_original, direction = "backward")
+broom::tidy(model_logit_full) %>% 
+  knitr::kable()
+
+summary(model_logit_full)
+```
+```{r, message=FALSE, warning=FALSE}
+# stepwise for AIC
+step(model_logit_full, direction = "both", k = 2)
+
+model_logit = glm(inspection_result ~ borough + inspection_daytime + covid_yn + prcp_yn + snow_yn + snwd_yn + feeling, data = rat_binary, family = "binomial")
+
 broom::tidy(model_logit) %>% 
   knitr::kable()
 
-summary(model_logit_original)
-anova(model_logit_original)
+summary(model_logit)
+
 ```
 
 ### Model Diagnostics
