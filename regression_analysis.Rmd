@@ -9,6 +9,10 @@ output:
     code_folding: hide
 ---
 
+<h1><strong>REGRESSION</strong></h1>
+
+&nbsp;
+
 ```{r message = FALSE, warning = FALSE}
 library(tidyverse)
 library(readxl)
@@ -17,6 +21,7 @@ library(car)
 
 
 ```{r message = FALSE, warning = FALSE}
+# import dataset
 url_2012 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2012.csv"
 rat_2012 = read_csv(url(url_2012)) 
 url_2013 = "https://raw.githubusercontent.com/YijiaJiang/p8105_final_project_data/main/rat_2013.csv"
@@ -43,17 +48,17 @@ rat_2021 = read_csv(url(url_2021))
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
    mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
-                                   inspection_month == "Feb" ~ 2,
-                                   inspection_month == "Mar" ~ 3,
-                                   inspection_month == "Apr" ~ 4,
-                                   inspection_month == "May" ~ 5,
-                                   inspection_month == "Jun" ~ 6,
-                                   inspection_month == "Jul" ~ 7,
-                                   inspection_month == "Aug" ~ 8,
-                                   inspection_month == "Sep" ~ 9,
-                                   inspection_month == "Oct" ~ 10,
-                                   inspection_month == "Nov" ~ 11,
-                                   inspection_month == "Dec" ~ 12)) %>%
+                                         inspection_month == "Feb" ~ 2,
+                                         inspection_month == "Mar" ~ 3,
+                                         inspection_month == "Apr" ~ 4,
+                                         inspection_month == "May" ~ 5,
+                                         inspection_month == "Jun" ~ 6,
+                                         inspection_month == "Jul" ~ 7,
+                                         inspection_month == "Aug" ~ 8,
+                                         inspection_month == "Sep" ~ 9,
+                                         inspection_month == "Oct" ~ 10,
+                                         inspection_month == "Nov" ~ 11,
+                                         inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
   mutate(date = as.Date(date,format = "%Y-%m-%d")) %>% 
   mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
@@ -68,6 +73,101 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   
 #%>%  filter(result != "Passed")
 ```
+
+
+
+## Exploratory Statistical Analyses
+
+```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=8}
+cases = rat %>% 
+  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %>%
+  filter(result != "Passed") %>%
+  select(inspection_ym, borough) %>% 
+  group_by(inspection_ym, borough) %>% 
+  add_count(borough, inspection_ym, name = "borough_month_cases") %>%
+  distinct()
+
+rat_tidy = rat %>% 
+  mutate(inspection_ym = paste(inspection_year, inspection_month_n)) %>%
+  filter(result != "Passed") %>%
+  select(boro_code, borough, inspection_ym, inspection_month, inspection_month_n, prcp, snow, snwd, tmin, tmax) %>%
+  mutate(borough = as.factor(borough), inspection_month = as.factor(inspection_month), 
+         prcp = as.numeric(prcp), snow = as.numeric(snow), snwd = as.numeric(snwd),
+         tmin = as.numeric(tmin), tmax = as.numeric(tmax)) 
+
+cases_borough_month = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) %>% distinct() 
+
+
+cases_borough_month %>%
+  select(borough, inspection_month, prcp, snow, snwd, tmin, tmax) %>% 
+  rename(
+    "Borough" = borough,
+    "Month" = inspection_month,
+    "Precipitation" = prcp,
+    "Snowfall" = snow,
+    "Snow Depth" = snwd,
+    "Minimum Temperature" = tmin,
+    "Maximum Temperature" = tmax
+  ) %>% 
+  ggpairs(
+    title = "Correlations Between Key Outcomes"
+  ) + 
+  scale_fill_discrete()
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+cases_borough_month %>%
+  select(-inspection_ym, -borough) %>%
+  rename(
+    "Borough" = boro_code,
+    "Month" = inspection_month,
+    "Precipitation" = prcp,
+    "Snowfall" = snow,
+    "Snow Depth" = snwd,
+    "Minimum Temperature" = tmin,
+    "Maximum Temperature" = tmax,
+    "Borough Monthly Cases" = borough_month_cases
+  ) %>% 
+  ggcorr(label = TRUE, hjust = 0.9, layout.exp = 2, label_size = 3, label_round = 2)
+
+
+cases_borough_month %>% 
+  select(boro_code, inspection_month_n, tmin, tmax, prcp, snow, snwd, borough_month_cases) %>%
+  cor_mat() %>%
+  cor_gather() %>%
+  filter(var1 %in% "borough_month_cases") %>%
+  filter(!var2 %in% "borough_month_cases") %>%
+  mutate(
+    sig_p = ifelse(p < 0.01, T, F),
+    cor_if_sig = ifelse(p < 0.01, cor, NA)
+    ) %>% 
+  ggplot(aes(
+    x = var1, 
+    y = var2, 
+    fill = cor,
+    label = round(cor_if_sig, 2))) + 
+  geom_tile(color = "white") +   
+  geom_text(
+    color = "white",
+    size = 4
+  ) + 
+  scale_x_discrete(
+    labels = c("Borough Monthly cases")
+  ) + 
+  labs(
+    x = "Outcome Variable",
+    y = "Predictor Variables",
+    title = "Correlation Matrix between Predictors and Outcome",
+    subtitle = "significant predictors at significance level 0.01",
+    fill = "Correlation"
+  )
+
+
+skimr::skim(cases_borough_month)
+```
+
+
 
 ## Variable selection
  

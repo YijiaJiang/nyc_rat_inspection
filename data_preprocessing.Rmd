@@ -10,6 +10,9 @@ output:
 
 &nbsp;
 
+<h1><strong>DATA PREPROCESSING</strong></h1>
+
+
 In this section, we would like to introduce the data sources we used in our project and provide the procedure of data preprocessing.
 &nbsp;
 

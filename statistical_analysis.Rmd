@@ -9,6 +9,8 @@ output:
     code_folding: hide
 ---
 
+<h1><strong>HYPOTHESIS TEST</strong></h1>
+
 &nbsp;
 
 
