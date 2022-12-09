@@ -3,9 +3,12 @@ library(shinythemes)
 library(tidyverse)
 library(shinydashboard)
 library(ggplot2)
-library(dplyr)
 library(plyr)
+library(dplyr)
 library(fresh)
+library(leaflet)
+library(plotly)
+library(vroom)
 
 # Create theme
 rat_theme <- create_theme(
@@ -23,9 +26,15 @@ rat_theme <- create_theme(
   theme = c('flatly')
 )
 
+# Data 
+rat_tidy <- read_csv('./www/rat_data.csv')
+
+# # Model
+# model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
+
 # UI
 ui <- dashboardPage(
-  dashboardHeader(title = strong("NYC Rat Inspection"),
+  dashboardHeader(title = "NYC Rat Inspection",
                     tags$li(
                       class = "dropdown",
                       tags$a(href = 'https://yijiajiang.github.io/nyc_rat_inspection/index.html',
@@ -65,12 +74,23 @@ ui <- dashboardPage(
         tabName = "prediction",
         fluidRow(
           box(
-            title = "Inputs", status = "warning", width = 6,
-            selectInput("area1", "Choose area:", ''),
-            selectInput("year1", "Choose year:", '')
+            title = strong("Inputs"), status = "warning", width = 6,
+            p('According to our model, the monthly observed rat population is related to borough, month, precipitation (tenths of mm),
+              snow depth (mm), and maximum temperature. Now make your choices and input the data you interested in to explore.'),
+            selectInput("borough1", "Choose borough:", 
+                        choices = unique(rat_tidy$borough),
+                        selected = NULL
+                        ),
+            selectInput('month', "Choose month:",
+                        choices = unique(rat_tidy$inspection_month),
+                        selected = NULL),
+            numericInput("prcp", "Input precipitation (tenths of mm):", ' ', min = 0),
+            numericInput("snwd", "Input snow depth (mm)", ' ', min = 0),
+            numericInput("tmax", "Input maximum temperature", ' ', min = 0)
           ),
           box(
-            title = "The rat population will be...", status = "primary", width = 6
+            title = strong("The rat population will be..."), status = "primary", width = 6,
+            h1(strong(htmlOutput("rat_num")))
             )
         )
       ),
@@ -82,7 +102,8 @@ ui <- dashboardPage(
             selectInput("year2", "Choose year:", '')
           ),
           box(
-            title = "The rat population will be...", status = "primary", width = 9
+            title = "Interactive Map", status = "primary", width = 9,
+            leafletOutput('int_map')
           )
         )
       ),
@@ -131,171 +152,18 @@ ui <- dashboardPage(
 
 # Server
 server <- function(input, output, session) {
-  
-  # # Download sample data
-  # output$download_sample_data = downloadHandler(
-  #   filename = "sample_data.csv",
-  #   content = function(file) {
-  #     file.copy("./www/swimmer_data.csv", file)
-  #   }
-  # )
-  # 
-  # #show sample dataset
-  # output$ex_table = renderDataTable({
-  #   ex = #data.frame(
-  #     tibble(
-  #       ID = c(1, 2, 3, 3, 4, 4, 5, 5, 5, 6), 
-  #       Event = c("Disease Progression", "Disease Progression", "Dose Reduced", 
-  #                 "Consent Withdrawn", "Dose Reduced", "Disease Progression",
-  #                 "Dose Reduced", "Dose Reduced", "Study Complete", "Disease Progression"),
-  #       Event_Time = c(7.14, 8.14, 3.00, 6.71, 9.00, 99.43, 44.00, 47.00, 118.71, 7.57), 
-  #       HR = c(rep("HR Positive", 10))
-  #     )
-  #   return(ex)
-  # })
-  # 
-  # # Table display of uploaded file
-  # output$uploaded_table = renderTable({
-  #   req(input$file)
-  #   return(head(data_raw(), 30))
-  # })
-  # 
-  # #read in data
-  # data_raw = reactive({
-  #   if (is.null(input$file)) {
-  #     return(NULL)
-  #   } 
-  #   else if (file_ext(input$file$datapath) == "csv"){
-  #     read.csv(input$file$datapath, na.strings = "")
-  #   } else if (file_ext(input$file$datapath) == "xlsx" | file_ext(input$file$datapath) == "xls"){
-  #     read_excel(input$file$datapath)
-  #   }else (return(NULL))
-  # })
-  # 
-  # # Process data for plotting
-  # data_clean = reactive({
-  #   req(data_raw())
-  #   
-  #   data = data_raw()
-  #   keeps = c('id', 'outcome', 'time', 'group')
-  #   
-  #   # Set up variables
-  #   data$id = data %>% pull(input$id)
-  #   data$outcome = data %>% pull(input$outcome)
-  #   data$time = data %>% pull(input$time)
-  #   data$group = factor(data %>% pull(input$group))
-  #   
-  #   data$id = as.factor(data$id)
-  #   data$outcome = as.factor(data$outcome)
-  #   data$time = as.numeric(data$time)
-  #   data$group = as.factor(data$group)
-  #   
-  #   data=data[keeps]
-  #   # Add change from baseline variable
-  #   data %>%
-  #     
-  #     group_by(id) %>%
-  #     arrange(id, time) %>%
-  #     ungroup() %>%
-  #     mutate(id = as.factor(id)) %>%
-  #     mutate(id = fct_reorder(id, time)) %>%
-  #     as.data.frame()
-  # })
-  # 
-  # data_clean2 = reactive({
-  #   data = data_clean()
-  #   
-  #   data %>%
-  #     group_by(id) %>%
-  #     filter(time == max(time, na.rm=TRUE)) %>%
-  #     ungroup() %>%
-  #     as.data.frame()
-  # 
-  # })
-  # 
-  # 
-  # # Update event variable selector
-  # observeEvent(data_raw(), {
-  #   updateSelectInput(session, "outcome", choices = names(data_raw()), selected = "NULL")
-  # })
-  # 
-  # # Update time variable selector
-  # observeEvent(data_raw(), {
-  #   updateSelectInput(session, "time", choices = names(data_raw()), selected = "NULL")
-  # })
-  # 
-  # # Update group variable selector
-  # observeEvent(data_raw(), {
-  #   updateSelectInput(session, "group", choices = names(data_raw()), selected = "NULL")
-  # }) 
-  # 
-  # # Update ID variable selector
-  # observeEvent(data_raw(), {
-  #   updateSelectInput(session, "id", choices = names(data_raw()), selected = "NULL")
-  # }) 
-  # 
-  # # swimmer plot
-  # swimmer_plot = reactive({
-  # 
-  #   
-  #   plot = ggplot()+
-  #     #time frame
-  #     geom_col(data = data_clean2(), aes(x=fct_reorder(id, time), y=time, fill=group)) +
-  #     coord_flip() +
-  #     #event point
-  #     geom_point(data = data_clean(), aes(x=id, y=time, shape=outcome), size = input$symbolsize) +
-  #     #axis and title
-  #     labs(x = input$yaxis_label,
-  #          y = input$xaxis_label,
-  #          title = input$plot_title,
-  #          shape = " ",
-  #          color = " ") +
-  #     theme_minimal()+
-  #     theme_bw()+
-  #     #font size and background
-  #     guides(fill=guide_legend(title=" "))+
-  #     theme(panel.grid.minor = element_blank(),
-  #           panel.grid.major = element_blank(),
-  #           panel.background = element_blank(),
-  #           plot.title = element_text(hjust = 0.5, size = 16),
-  #           axis.text=element_text(size=16),
-  #           axis.title=element_text(size=16),
-  #           legend.text = element_text(size=16))
-  #   
-  #   #color scheme
-  #   if(input$color_scheme == 'def'){
-  #     plot = plot + scale_fill_manual(values=c("#1d4f91", "#FF9800", "#228848", '#AE2573', '#D14124'))
-  #   }
-  #   if(input$color_scheme == 'blue'){
-  #     plot = plot + scale_fill_manual(values=c("#163c6f", "#005c99", "#2a74d5", '#6198e0', '#9dbfec'))
-  #   }
-  #   if(input$color_scheme == 'grey'){
-  #     plot = plot + scale_fill_manual(values=c("#c3bcb7", "#a0968d", "#757575", '#5f564f', '#403a35'))
-  #   }
-  #   
-  #   #indicator variable
-  #   if(input$referenceyesno == 'Yes'){
-  #     #Reference Line
-  #     plot = plot + geom_hline(yintercept = input$reference1, show.legend = FALSE, linetype = "dashed", size=1)
-  #   }
-  #   return(plot)
-  #   
-  # })
-  # 
-  # observe({
-  #   output$swimmer_plot <- renderPlot({
-  #     swimmer_plot() }, height = input$figureheight, width = input$figurewidth)
-  # })
-  # 
-  # #download
-  # output$download = downloadHandler(
-  #   filename = function() {
-  #     paste("swimmer_plot", input$extension, sep = ".")
-  #   },
-  #   content = function(file){
-  #     ggsave(file, swimmer_plot(), width = 12, height = 8, dpi = input$dpi, device = input$extension, limitsize = FALSE)
-  #   }
-  # )
+  output$rat_num <- renderText({
+    # Model
+    model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
+    
+    req(input$prcp)
+    req(input$snwd)
+    req(input$tmax)
+    pred1 = predict(model_linear_original, 
+                    newdata = data.frame(inspection_month = input$month, borough = input$borough1, covid_yn = 0, avg_prcp = input$prcp, avg_snwd = input$snwd, avg_tmax = input$tmax))
+    return(round(as.numeric(pred1), digits = 0))
+  })
+
 }
 
 # Run the application 
