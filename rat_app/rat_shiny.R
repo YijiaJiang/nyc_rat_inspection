@@ -70,7 +70,7 @@ ui <- dashboardPage(
         hr(),
         h3(strong("Rat Population Prediction:")),
         p("Are you curious about the number of rats in NYC in the future? Can you imagine a world that human must get along well with rats in NYC? 
-               Under the tab of Rat Population Prediction, by choosing the location and year, you will get a predicted number base on our model."
+               Under the tab of Rat Population Prediction, by inputting your own value, you will get a predicted number base on our model."
         ),
         h3(strong("Interactive Map:")),
         p("Want to know how many rats live in the same area as you in the corner that you never noticed? Come to the Interactive Map and move your mouse to explore!")
