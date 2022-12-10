@@ -13,9 +13,13 @@ We appreciate your queries, if any.
 
 ### Github Link of Team Members
 
-[Jia Ji](https://github.com/jj936)
-[Yijia Jiang](https://github.com/YijiaJiang)
+[Jia Ji](https://github.com/jj936)  
+
+[Yijia Jiang](https://github.com/YijiaJiang)  
+
 [Gonghao Liu](https://github.com/lghszdnp)
+
 [Yifei Xu](https://github.com/yifeixu0306)
+
 [Ziyan Xu](https://github.com/zx2373)
 
