@@ -142,9 +142,7 @@ cases_borough_monthly %>%
     "Average Temperature" = avg_temp,
     "COVID" = covid_yn
   ) %>% 
-  ggpairs(
-    title = "Correlations Between Key Outcomes"
-  ) + 
+  ggpairs() + 
   scale_fill_discrete()
 ```
 
