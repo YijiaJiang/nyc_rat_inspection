@@ -232,7 +232,7 @@ model_linear = step(model_linear_full, direction = "both")
 
 
 We eliminated those variables that are not statistically significant using stepwise regression: 
-$borough\_monthly\_cases= \beta_0+ \beta_1(borough) + \beta_2(covid) + \beta_3(snowFall) + \beta_4(snowDepth)$
+$borough\_monthly\_cases= \beta_0+ \beta_1(borough) + \beta_2(covid) + \beta_3(avg\_snowFall) + \beta_4(avg\_snowDepth)$
 
 &nbsp;
 

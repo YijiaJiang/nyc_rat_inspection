@@ -88,7 +88,7 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
   mutate(date = as.Date(date,format = "%Y-%m-%d"))
 ```
 
-## Homogenity among Boroughs
+## Homogeneity among Boroughs
 
 &nbsp;
 
@@ -97,7 +97,7 @@ In the section of borough visualizations, we find some independence among differ
 &nbsp;
 
 
-### Chi-square testing homogenity among boroughs in recent years
+### Chi-square testing homogeneity among boroughs in recent years
 
 We decide to look at the number of inspections over years to figure out the distribution of inspections varies in different boroughs from year to year.
 
@@ -131,7 +131,7 @@ We can see from the Chi-square test above, we reject the null hypothesis at 1% s
 
 &nbsp;
 
-### Chi-square testing homogenity among boroughs in 2021
+### Chi-square testing homogeneity among boroughs in 2021
 
 Given that the distribution of inspections varies in different boroughs from year to year, we decide to look at inspections among different boroughs in 2021. 
 
@@ -172,7 +172,7 @@ In the visualization, we see some difference of rat inspections as the temperatu
 
 &nbsp;
 
-### Chi-sqaure testing association betwwen inspection density and temperature in 2021
+### Chi-sqaure testing association between inspection density and temperature in 2021
 
 $H_0$ : The distribution of inspections in different weather are same in 2021.
 
