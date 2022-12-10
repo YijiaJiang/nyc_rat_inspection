@@ -1132,13 +1132,32 @@ Additional analysis: If you undertake formal statistical analyses, describe thes
 
 ## Discussion
 
-Discussion: What were your findings? Are they what you expect? What insights into the data can you make?
+### Main Findings
 
-Based on the comprehensive analyses, we mainly found that:  
+In our exploratory analysis, we explored the patterns and characteristics of rat inspections through visualizations in both spatial and temporal dimensions and analyzed the association between inspections and some interesting covariates. 
 
-* From 2012 to 2019, the number of rat inspections presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19 in 2020.
-* Brooklyn had the largest number of rat inspections while Manhattan had the highest density of rat inspections, regardless of count per-person or per-area.
-* More rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
+When looking at the number of rat inspections in different time levels, we first found out that from 2012 to 2019, the count generally presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19 in 2020. The distribution failed to show a obvious pattern that rats preferred which month but reminded us that a nicer weather in spring might be comfortable for their urban-life. To be more specific, rat inspections concentrated at daytime due to people's working schedule and clear vision. 
+
+From the visualization by borough, it's undoubtful that Brooklyn and Manhattan were two rattiest boroughs, one is the first in the number of rat inspections, and the other is the first in the density. We also listed top 5 rat popular streets in each borough to help those feel scared of rats avoid them. But unfortunately, some of them are main road such as Broadway. Moreover, more rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
+
+The results of hypothesis test further verified our sights gained from EDA. Rat inspections among boroughs have a significantly different distribution across years. After transforming the numeric temperature to the categorical feeling variable (cold, warm, etc.), we found that the inspections are not equally distributed in different weather in 2021. Not suprisingly, the count difference before and after COVID-19 was proved significant by Wilcoxon Rank-sum test, which was consistent with EDA result.
+
+In our linear regression model, we considered that the monthly rat inspection count was a linear combination of 6 predictors. We found precipitation and average monthly temperature had a slightly positive association with our outcome while snow depth and the outbreak of COVID-19 would be negatively associated. Besides, inspection month and borough are two important categorical predictors in our final model.
+
+
+### Limitations
+
+It is estimated that 2 million rats living in New York City but no one knows exactly how many rats live here. Considering the attributes of animals and rats' flexible body, high speed of scurry and wide range of activity, it is very hard to conduct rat population census just like human beings. Therefore, we used the number of rat inspections to represent. Chances are that none of the rats were inspected during one inspection or one rat was repeatedly inspected during multiple inspections, which could introduce some biases.
+
+The weakness of multiple linear regression cannot be ignored. For instance, it will not be good at explaining the relationship of the independent variable temperature to the dependent rat inspection count since their relationship are not strictly linear. Rat prefer 30-32 degrees Celsius, but it does not represent higher the temperature, more active are the rats.
+
+
+### Next Steps
+
+Based on our comprehensive analysis, future research could focus on how to better predict the number of rat population and the rate of observing the rat given a specific condition of time, location, weather, etc. Meanwhile, we will actively seek more informative data to explore other potential covariates. We believe that it will be beneficial not only individually, but also in a broad sense, to identify potential public health issues and help build a pleasant living environment.
+
+
+
 
 
 
