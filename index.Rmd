@@ -27,7 +27,7 @@ Gaining deeper sights into the pattern of rat inspections in both the temporal a
 <center><h2><strong>Project Outline</strong></h2> </center>
 
 
-<img src="pic/outline.jpg">
+<img src="pic/outline.png">
 
 
 &nbsp;

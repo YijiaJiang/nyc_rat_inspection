@@ -12,39 +12,229 @@ output:
 
 &nbsp;
 
+
 ## Motivation
 
 
-Motivation: Provide an overview of the project goals and motivation.
+Motivation: Provide an overview of the project goals and motivation. 
+
+
+Norway rats first came to New York City in the 18th century, and as the city’s population grew, so did the rodent population. The city harbors one of the largest rat populations in the United States. In New York, rodent control is conducted by the Office of Pest Control of the Bureau of Veterinary and Pest Control Services within the Division of Environmental Health at the New York City Department of Health and Mental Hygiene (NYC DOHMH). Rodent complaints represented about 40% of the complaints directed to NYC DOHMH. T
+As part of the program’s rodent control activities, the Office of Pest Control is both a proactive and complaint-based program. 
 
 &nbsp;
 
 ## Related Work
 
-Related work: Anything that inspired you, such as a paper, a web site, or something we discussed in class.
+Our project is inspired by Related work: Anything that inspired you, such as a paper, a web site, or something we discussed in class. Program inspectors perform “rodent indexing,” which is block-by-block inspection of properties in a targeted area to look for active rodent signs, provide education, and enforce rat control measures. 
 
-&nbsp;
+* The video [Why New York Has So Many Rats](https://www.youtube.com/watch?v=6rNvxML07CU)
+
+The Rat Information Portal gives the public the facts about rats in New York.
 
 
 ## Research Questions
 
-Initial questions: What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis?
+Initial questions: What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis? 
+
+* How do the rat population 
+* Are there any 
+* Analyze climatic and geographical characteristics, and results of rat inspection
+
+Compare the number of rat inspection cases across years
+Explore the trend in the number of rat inspections throughout the years
+Evaluate the efficiency in handling rat related complaints among different agencies
+Conduct hypothesis test to compare the rat density in different boroughs and time
+Construct a linear model that predicts the rate of observing a rat from various potential covariates, including climatic and geographical factors
+ 
+The detailed information concerning our data analysis is 
+
 
 &nbsp;
 
 ## Data
 
-Data: Source, scraping method, cleaning, etc.
+### Data Sources
+
+
+#### DOHMH Rodent Inspection Data
+
+
+The [rodent inspection data](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) contains the information on rat sightings and intervention visits in NYC from 1918 to 2022, which is managed by New York City Department of Health and Mental Hygiene, Division of Environmental Health. The data source is the Veterinary, Rodent and Vector Surveillance System (VRVSS). It is also available on the [Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page), which is a web-based mapping application where users can view and map rat inspection and intervention data. Users can search results from Health Department inspections for rats at the level of individual properties, and view neighborhood maps. 
+
+What should to be mentioned is that most of the inspection is due to the complaints from the general public. Thus, if a property/taxlot does not appear in the file, which does not indicate an absence of rats - rather just that it has not been inspected. Similarly, neighborhoods with higher numbers properties with active rat signs may not actually have higher rat populations but simply have more inspections.
+
 
 &nbsp;
 
-## Exploratory Data Analysis
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#### NYC Daily Weather Data
+
+
+The [NYC daily weather data](https://www.ncei.noaa.gov/metadata/geoportal/rest/metadata/item/gov.noaa.ncdc:C00861/html) from the National Oceanic and Atmospheric Association (NOAA) of the National Centers for Environmental Information (NCEI), consists of the NYC daily climate observations from the Central Park station (id: USW00094728), which is integrated by the GHCN (Global Historical Climatology Network)-Daily database. The data is also available to be retrieved using R functions from the `rnoaa` package. 
+
+Global Historical Climate Network includes daily land surface observations from over 100,000 stations in 180 countries and territories. The GHCN-Daily was developed to meet the needs of climate analysis and monitoring studies that require data at a sub-monthly time resolution (e.g., assessments of the frequency of heavy rainfall, heat wave duration, etc.). NCEI provides numerous daily variables, including maximum and minimum temperature, total daily precipitation, snowfall, and snow depth; however, about one half of the stations report precipitation only. Both the record length and period of record vary by station and cover intervals ranging from less than a year to more than 175 years. 
+
+
+&nbsp;
+
+
+#### NYC COVID-19 Daily Case Count Data
+
+
+The [NYC COVID-19 daily case count data](https://data.cityofnewyork.us/Health/COVID-19-Daily-Counts-of-Cases-Hospitalizations-an/rc75-m7u3), provided by New York City Department of Health and Mental Hygiene (DOHMH), represents citywide and borough-specific daily counts of COVID-19 confirmed cases and COVID-related hospitalizations and confirmed and probable deaths among New York City residents. The case counts are aggregated by date of diagnosis (i.e., date of specimen collection), and the hospitalization cases areaggregated by date of admission, and death cases are aggregated by date of death. 
+
+Data collection is since February 29, 2020, which is the date that the Health Department classifies as the start of the COVID-19 outbreak in NYC as it was the date of the first laboratory-confirmed COVID-19 case. Data on confirmed cases were passively reported to the NYC Health Department by hospital, commercial, and public health laboratories. In March, April, and early May, the NYC Health Department had discouraged people with mild and moderate symptoms from being tested, so our data primarily represent people with more severe illness. Until mid-May, patients with more severe COVID-19 illness were more likely to have been tested and included in these data. Data on hospitalizations for confirmed COVID-19 cases were obtained from direct remote access to electronic health record systems, regional health information organization (RHIOs), and NYC Health and Hospital information, as well as matching to syndromic surveillance. Deaths were confirmed by the New York City Office of the Chief Medical Examiner and the Health Department’s Bureau of Vital Statistics. Data counts are underestimates. This dataset has been available to the public since May 19, 2020, and is updated on a daily basis.
+
+These data can be used to:  
+
+* Identify temporal trends in the number of persons diagnosed with COVID-19, citywide and by borough.
+* Identify temporal trends in the numbers of COVID-19-related hospitalizations and deaths, citywide and by borough.
+
+&nbsp;
+
+
+#### NYC Borough Population Data
+
+
+The [NYC borough population data](http://www.citypopulation.de/en/usa/newyorkcity/), provided by City Population, consists of the population of the boroughs of New York City according to the U.S. Census Bureau results. Additional information about the population structure including gender, age groups, age distribution, race, ethnicity can be also found.
+
+
+&nbsp;
+
+&nbsp;
+
+### Data Cleaning
+
+
+Due to the large size of our final project datasets, another [repository](https://github.com/YijiaJiang/p8105_final_project_data) is created for storing tidied data. The codes below describes the steps we took to collate and merge dataset we used in the following exploratory and statistical analysis. Moreover, the detailed data preprocessing procedures can be find [here](https://github.com/YijiaJiang/p8105_final_project_data/blob/main/data_preprocessing_rat.Rmd). 
+
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(RSocrata)
+library(rnoaa)
 ```
 
+```{r, eval = FALSE}
+# deal with rat inspection data
+url_rat = "https://data.cityofnewyork.us/OData.svc/p937-wjvj"
+rat = read.socrata(url_rat) %>% 
+  janitor::clean_names()
+
+rat_tidy = rat %>%
+  select(inspection_type, bbl, zip_code, street_name, latitude, longitude, borough, result, inspection_date, approved_date) %>%
+  drop_na() %>% 
+  mutate(boro_code = substr(bbl, 1, 1),
+         block = substr(bbl, 2, 6),
+         lot = substr(bbl, 7, 10)) %>% 
+  select(inspection_type, boro_code, block, lot, zip_code, street_name, latitude, longitude, borough, result, inspection_date, approved_date) %>% 
+  separate(inspection_date, c("inspection_date", "inspection_time"), " ") %>% 
+  separate(inspection_date, c("inspection_year", "inspection_month", "inspection_day"), "-") %>%
+  separate(approved_date, c("approved_date", "approved_time"), " ") %>% 
+  separate(approved_date, c("approved_year", "approved_month", "approved_day"), "-") %>%
+  mutate(inspection_year = as.integer(inspection_year), 
+         inspection_month = as.integer(inspection_month), 
+         inspection_day = as.integer(inspection_day)) %>%
+  mutate(approved_year = as.integer(approved_year), 
+         approved_month = as.integer(approved_month), 
+         approved_day = as.integer(approved_day)) %>%
+  relocate(inspection_year, .before = "inspection_month") %>% 
+  relocate(approved_year, .before = "approved_month") %>%
+  arrange(inspection_year, inspection_month) %>% 
+  mutate(inspection_month = month.abb[inspection_month],
+         approved_month = month.abb[approved_month]) %>% 
+  filter(inspection_year >= 2012 & inspection_year <= 2021)
+
+
+# deal with weather data
+nycstationsid = ghcnd_stations() %>% 
+  filter(id == "USW00094728") %>% 
+  distinct(id)
+
+nyc_weather = meteo_pull_monitors(nycstationsid$id, 
+                             date_min = "2012-01-01", 
+                             date_max = "2021-12-31",
+                             var = c("PRCP", "SNOW", "SNWD", "TMAX", "TMIN"))
+
+nyc_weather_tidy = nyc_weather %>% 
+  janitor::clean_names() %>%
+  separate(date, into = c("year", "month", "day")) %>% 
+  mutate(year = as.numeric(year),
+         month = month.abb[as.numeric(month)],
+         day = as.numeric(day)) %>%
+  mutate(prcp = prcp/10,
+         tmax = tmax/10,
+         tmin = tmin/10) 
+
+
+# deal with covid data
+url_covid = "https://data.cityofnewyork.us/OData.svc/rc75-m7u3"
+covid = read.socrata(url_covid) %>% 
+  janitor::clean_names() 
+
+covid_tidy = covid %>%
+  rename(date = date_of_interest) %>% 
+  select(date, contains("case_count")) %>% 
+  select(-contains(c("probable_case_count", "case_count_7day_avg", "all_case_count_7day_avg"))) %>%
+  separate(date, into = c("year", "month", "day")) %>% 
+  mutate(year = as.numeric(year),
+         month = month.abb[as.numeric(month)],
+         day = as.numeric(day)) %>%
+  pivot_longer(
+    cols = bx_case_count:si_case_count,
+    names_to = "borough",
+    values_to = "borough_case_count"
+  ) %>% 
+  mutate(borough = gsub("_case_count", "", borough)) %>% 
+  mutate(borough = dplyr::recode(borough, "bx" = "Bronx","bk" = "Brooklyn","mn" = "Manhattan","si" = "Staten Island","qn" = "Queens")) %>% 
+  relocate(case_count, .after = borough_case_count) %>% 
+  rename(total_case_count = case_count) 
+
+
+# merge the above dataframe with covid info.
+rat_weather_covid = rat_tidy %>% 
+  filter(inspection_year %in% c(2020,2021)) %>% 
+  merge(nyc_weather_tidy, by.x = c("inspection_year","inspection_month","inspection_day"), by.y = c("year","month","day")) %>% 
+  select(-id) %>% 
+  merge(covid_tidy, by.x = c("inspection_year","inspection_month","inspection_day","borough"), by.y = c("year","month","day","borough"))
+```
+
+&nbsp;
+
+After cleaning the datasets mentioned above, our tidied and aggregated data has a total of 1,679,675 rows, one for each rat inspection record, and is the basis of our exploratory and statistical analysis. Altogether 24 variables are selected as meaningful and valuable. The specific variable names and their corresponding explanation are listed below:
+
+* `inspection_year`: year of the inspection
+* `inspection_month`: month of the inspection 
+* `inspection_day`: day of the inspection
+* `boro_code`: code assigned to the NYC borough
+* `block`: block number for the inspected taxlot; block numbers repeat in different boroughs
+* `lot`: lot number for the inspected taxlot (Notes: lot numbers can repeat in different blocks)
+* `zip_code`: postal zipcode of the taxlot that was inspected
+* `street_name`:
+* `latitude`: latitude in decimal degrees of the inspected taxlot (WGS 1984)
+* `longitude`: longitude in decimal degrees of the inspected taxlot (WGS 1984)
+* `borough`: name of the NYC borough
+* `result`: result of the inspection including Active Rat Signs (ARS) and Problem Conditions
+* `inspection_time`: time of the inspection.
+* `approved_year`: year of the inspection approved by supervisor at DOHMH
+* `approved_month`: month of the inspection approved by supervisor at DOHMH
+* `approved_day`: day of the inspection approved by supervisor at DOHMH
+* `approved_time`: time of the inspection approved by supervisor at DOHMH
+* `prcp`: precipitation (mm)
+* `snow`: snowfall (mm)
+* `snwd`: snow depth (mm)
+* `tmax`: maximum temperature (&deg;C)
+* `tmin`: minimum temperature (&deg;C)
+* `borough_case_count`: count of patients tested who were confirmed to be COVID-19 cases on date_of_interest in borough_of_interest
+* `total_case_count`: total count of patients tested who were confirmed to be COVID-19 cases on date_of_interest in NYC
+
+&nbsp;
+
+### Exploratory Data Analysis
+
 ```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(plotly)
 library(highcharter)
@@ -139,7 +329,7 @@ In this section, we would like to explore the pattern and characteristics of rat
 
 &nbsp;
 
-## Time Visualizations
+### Time Visualizations
 
 &nbsp;
 
@@ -147,7 +337,7 @@ In order to obtain in-depth sights of the rat inspections across time, we used f
 
 &nbsp;
 
-### Overall Rat Inspections Across Time 
+#### Overall Rat Inspections Across Time 
 
 First, a time series plot was used to illustrate data points at successive intervals of time. From 2012, the number of rat inspections continually presented a increasing trend and reached its peak in 2018. After 2020, it appeared a sharp decrease as the outbreak of COVID-19.
 
@@ -168,7 +358,7 @@ hchart(time_series, name = "Rat Inspections") %>%
 
 &nbsp;
 
-### Rat Inspections by Year
+#### Rat Inspections by Year
 
 To be more specific, we compared the rat inspections year by year. The number was roughly around 150,000 in 2012-2016. There was a surge of rat inspections in 2017 which had 247,985 cases. After staying at the peak in 2018-2019, the number of inspections rapidly dropped to 71,770 in 2020. Whether this drop was associated with COVID-19 will be analyzed in the following section.
 
@@ -187,7 +377,7 @@ rat %>%
 
 &nbsp;
 
-### Rat Inspections by Month
+#### Rat Inspections by Month
 
 The average number of rat inspections was 13,997. We plotted the number of inspections every months across years and found that rats were more likely to be inspected in spring compared to winter. This might be due to the nicer weather in spring, suitable for rats to wander outside.
 
@@ -210,14 +400,14 @@ rat %>%
 
 &nbsp;
 
-### Rat Inspections Througout a Day {.tabset}
+#### Rat Inspections Througout a Day {.tabset}
 
 Most rat inspections happened at daytime regardless of the month, concentrated at 9am-12pm. Contradicted with the common sense that rats prefer nightlife, this finding would be corresponding to inspectors' daily schedule. Additionally, there are a few explanations for observing rat during daylight hours:  
 
 *  The infestation is large  
 *  The older/sub-dominant rats cannot compete with dominant rats for food during the safer night time period
 
-#### Inspection
+##### Inspection
 ```{r, message=FALSE, warning=FALSE}
 rat_2021 %>%
   mutate(inspection_day = as.factor(inspection_day)) %>%
@@ -244,7 +434,7 @@ rat_2021 %>%
 
 &nbsp;
 
-#### Observed
+##### Observed
 ```{r, message=FALSE, warning=FALSE}
 rat_2021 %>%
   filter(!result == "Passed") %>%
@@ -272,7 +462,7 @@ rat_2021 %>%
 
 &nbsp;
 
-## Borough Visualizations
+### Borough Visualizations
 
 &nbsp;
 
@@ -280,7 +470,7 @@ We explored the demographic characteristics of the rat inspections to find wheth
 
 &nbsp;
 
-### Overall Rat Inspections by Borough
+#### Overall Rat Inspections by Borough
 
 First, let’s look at the overall rat inspections in each borough across years. Brooklyn, Bronx and Manhattan always ranked top 3 most rat inspections while Queens and Staten Island had quite fewer inspections. 
 
@@ -302,7 +492,7 @@ rat %>%
 
 &nbsp;
 
-### Rat Inspections VS. Population
+#### Rat Inspections VS. Population
 
 It's not sufficient and solid to only go through the number of rat inspections in each borough without considering their populations and land area. Therefore, we combined these factors in certain borough to evaluate the rat density.  
 
@@ -399,11 +589,11 @@ p_density_p + p_density_a
 
 &nbsp;
 
-### Rat Inspections by Month in Each Borough {.tabset}
+#### Rat Inspections by Month in Each Borough {.tabset}
 
 In order to obtain more demographic information, we analyzed the rat inspections stratified by borough and month. Generally, for all five boroughs, more rats were inspected in late spring and summer in 2021, especially in July and August. Individually, Bronx, Brooklyn and Manhattan were above the borough average level while Queens and Staten Island were significantly below the average, which was consistent with our previous findings.
 
-#### Bronx
+##### Bronx
 ```{r, message=FALSE, warning=FALSE}
 avg_2021 = rat %>%
   filter(inspection_year == 2021) %>%
@@ -439,7 +629,7 @@ rat %>%
 
 &nbsp;
 
-#### Brooklyn
+##### Brooklyn
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Brooklyn") %>%
@@ -467,7 +657,7 @@ rat %>%
 
 &nbsp;
 
-#### Manhattan
+##### Manhattan
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Manhattan") %>%
@@ -495,7 +685,7 @@ rat %>%
 
 &nbsp;
 
-#### Queens
+##### Queens
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Queens") %>%
@@ -523,7 +713,7 @@ rat %>%
 
 &nbsp;
 
-#### Staten Island
+##### Staten Island
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Staten Island") %>%
@@ -551,7 +741,7 @@ rat %>%
 
 &nbsp;
 
-### Overall Top 15 Rat Popular Streets
+#### Overall Top 15 Rat Popular Streets
 
 To be more detailed, we investigated the fifteen streets with most rat inspections in New York City. Among them, Greene Avenue, Brooklyn with 1366 cases, Broadway, Manhattan with 1154 cases and Hart Street, Brooklyn with 1118 cases ranked the top 3.  
 
@@ -576,11 +766,11 @@ rat %>%
 
 &nbsp;
 
-### Top 5 Rat Popular Streets {.tabset}
+#### Top 5 Rat Popular Streets {.tabset}
 
 Below are the five streets with most rat inspections in each borough, respectively.
 
-#### Bronx
+##### Bronx
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -602,7 +792,7 @@ rat %>%
 
 &nbsp;
 
-#### Brooklyn
+##### Brooklyn
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -624,7 +814,7 @@ rat %>%
 
 &nbsp;
 
-#### Manhattan
+##### Manhattan
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -646,7 +836,7 @@ rat %>%
 
 &nbsp;
 
-#### Queens
+##### Queens
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -668,7 +858,7 @@ rat %>%
 
 &nbsp;
 
-#### Staten Island
+##### Staten Island
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -690,7 +880,7 @@ rat %>%
 
 &nbsp;
 
-## Inspection Types and Results
+### Inspection Types and Results
 
 &nbsp;
 
@@ -698,7 +888,7 @@ Inspection type and result were two important attributes, which reflect the moti
 
 &nbsp;
 
-### Inspection Types
+#### Inspection Types
 
 We can easily observed that initial inspection was the most frequent inspection, accounted for 70.3%. It represents inspection conducted in response to a 311 complaint, or a proactive inspection conducted through our neighborhood indexing program. Baiting and compliance (follow-up) inspection followed. It's very rare to see clean-up and stoppage in the inspection process.
 
@@ -733,7 +923,7 @@ rat %>%
 
 &nbsp;
 
-### Inspection Results
+#### Inspection Results
 
 The result of passed had the largest proportion, accounting for 61.6%. Even though in such circumstances, inspector recieved the rat complains but did not observe active signs of rat and mouse activity, or conditions conducive to rodent activity, on the property, we cannot say there was no rats due to their high speed of scurry and wide range of activity. Particularly, 13.6% of results were rat activity. We would like to mention here that active rat signs include any of six different signs below:  
 
@@ -769,7 +959,7 @@ rat %>%
 
 &nbsp;
 
-## Weather and COVID-19
+### Weather and COVID-19
 
 &nbsp;
 
@@ -778,11 +968,11 @@ In March 2020, countries around the world including the U.S. deployed various me
 
 &nbsp;
 
-### Weather {.tabset}
+#### Weather {.tabset}
 
 Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the pattern was not that obvious and the temperatures were almost above 0 degree Celsius in 2021. We could not immediately determine whether rats seldom wandered outside when the temperatures were extremely low. 
 
-#### Inspection
+##### Inspection
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n = rat %>%
@@ -815,7 +1005,7 @@ ggplotly(p_weather)
 
 &nbsp;
 
-#### Observed
+##### Observed
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n_o = rat %>%
@@ -849,7 +1039,7 @@ ggplotly(p_weather_o)
 
 &nbsp;
 
-### COVID-19
+#### COVID-19
 
 Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000 per month. In April 2021, only 4 cases of rat inspections were recorded.
 
@@ -907,7 +1097,7 @@ ggplotly(p_covid)
 
 &nbsp;
 
-## Summaries
+#### Summaries
 
 Based on the comprehensive analyses, we mainly found that:  
 
