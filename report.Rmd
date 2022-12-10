@@ -1107,7 +1107,9 @@ ggplotly(p_covid)
 
 ## Statistical Analysis
 
-### Homogenity among Boroughs
+### Hypothesis Test 
+
+#### Homogenity among Boroughs
 
 &nbsp;
 
@@ -1116,7 +1118,7 @@ In the section of borough visualizations, we find some indepence among different
 &nbsp;
 
 
-#### Chi-square testing homogenity among boroughs in recent years
+##### Chi-square testing homogenity among boroughs in recent years
 
 We decide to look at the number of inspections over years to figure out the distribution of inspections varies in different boroughs from year to year.
 
@@ -1150,7 +1152,7 @@ We can see from the Chi-square test above, we reject the null hypothesis at 1% s
 
 &nbsp;
 
-#### Chi-square testing homogenity among boroughs in 2021
+##### Chi-square testing homogenity among boroughs in 2021
 
 Given that the distribution of inspections varies in different boroughs from year to year, we decide to look at inspections among different boroughs in 2021. 
 
@@ -1183,7 +1185,7 @@ We can see from the chi-square test result we should reject the null hypothesis,
 
 &nbsp;
 
-### Association with Weather and COVID-19
+#### Association with Weather and COVID-19
 
 &nbsp;
 
@@ -1191,7 +1193,7 @@ In the visualization, we see some difference of rat inspections as the temperatu
 
 &nbsp;
 
-#### Chi-sqaure testing association betwwen inspection density and temperature in 2021
+##### Chi-sqaure testing association betwwen inspection density and temperature in 2021
 
 $H_0$ : The distribution of inspections in different weather are same in 2021.
 
@@ -1237,7 +1239,7 @@ We can see from the chi-square test result we should reject the null hypothesis,
 
 &nbsp;
 
-#### Wilcoxon Rank-sum testing changes of inspection density caused by COVID-19
+##### Wilcoxon Rank-sum testing changes of inspection density caused by COVID-19
 
 For the rodent inspection across time, we compared mean difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
 
@@ -1273,6 +1275,318 @@ We can see from the Wilcoxon Rank-sum test result that the true location shift i
 
 &nbsp;
 
+### Regression Analysis
+
+```{r, include=FALSE, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(readxl)
+library(car)
+library(ggplot2)
+library(GGally)
+library(rstatix)
+library(modelr)
+library(patchwork)
+library(see)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+
+#### Exploratory Statistical Analyses
+
+Before constructing the model, we performed the correlational analysis to identify relevant variables and their impacts. 
+
+```{r, include = FALSE, message=FALSE, warning=FALSE}
+rat_reg = rat %>%
+  mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
+  mutate(covid_yn = case_when(date < "2020-02-29" ~ 0,
+                              TRUE ~ 1)) %>%
+  mutate(covid_yn = as.factor(covid_yn)) %>%
+  separate(inspection_time, into = c("hour", "minute", "second")) %>%
+  mutate(hour = as.numeric(hour)) %>%
+  mutate(inspection_daytime = case_when(
+      hour < 6 | hour >= 18 ~ "Night",
+      hour >= 6 & hour < 12 ~ "Morning",
+      hour >= 12 & hour < 18 ~ "Afternoon"))
+
+cases = rat_reg %>% 
+  select(inspection_ym, borough, inspection_month_n) %>% 
+  group_by(inspection_ym, borough) %>% 
+  add_count(borough, inspection_ym, name = "borough_monthly_cases") %>%
+  distinct()
+
+rat_tidy = rat_reg %>%
+  dplyr::select(boro_code, borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
+  mutate(borough = as.factor(borough),
+         inspection_month = as.factor(inspection_month)) %>%
+  group_by(inspection_ym, borough) %>% 
+  summarise(avg_prcp = mean(prcp), 
+            avg_snow = mean(snow), 
+            avg_snwd = mean(snwd),
+            avg_tmin = mean(tmin),
+            avg_tmax = mean(tmax)) %>%
+  mutate(avg_temp = (avg_tmin + avg_tmax)/2) %>% 
+  mutate(covid_yn = case_when(inspection_ym < "2020-02" ~ 0, TRUE ~ 1)) %>% 
+  mutate(boro_code = case_when(borough == "Manhattan" ~ 1,
+                               borough == "Bronx" ~ 2,
+                               borough == "Brooklyn" ~ 1,
+                               borough == "Queens" ~ 4,
+                               borough == "Staten Island" ~ 5))
+
+cases_borough_monthly = merge(x = rat_tidy, y = cases, by = c("inspection_ym", "borough")) 
+```
+
+
+
+```{r, message=FALSE, warning=FALSE, fig.height=16, fig.width=16}
+# correlation between key predictors
+cases_borough_monthly %>%
+  dplyr::select(borough, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn) %>% 
+  mutate(inspection_month_n = as.factor(inspection_month_n),
+         covid_yn = as.factor(covid_yn)) %>% 
+  rename(
+    "Borough" = borough,
+    "Month" = inspection_month_n,
+    "Average Precipitation" = avg_prcp,
+    "Average Snowfall" = avg_snow,
+    "Average Snow Depth" = avg_snwd,
+    "Average Tmin" = avg_tmin,
+    "Average Tmax" = avg_tmax,
+    "Average Temperature" = avg_temp,
+    "COVID" = covid_yn
+  ) %>% 
+  ggpairs() + 
+  scale_fill_discrete()
+```
+
+Through the correlation analysis between key predictors, the result above shown that the daily average temperature, the highest temperature, and the lowest temperature are highly correlated between each other.
+
+&nbsp;
+
+```{r, message=FALSE, warning=FALSE, fig.height=6, fig.width=6}
+# correlation between predictors and outcome
+cases_borough_monthly %>% 
+  dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %>%
+  rename(
+    "Borough" = boro_code,
+    "Month" = inspection_month_n,
+    "Average Precipitation" = avg_prcp,
+    "Average Snowfall" = avg_snow,
+    "Average Snow Depth" = avg_snwd,
+    "Average Tmin" = avg_tmin,
+    "Average Tmax" = avg_tmax,
+    "Average Temperature" = avg_temp,
+    "COVID" = covid_yn
+  ) %>% 
+  cor_mat() %>%
+  cor_gather() %>%
+  filter(var1 %in% "borough_monthly_cases") %>%
+  filter(!var2 %in% "borough_monthly_cases") %>%
+  ggplot(aes(x = var1, y = var2, fill = cor, label = cor)) + 
+  geom_tile(color = "white") +   
+  geom_text(color = "white",size = 4) + 
+  scale_x_discrete(labels = c("Borough Monthly cases")) + 
+  labs(x = "Outcome Variable", y = "Predictor Variables",
+       fill = "Correlation")
+```
+
+
+Through the correlation analysis between predictors and outcome, the result above shown that the borough was comparatively related to the outcome.
+
+&nbsp;
+
+&nbsp;
+
+
+#### Model Selection
+
+##### Full Model
+```{r, message = FALSE, warning = FALSE}
+# full model
+cases_borough_monthly = cases_borough_monthly %>% 
+  mutate(inspection_month = month.abb[inspection_month_n],
+         covid_yn = as.factor(covid_yn))
+
+
+model_linear_full = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+broom::tidy(model_linear_full) %>% 
+   knitr::kable()
+
+#summary(model_linear_full)
+```
+
+The full multiple linear regression model we constructed is 
+
+$borough\_monthly\_cases= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton) + \\\beta_5(avg\_snowFall) + \beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)$.   
+
+The result shown that the p-value of `inspectionMonth`, `avg_precipitaiton`, `avg_snowFall`, and `avg_temperature` were greater than 0.05, which had to be analyzed by stepwise regression method.
+
+&nbsp;
+
+&nbsp;
+
+##### Stepwise Selection in Full Model
+
+```{r, message = FALSE, warning = FALSE}
+# stepwise with AIC (full model)
+model_linear = step(model_linear_full, direction = "both")
+
+#model_linear = lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = cases_borough_monthly) 
+
+ 
+ broom::tidy(model_linear) %>% 
+   knitr::kable()
+
+#summary(model_linear)
+```
+
+
+We eliminated those variables that are not statistically significant using stepwise regression: 
+$borough\_monthly\_cases= \beta_0+ \beta_1(borough) + \beta_2(covid) + \beta_3(snowFall) + \beta_4(snowDepth)$
+
+&nbsp;
+
+&nbsp;
+
+##### Full Model with Log Transformation
+
+```{r, message = FALSE, warning = FALSE}
+# full model with log transformation
+model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+ broom::tidy(model_linear_full_log) %>% 
+   knitr::kable()
+
+#summary(model_linear_full_log)
+```
+
+Log transformation was applied to our model to improve validity, additivity, and linearity:
+$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton) + \\\beta_5(avg\_snowFall) + \beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)$
+
+&nbsp;
+
+&nbsp;
+
+##### Stepwise Selection in Full Model with Log Transformation
+
+```{r, message = FALSE, warning = FALSE}
+# stepwise with AIC
+model_linear_log = step(model_linear_full_log, direction = "both")
+
+#model_linear_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly) 
+
+
+ broom::tidy(model_linear_log) %>% 
+   knitr::kable()
+
+
+#summary(model_linear_log)
+```
+
+Same as the original linear model above, we also applied the stepwise selection and got the final model:
+$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton)+ \\\beta_5(avg\_snowDepth) + \beta_6(avg\_temperature)$
+
+&nbsp;
+
+&nbsp;
+
+#### Model Diagnostics
+
+```{r, message = FALSE, warning = FALSE, fig.width = 12,  fig.height = 9}
+performance::check_model(model_linear, check = c("linearity", "qq", "normality", "outliers", "homogeneity", "vif"))
+```
+
+
+```{r, message = FALSE, warning = FALSE, fig.width = 12, fig.height = 9}
+
+performance::check_model(model_linear_log, check = c("linearity", "qq", "normality", "outliers", "homogeneity", "vif"))
+
+```
+
+According to plots above, we can see that linearity, homogeneity, and normality of residuals were all improved after the log transformation. Residuals were distributed around the 0 horizontal line and the reference line was flatter. There was no influential points outside the contour lines. Also, the residuals were approximately normally distributed.
+
+&nbsp;
+
+&nbsp;
+
+
+#### Cross-validation
+
+
+```{r, message=FALSE, warning=FALSE, fig.height = 6}
+# cross-validation 
+set.seed(2022)
+
+# without log
+cv_df_1 = 
+  crossv_mc(cases_borough_monthly, 100) %>% 
+    mutate(
+        train = map(train, as_tibble),
+        test = map(test,as_tibble)
+    )  %>%
+  mutate(
+    model_fit1  = map(train, ~lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = .x)),
+    model_fit2  = map(train, ~lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = .x))) %>% 
+  mutate(
+    rmse_1 = map2_dbl(model_fit1, test, ~rmse(model = .x, data = .y)),
+    rmse_2 = map2_dbl(model_fit2, test, ~rmse(model = .x, data = .y))) 
+
+p_cv_1 = cv_df_1 %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin() +
+  labs(title = "Comparison of the Cross-Validated Prediction Error", 
+       x = "Models", 
+       y = "Root Mean Square Error (RMSE)")  +
+  scale_x_discrete(labels = c("Full Model", "Stepwise Model")) 
+
+# log
+cv_df_2 = 
+  crossv_mc(cases_borough_monthly, 100) %>% 
+    mutate(
+        train = map(train, as_tibble),
+        test = map(test,as_tibble)
+    )  %>%
+  mutate(
+    model_fit3  = map(train, ~lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = .x)),
+    model_fit4  = map(train, ~lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = .x))) %>% 
+  mutate(
+    rmse_3 = map2_dbl(model_fit3, test, ~rmse(model = .x, data = .y)),
+    rmse_4 = map2_dbl(model_fit4, test, ~rmse(model = .x, data = .y))) 
+
+p_cv_2 = cv_df_2 %>% 
+  select(starts_with("rmse")) %>% 
+  pivot_longer(
+    everything(),
+    names_to = "model", 
+    values_to = "rmse",
+    names_prefix = "rmse_") %>% 
+  mutate(model = fct_inorder(model)) %>% 
+  ggplot(aes(x = model, y = rmse)) + 
+  geom_violin() +
+  labs(title = "Comparison of the Cross-Validated Prediction Error", 
+       x = "Models", 
+       y = "Root Mean Square Error (RMSE)")  +
+  scale_x_discrete(labels = c("Full Model (Log)", "Stepwise Model (Log)")) 
+
+
+p_cv_1 / p_cv_2
+
+
+```
+
+According to the plot, there was a significant difference on RMSE between models with and without log-transformed outcomes. Model with log-transformation had a substantially lower average value of RMSE, which means this type of model better fits. After stepwise selection, only one variable was dropped and the RMSE were similar. We preferred the model with less variables to avoid potential over-fit.
+
+&nbsp;
+
+&nbsp;
 
 
 
