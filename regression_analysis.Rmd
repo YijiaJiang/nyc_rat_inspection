@@ -29,6 +29,7 @@ library(GGally)
 library(rstatix)
 library(modelr)
 library(patchwork)
+library(see)
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
@@ -77,7 +78,14 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
                                         inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
   mutate(date = as.Date(date,format = "%Y-%m-%d")) 
+```
 
+
+## Exploratory Statistical Analyses
+
+Before constructing the model, we performed the correlational analysis to identify relevant variables and their impacts. 
+
+```{r, include = FALSE, message=FALSE, warning=FALSE}
 rat_reg = rat %>%
   mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
   mutate(covid_yn = case_when(date < "2020-02-29" ~ 0,
@@ -89,14 +97,7 @@ rat_reg = rat %>%
       hour < 6 | hour >= 18 ~ "Night",
       hour >= 6 & hour < 12 ~ "Morning",
       hour >= 12 & hour < 18 ~ "Afternoon"))
-```
 
-
-## Exploratory Statistical Analyses
-
-Before constructing the model, we performed the correlational analysis to identify relevant variables and their impacts. 
-
-```{r, include = FALSE, message=FALSE, warning=FALSE}
 cases = rat_reg %>% 
   select(inspection_ym, borough, inspection_month_n) %>% 
   group_by(inspection_ym, borough) %>% 
@@ -175,8 +176,7 @@ cases_borough_monthly %>%
   geom_text(color = "white",size = 4) + 
   scale_x_discrete(labels = c("Borough Monthly cases")) + 
   labs(x = "Outcome Variable", y = "Predictor Variables",
-    title = "Correlation Matrix between Predictors and Outcome",
-    fill = "Correlation")
+       fill = "Correlation")
 ```
 
 
@@ -205,7 +205,11 @@ broom::tidy(model_linear_full) %>%
 #summary(model_linear_full)
 ```
 
-The full multiple linear regression model we constructed is $borough\_monthly\_cases= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton) + \beta_5(avg\_snowFall) + \beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)$. The result shown that the p-value of `inspectionMonth`, `avg_precipitaiton`, `avg_snowFall`, and `avg_temperature` were greater than 0.05, which had to be analyzed by stepwise regression method.
+The full multiple linear regression model we constructed is 
+
+$borough\_monthly\_cases= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton) + \\\beta_5(avg\_snowFall) + \beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)$.   
+
+The result shown that the p-value of `inspectionMonth`, `avg_precipitaiton`, `avg_snowFall`, and `avg_temperature` were greater than 0.05, which had to be analyzed by stepwise regression method.
 
 &nbsp;
 
@@ -227,7 +231,8 @@ model_linear = step(model_linear_full, direction = "both")
 ```
 
 
-We eliminated those variables that are not statistically significant using stepwise regression: $y_\_borough\_monthly\_cases= \beta_0+ \beta_1(borough) + \beta_2(covid) + \beta_3(snowFall) + \beta_4(snowDepth)$
+We eliminated those variables that are not statistically significant using stepwise regression: 
+$borough\_monthly\_cases= \beta_0+ \beta_1(borough) + \beta_2(covid) + \beta_3(snowFall) + \beta_4(snowDepth)$
 
 &nbsp;
 
@@ -246,7 +251,7 @@ model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borou
 ```
 
 Log transformation was applied to our model to improve validity, additivity, and linearity:
-$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton) + \beta_5(avg\_snowFall) + \beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)$
+$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton) + \\\beta_5(avg\_snowFall) + \beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)$
 
 &nbsp;
 
@@ -269,7 +274,7 @@ model_linear_log = step(model_linear_full_log, direction = "both")
 ```
 
 Same as the original linear model above, we also applied the stepwise selection and got the final model:
-$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton)+ \beta_5(avg\_snowDepth) + \beta_6(avg\_temperature)$
+$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(avg\_precipitaiton)+ \\\beta_5(avg\_snowDepth) + \beta_6(avg\_temperature)$
 
 &nbsp;
 
@@ -277,12 +282,12 @@ $log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borou
 
 ## Model Diagnostics
 
-```{r, message = FALSE, warning = FALSE, fig.width = 8,  fig.height = 6}
+```{r, message = FALSE, warning = FALSE, fig.width = 12,  fig.height = 9}
 performance::check_model(model_linear, check = c("linearity", "qq", "normality", "outliers", "homogeneity", "vif"))
 ```
 
 
-```{r, message = FALSE, warning = FALSE, fig.width = 8, fig.height = 6}
+```{r, message = FALSE, warning = FALSE, fig.width = 12, fig.height = 9}
 
 performance::check_model(model_linear_log, check = c("linearity", "qq", "normality", "outliers", "homogeneity", "vif"))
 
@@ -366,7 +371,7 @@ p_cv_1 / p_cv_2
 
 ```
 
-According to the plot, there was a significant difference on RMSE between models with and without log-transformed outcomes. Model with log-transformation had a substaintially lower average value of RMSE, which means this type of model better fits. After stepwise selection, only one variable was dropped and the RMSE were similar. We preferred the model with less variables to avoid potential over-fit.
+According to the plot, there was a significant difference on RMSE between models with and without log-transformed outcomes. Model with log-transformation had a substantially lower average value of RMSE, which means this type of model better fits. After stepwise selection, only one variable was dropped and the RMSE were similar. We preferred the model with less variables to avoid potential over-fit.
 
 &nbsp;
 

@@ -413,10 +413,8 @@ number of rat cases which were inspected in different borough per
 month.</p>
 <p> </p>
 <p> </p>
-<div id="linear-regression-model" class="section level2">
-<h2>Linear Regression Model</h2>
-<div id="exploratory-statistical-analyses" class="section level3">
-<h3>Exploratory Statistical Analyses</h3>
+<div id="exploratory-statistical-analyses" class="section level2">
+<h2>Exploratory Statistical Analyses</h2>
 <p>Before constructing the model, we performed the correlational
 analysis to identify relevant variables and their impacts.</p>
 <pre class="r"><code># correlation between key predictors
@@ -435,14 +433,13 @@ cases_borough_monthly %&gt;%
     &quot;Average Temperature&quot; = avg_temp,
     &quot;COVID&quot; = covid_yn
   ) %&gt;% 
-   ggpairs(
-     title = &quot;Correlations Between Key Predictors&quot;
-   ) +
+  ggpairs() + 
   scale_fill_discrete()</code></pre>
 <p><img src="regression_analysis_files/figure-html/unnamed-chunk-5-1.png" width="1536" /></p>
 <p>Through the correlation analysis between key predictors, the result
 above shown that the daily average temperature, the highest temperature,
 and the lowest temperature are highly correlated between each other.</p>
+<p> </p>
 <pre class="r"><code># correlation between predictors and outcome
 cases_borough_monthly %&gt;% 
   dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %&gt;%
@@ -466,16 +463,18 @@ cases_borough_monthly %&gt;%
   geom_text(color = &quot;white&quot;,size = 4) + 
   scale_x_discrete(labels = c(&quot;Borough Monthly cases&quot;)) + 
   labs(x = &quot;Outcome Variable&quot;, y = &quot;Predictor Variables&quot;,
-#    title = &quot;Correlation Matrix between Predictors and Outcome&quot;,
-    fill = &quot;Correlation&quot;)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+       fill = &quot;Correlation&quot;)</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-6-1.png" width="576" /></p>
 <p>Through the correlation analysis between predictors and outcome, the
 result above shown that the borough was comparatively related to the
 outcome.</p>
 <p> </p>
+<p> </p>
 </div>
-<div id="model-selection" class="section level3">
-<h3>Model Selection</h3>
+<div id="model-selection" class="section level2">
+<h2>Model Selection</h2>
+<div id="full-model" class="section level3">
+<h3>Full Model</h3>
 <pre class="r"><code># full model
 cases_borough_monthly = cases_borough_monthly %&gt;% 
   mutate(inspection_month = month.abb[inspection_month_n],
@@ -647,13 +646,20 @@ broom::tidy(model_linear_full) %&gt;%
 </tbody>
 </table>
 <pre class="r"><code>#summary(model_linear_full)</code></pre>
-<p>The full multiple linear regression model we constructed is <span
-class="math inline">\(y_\_borough\_monthly\_cases= \beta_0+
+<p>The full multiple linear regression model we constructed is</p>
+<p><span class="math inline">\(borough\_monthly\_cases= \beta_0+
 \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) +
-\beta_4(precipitaiton) + \\\beta_5(snowFall) + \beta_6(snowDepth) +
-\beta_7(temperature)\)</span>. The result shown that the p-value of
-inspectionMonth, precipitaiton, snowFall, and temperature were greater
-than 0.05, which had to be analyzed by stepwise regression method.</p>
+\beta_4(avg\_precipitaiton) + \\\beta_5(avg\_snowFall) +
+\beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)\)</span>.</p>
+<p>The result shown that the p-value of <code>inspectionMonth</code>,
+<code>avg_precipitaiton</code>, <code>avg_snowFall</code>, and
+<code>avg_temperature</code> were greater than 0.05, which had to be
+analyzed by stepwise regression method.</p>
+<p> </p>
+<p> </p>
+</div>
+<div id="stepwise-selection-in-full-model" class="section level3">
+<h3>Stepwise Selection in Full Model</h3>
 <pre class="r"><code># stepwise with AIC (full model)
 model_linear = step(model_linear_full, direction = &quot;both&quot;)</code></pre>
 <pre><code>## Start:  AIC=8818.76
@@ -794,9 +800,13 @@ model_linear = step(model_linear_full, direction = &quot;both&quot;)</code></pre
 <pre class="r"><code>#summary(model_linear)</code></pre>
 <p>We eliminated those variables that are not statistically significant
 using stepwise regression: <span
-class="math inline">\(y_\_borough\_monthly\_cases= \beta_0+
-\beta_1(borough) + \beta_2(covid) + \beta_3(snowFall) +
-\beta_4(snowDepth)\)</span></p>
+class="math inline">\(borough\_monthly\_cases= \beta_0+ \beta_1(borough)
++ \beta_2(covid) + \beta_3(snowFall) + \beta_4(snowDepth)\)</span></p>
+<p> </p>
+<p> </p>
+</div>
+<div id="full-model-with-log-transformation" class="section level3">
+<h3>Full Model with Log Transformation</h3>
 <pre class="r"><code># full model with log transformation
 model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
@@ -967,8 +977,14 @@ model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borou
 additivity, and linearity: <span
 class="math inline">\(log(borough\_monthly\_cases)= \beta_0+
 \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) +
-\beta_4(precipitaiton) + \\\beta_5(snowFall) + \beta_6(snowDepth) +
-\beta_7(temperature)\)</span></p>
+\beta_4(avg\_precipitaiton) + \\\beta_5(avg\_snowFall) +
+\beta_6(avg\_snowDepth) + \beta_7(avg\_temperature)\)</span></p>
+<p> </p>
+<p> </p>
+</div>
+<div id="stepwise-selection-in-full-model-with-log-transformation"
+class="section level3">
+<h3>Stepwise Selection in Full Model with Log Transformation</h3>
 <pre class="r"><code># stepwise with AIC
 model_linear_log = step(model_linear_full_log, direction = &quot;both&quot;)</code></pre>
 <pre><code>## Start:  AIC=-414.36
@@ -1161,24 +1177,29 @@ model_linear_log = step(model_linear_full_log, direction = &quot;both&quot;)</co
 selection and got the final model: <span
 class="math inline">\(log(borough\_monthly\_cases)= \beta_0+
 \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) +
-\beta_4(precipitaiton)+ \\ \beta_5(snowDepth) +
-\beta_6(temperature)\)</span></p>
+\beta_4(avg\_precipitaiton)+ \\\beta_5(avg\_snowDepth) +
+\beta_6(avg\_temperature)\)</span></p>
+<p> </p>
+<p> </p>
 </div>
-<div id="model-diagnostics" class="section level3">
-<h3>Model Diagnostics</h3>
+</div>
+<div id="model-diagnostics" class="section level2">
+<h2>Model Diagnostics</h2>
 <pre class="r"><code>performance::check_model(model_linear, check = c(&quot;linearity&quot;, &quot;qq&quot;, &quot;normality&quot;, &quot;outliers&quot;, &quot;homogeneity&quot;, &quot;vif&quot;))</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
 <pre class="r"><code>performance::check_model(model_linear_log, check = c(&quot;linearity&quot;, &quot;qq&quot;, &quot;normality&quot;, &quot;outliers&quot;, &quot;homogeneity&quot;, &quot;vif&quot;))</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
 <p>According to plots above, we can see that linearity, homogeneity, and
 normality of residuals were all improved after the log transformation.
 Residuals were distributed around the 0 horizontal line and the
 reference line was flatter. There was no influential points outside the
 contour lines. Also, the residuals were approximately normally
 distributed.</p>
+<p> </p>
+<p> </p>
 </div>
-<div id="cross-validation" class="section level3">
-<h3>Cross-validation</h3>
+<div id="cross-validation" class="section level2">
+<h2>Cross-validation</h2>
 <pre class="r"><code># cross-validation 
 set.seed(2022)
 
@@ -1243,15 +1264,17 @@ p_cv_2 = cv_df_2 %&gt;%
 
 p_cv_1 / p_cv_2</code></pre>
 <p><img src="regression_analysis_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
-<p>According to the plot, there was no obvious difference on RMSE
-between model 3 and model 4. However, model 2 had a relatively lower
-average value of RMSE compared with model 1, since three variables were
-dropped by stepwise elimination. Therefore model 2 fit better than model
-1.</p>
+<p>According to the plot, there was a significant difference on RMSE
+between models with and without log-transformed outcomes. Model with
+log-transformation had a substantially lower average value of RMSE,
+which means this type of model better fits. After stepwise selection,
+only one variable was dropped and the RMSE were similar. We preferred
+the model with less variables to avoid potential over-fit.</p>
+<p> </p>
+<p> </p>
 </div>
-</div>
-<div id="conclusion" class="section level2">
-<h2>Conclusion</h2>
+<div id="summaries" class="section level2">
+<h2>Summaries</h2>
 <p>The model diagnostics result shown linearity and normality were
 relatively improved after the log transformation and the stepwise
 regression. Therefore, we concluded that the number of rat inspection
