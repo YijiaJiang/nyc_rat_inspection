@@ -17,19 +17,11 @@ output:
 
 New York City is one of the largest and most popular cities in the United States. It is popular for its hustle and bustle, Wall Street legends and Broadway shows. It looks like the city never sleeps. Whenever you go outside, you will see people walking here and there and doing some sorts of things. However, like humans, rats are present in the city in a large number, with an estimate number of 2 million.
 
-NYC rats, also known as Norway rats, first came to New York City in the 18th century, and as the city’s population grew, so did the rodent population. New York city harbors one of the largest rat populations in the United States. Therefore, with time, the issue of rats is quite serious and is even getting worse. 
+NYC rats, also known as Norway rats, first came to New York City in the 18th century, and as the city’s population grew, so did the rodent population. New York city harbors one of the largest rat populations in the United States. Thus, with time, the issue of rats is quite serious and is even getting worse. 
 
-Reported rat sightings, health inspections finding evidence of rat activity and cases of a disease spread via rat urine are all up amid the pandemic.
+Surprisingly, NYC is setting a record in 2022 for rat sightings, with 16,000 rodents sightings reported through the end of July. During the pandemic, reported rat sightings, health inspections finding evidence of rat activity and cases of a disease spread via rat urine are all on the rise, which raised our concerns. 
 
-In New York, rodent control is conducted by the Office of Pest Control of the Bureau of Veterinary and Pest Control Services within the Division of Environmental Health at the New York City Department of Health and Mental Hygiene (NYC DOHMH). Rodent complaints represented about 40% of the complaints directed to NYC DOHMH. T
-As part of the program’s rodent control activities, the Office of Pest Control is both a proactive and complaint-based program. 
-
-
-Here we intend to provide an in-depth look at New York City’s crash database with an exploratory data analysis, in addition to visualizations (plots, heatmaps, geolocation mapping) and statistical analysis. At first, we wondered if the incidence of electric moped crashes with injuries increased in 2020, compared to 2019.
-
-Submit a Rodent Complaint Online Through 311: Include a description of the problem and the address of the location. Health Department inspectors can only inspect those parts of the property accessible to them. 
-
-Gaining deeper sights into the pattern of rat inspections in both the temporal and spatial dimensions will help those in fear of rats minimize exposure as much as possible. Broadly, it is beneficial to identify potential risks of disease-spread and then build a clean and pleasant living environment, which is what we as public health students should be working towards.
+Therefore, by combining the COVID case count and weather information, we are intended to provide an in-depth look at NYC rat inspection database with an exploratory data analysis, as well as statistical analysis including hypothesis test and regression analysis. Gaining deeper sights into the pattern and characteristics of rat inspections in both the temporal and spatial dimensions will help those in fear of rats minimize exposure as much as possible. Broadly, it is beneficial to identify potential risks of disease-spread and then build a clean and pleasant living environment, which is what we as public health students should be working towards.
 
 &nbsp;
 &nbsp;
@@ -75,7 +67,6 @@ The detailed information concerning our data analysis can be found
 
 
 #### DOHMH Rodent Inspection Data
-
 
 The [rodent inspection data](https://data.cityofnewyork.us/Health/Rodent-Inspection/p937-wjvj) contains the information on rat sightings and intervention visits in NYC from 1918 to 2022, which is managed by New York City Department of Health and Mental Hygiene, Division of Environmental Health. The data source is the Veterinary, Rodent and Vector Surveillance System (VRVSS). It is also available on the [Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page), which is a web-based mapping application where users can view and map rat inspection and intervention data. Users can search results from Health Department inspections for rats at the level of individual properties, and view neighborhood maps. 
 
