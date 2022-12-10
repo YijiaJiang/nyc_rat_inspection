@@ -13,8 +13,7 @@ output:
 
 &nbsp;
 
-In this section, we are intended to construct a linear model to generate the monthly number of rats observed using a variety of potential predictors potential predictors, together with its diagnostics and validation. This regression model will be further utilized in the Shiny App for rat activity prediction. 
-
+In this section, we aimed to construct a linear regression model and to generate the monthly number of rats observed using a variety of potential predictors, along with the model diagnostics and model validation. The regression model will be further utilized in the Shiny App for the rat activity prediction. The outcome was defined as the number of rat cases which were inspected in different borough per month.
 
 
 &nbsp;
@@ -61,7 +60,7 @@ rat_2021 = read_csv(url(url_2021))
 
 
 ```{r, include = FALSE, message = FALSE, warning = FALSE}
-# tidy the data
+# tidy data
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
   mutate(inspection_month_n = case_when(inspection_month == "Jan" ~ 1,
@@ -95,6 +94,8 @@ rat_reg = rat %>%
 ## Linear Regression Model
 
 ### Exploratory Statistical Analyses
+
+Before constructing the model, we performed the correlational analysis to identify relevant variables and their impacts. 
 
 ```{r, include = FALSE, message=FALSE, warning=FALSE}
 cases = rat_reg %>% 
@@ -142,10 +143,17 @@ cases_borough_monthly %>%
     "Average Temperature" = avg_temp,
     "COVID" = covid_yn
   ) %>% 
+<<<<<<< HEAD
   ggpairs() + 
+=======
+   ggpairs(
+     title = "Correlations Between Key Predictors"
+   ) +
+>>>>>>> 09dfd02f5a7d2e92bc2b69916dbe5ecbdcf4b2a5
   scale_fill_discrete()
 ```
 
+Through the correlation analysis between key predictors, the result above shown that the daily average temperature, the highest temperature, and the lowest temperature are highly correlated between each other.
 
 ```{r, message=FALSE, warning=FALSE, fig.height=8, fig.width=8}
 # correlation between predictors and outcome
@@ -171,14 +179,17 @@ cases_borough_monthly %>%
   geom_text(color = "white",size = 4) + 
   scale_x_discrete(labels = c("Borough Monthly cases")) + 
   labs(x = "Outcome Variable", y = "Predictor Variables",
-    title = "Correlation Matrix between Predictors and Outcome",
+#    title = "Correlation Matrix between Predictors and Outcome",
     fill = "Correlation")
 ```
+
+
+Through the correlation analysis between predictors and outcome, the result above shown that the borough was comparatively related to the outcome.
 
 &nbsp;
 
 
-### Model Fitting
+### Model Selection
 
 ```{r, message = FALSE, warning = FALSE}
 # full model
@@ -190,95 +201,77 @@ cases_borough_monthly = cases_borough_monthly %>%
 model_linear_full = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
 broom::tidy(model_linear_full) %>% 
-  knitr::kable()
+   knitr::kable()
 
-summary(model_linear_full)
+#summary(model_linear_full)
 ```
 
-Full model: borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp
-
+The full multiple linear regression model we constructed is $y_\_borough\_monthly\_cases= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(precipitaiton) + \\\beta_5(snowFall) + \beta_6(snowDepth) + \beta_7(temperature)$. The result shown that the p-value of inspectionMonth, precipitaiton, snowFall, and temperature were greater than 0.05, which had to be analyzed by stepwise regression method.
 
 ```{r, message = FALSE, warning = FALSE}
 # stepwise with AIC (full model)
-step(model_linear_full, direction = "both")
+model_linear = step(model_linear_full, direction = "both")
 
-model_linear = lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = cases_borough_monthly) 
+#model_linear = lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = cases_borough_monthly) 
 
+ 
+ broom::tidy(model_linear) %>% 
+   knitr::kable()
 
-broom::tidy(model_linear) %>% 
-  knitr::kable()
-
-summary(model_linear)
+#summary(model_linear)
 ```
 
 
-Stepwise model: borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd
+We eliminated those variables that are not statistically significant using stepwise regression: $y_\_borough\_monthly\_cases= \beta_0+ \beta_1(borough) + \beta_2(covid) + \beta_3(snowFall) + \beta_4(snowDepth)$
 
 
 ```{r, message = FALSE, warning = FALSE}
 # full model with log transformation
 model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
-broom::tidy(model_linear_full_log) %>% 
-  knitr::kable()
+ broom::tidy(model_linear_full_log) %>% 
+   knitr::kable()
 
-summary(model_linear_full_log)
+#summary(model_linear_full_log)
 ```
 
-Full model with transformation: log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp
-
+Log transformation was applied to our model to improve validity, additivity, and linearity:
+$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(precipitaiton) + \\\beta_5(snowFall) + \beta_6(snowDepth) + \beta_7(temperature)$
 
 ```{r, message = FALSE, warning = FALSE}
 # stepwise with AIC
-step(model_linear_full_log, direction = "both")
+model_linear_log = step(model_linear_full_log, direction = "both")
 
-model_linear_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly) 
+#model_linear_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
 
-broom::tidy(model_linear_log) %>% 
-  knitr::kable()
+ broom::tidy(model_linear_log) %>% 
+   knitr::kable()
 
-summary(model_linear_log)
+
+#summary(model_linear_log)
 ```
 
-Stepwise model with log transformation: log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp
-
+Same as the original linear model above, we also applied the stepwise selection and got the final model:
+$log(borough\_monthly\_cases)= \beta_0+ \beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) + \beta_4(precipitaiton)+ \\ \beta_5(snowDepth) + \beta_6(temperature)$
 
 ### Model Diagnostics
 
 ```{r, message = FALSE, warning = FALSE}
-set.seed(100)
-par(mfrow = c(2,2))
-plot(model_linear)
-anova(model_linear)
-
-
-set.seed(100)
-par(mfrow = c(2,2))
-plot(model_linear_log)
-anova(model_linear_log)
+performance::check_model(model_linear, check = c("linearity", "qq", "normality", "outliers", "homogeneity", "vif"))
 ```
 
 
 ```{r, message = FALSE, warning = FALSE}
-outlierTest(model_linear)
-durbinWatsonTest(model_linear)
-performance::check_collinearity(model_linear)
 
-outlierTest(model_linear_log)
-durbinWatsonTest(model_linear_log)
-performance::check_collinearity(model_linear_log)
+performance::check_model(model_linear_log, check = c("linearity", "qq", "normality", "outliers", "homogeneity", "vif"))
+
 ```
 
-
-&nbsp;
-
-
+According to plots above, we can see that linearity, homogeneity, and normality of residuals were all improved after the log transformation. Residuals were distributed around the 0 horizontal line and the reference line was flatter. There was no influential points outside the contour lines. Also, the residuals were approximately normally distributed.
 
 ### Cross-validation
 
-
-The final model is log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp
 
 ```{r, message=FALSE, warning=FALSE, fig.height = 6}
 # cross-validation 
@@ -345,9 +338,15 @@ p_cv_2 = cv_df_2 %>%
 
 p_cv_1 / p_cv_2
 
+
 ```
 
+According to the plot, there was no obvious difference on RMSE between model 3 and model 4. However, model 2 had a relatively lower average value of RMSE compared with model 1, since three variables were dropped by stepwise elimination. Therefore model 2 fit better than model 1.
 
+
+## Conclusion
+
+The model diagnostics result shown linearity and normality were relatively improved after the log transformation and the stepwise regression. Therefore, we concluded that the number of rat inspection would be affected by  borough, COVID-19, and inspection time, also positively correlated with the precipitation and environment temperature, negatively related with the snow depth on the inspection date.
 
 
 ```{r, eval = FALSE, include=FALSE, message = FALSE, warning = FALSE}

@@ -404,17 +404,21 @@ div.tocify {
 <strong>REGRESSION ANALYSIS</strong>
 </h1>
 <p> </p>
-<p>In this section, we are intended to construct a linear model to
-generate the monthly number of rats observed using a variety of
-potential predictors potential predictors, together with its diagnostics
-and validation. This regression model will be further utilized in the
-Shiny App for rat activity prediction.</p>
+<p>In this section, we aimed to construct a linear regression model and
+to generate the monthly number of rats observed using a variety of
+potential predictors, along with the model diagnostics and model
+validation. The regression model will be further utilized in the Shiny
+App for the rat activity prediction. The outcome was defined as the
+number of rat cases which were inspected in different borough per
+month.</p>
 <p> </p>
 <p> </p>
 <div id="linear-regression-model" class="section level2">
 <h2>Linear Regression Model</h2>
 <div id="exploratory-statistical-analyses" class="section level3">
 <h3>Exploratory Statistical Analyses</h3>
+<p>Before constructing the model, we performed the correlational
+analysis to identify relevant variables and their impacts.</p>
 <pre class="r"><code># correlation between key predictors
 cases_borough_monthly %&gt;%
   dplyr::select(borough, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn) %&gt;% 
@@ -431,11 +435,14 @@ cases_borough_monthly %&gt;%
     &quot;Average Temperature&quot; = avg_temp,
     &quot;COVID&quot; = covid_yn
   ) %&gt;% 
-  ggpairs(
-    title = &quot;Correlations Between Key Outcomes&quot;
-  ) + 
+   ggpairs(
+     title = &quot;Correlations Between Key Predictors&quot;
+   ) +
   scale_fill_discrete()</code></pre>
 <p><img src="regression_analysis_files/figure-html/unnamed-chunk-5-1.png" width="1536" /></p>
+<p>Through the correlation analysis between key predictors, the result
+above shown that the daily average temperature, the highest temperature,
+and the lowest temperature are highly correlated between each other.</p>
 <pre class="r"><code># correlation between predictors and outcome
 cases_borough_monthly %&gt;% 
   dplyr::select(boro_code, inspection_month_n, avg_prcp, avg_snow, avg_snwd, avg_tmin, avg_tmax, avg_temp, covid_yn, borough_monthly_cases) %&gt;%
@@ -459,13 +466,16 @@ cases_borough_monthly %&gt;%
   geom_text(color = &quot;white&quot;,size = 4) + 
   scale_x_discrete(labels = c(&quot;Borough Monthly cases&quot;)) + 
   labs(x = &quot;Outcome Variable&quot;, y = &quot;Predictor Variables&quot;,
-    title = &quot;Correlation Matrix between Predictors and Outcome&quot;,
+#    title = &quot;Correlation Matrix between Predictors and Outcome&quot;,
     fill = &quot;Correlation&quot;)</code></pre>
 <p><img src="regression_analysis_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+<p>Through the correlation analysis between predictors and outcome, the
+result above shown that the borough was comparatively related to the
+outcome.</p>
 <p> </p>
 </div>
-<div id="model-fitting" class="section level3">
-<h3>Model Fitting</h3>
+<div id="model-selection" class="section level3">
+<h3>Model Selection</h3>
 <pre class="r"><code># full model
 cases_borough_monthly = cases_borough_monthly %&gt;% 
   mutate(inspection_month = month.abb[inspection_month_n],
@@ -475,7 +485,7 @@ cases_borough_monthly = cases_borough_monthly %&gt;%
 model_linear_full = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
 broom::tidy(model_linear_full) %&gt;% 
-  knitr::kable()</code></pre>
+   knitr::kable()</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -636,49 +646,16 @@ broom::tidy(model_linear_full) %&gt;%
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>summary(model_linear_full)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = borough_monthly_cases ~ inspection_month + borough + 
-##     covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -3893.1  -823.4  -177.3   865.9  6637.1 
-## 
-## Coefficients:
-##                       Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)           4877.562    579.616   8.415 3.11e-16 ***
-## inspection_monthAug    -23.758    641.515  -0.037   0.9705    
-## inspection_monthDec   -315.923    422.891  -0.747   0.4553    
-## inspection_monthFeb    110.611    464.227   0.238   0.8118    
-## inspection_monthJan   -704.794    521.622  -1.351   0.1772    
-## inspection_monthJul   -297.341    680.361  -0.437   0.6623    
-## inspection_monthJun   -132.072    547.715  -0.241   0.8095    
-## inspection_monthMar    213.703    378.803   0.564   0.5729    
-## inspection_monthMay   -204.762    407.848  -0.502   0.6158    
-## inspection_monthNov   -601.712    351.214  -1.713   0.0872 .  
-## inspection_monthOct   -528.976    357.576  -1.479   0.1396    
-## inspection_monthSep   -347.956    516.985  -0.673   0.5012    
-## boroughBrooklyn       -202.808    205.202  -0.988   0.3234    
-## boroughManhattan       234.561    204.704   1.146   0.2523    
-## boroughQueens        -3006.300    205.573 -14.624  &lt; 2e-16 ***
-## boroughStaten Island -3867.040    205.489 -18.819  &lt; 2e-16 ***
-## covid_yn1            -1666.867    167.385  -9.958  &lt; 2e-16 ***
-## avg_prcp                38.265     28.695   1.333   0.1829    
-## avg_snow               -51.989     35.077  -1.482   0.1389    
-## avg_snwd               -10.626      2.667  -3.984 7.65e-05 ***
-## avg_temp               -10.293     42.850  -0.240   0.8102    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 1585 on 576 degrees of freedom
-## Multiple R-squared:  0.5899, Adjusted R-squared:  0.5756 
-## F-statistic: 41.42 on 20 and 576 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>Full model: borough_monthly_cases ~ inspection_month + borough +
-covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp</p>
+<pre class="r"><code>#summary(model_linear_full)</code></pre>
+<p>The full multiple linear regression model we constructed is <span
+class="math inline">\(y_\_borough\_monthly\_cases= \beta_0+
+\beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) +
+\beta_4(precipitaiton) + \\\beta_5(snowFall) + \beta_6(snowDepth) +
+\beta_7(temperature)\)</span>. The result shown that the p-value of
+inspectionMonth, precipitaiton, snowFall, and temperature were greater
+than 0.05, which had to be analyzed by stepwise regression method.</p>
 <pre class="r"><code># stepwise with AIC (full model)
-step(model_linear_full, direction = &quot;both&quot;)</code></pre>
+model_linear = step(model_linear_full, direction = &quot;both&quot;)</code></pre>
 <pre><code>## Start:  AIC=8818.76
 ## borough_monthly_cases ~ inspection_month + borough + covid_yn + 
 ##     avg_prcp + avg_snow + avg_snwd + avg_temp
@@ -733,23 +710,11 @@ step(model_linear_full, direction = &quot;both&quot;)</code></pre>
 ## - avg_snwd          1   42278134 1535078942 8825.7
 ## - covid_yn          1  256710249 1749511057 8903.7
 ## - borough           4 1744255398 3237056206 9265.1</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = borough_monthly_cases ~ borough + covid_yn + avg_snow + 
-##     avg_snwd, data = cases_borough_monthly)
-## 
-## Coefficients:
-##          (Intercept)       boroughBrooklyn      boroughManhattan  
-##             4591.358              -200.567               234.745  
-##        boroughQueens  boroughStaten Island             covid_yn1  
-##            -2994.362             -3855.170             -1652.726  
-##             avg_snow              avg_snwd  
-##              -47.282                -8.338</code></pre>
-<pre class="r"><code>model_linear = lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = cases_borough_monthly) 
+<pre class="r"><code>#model_linear = lm(borough_monthly_cases ~ borough + covid_yn + avg_snow + avg_snwd, data = cases_borough_monthly) 
 
-
-broom::tidy(model_linear) %&gt;% 
-  knitr::kable()</code></pre>
+ 
+ broom::tidy(model_linear) %&gt;% 
+   knitr::kable()</code></pre>
 <table>
 <colgroup>
 <col width="31%" />
@@ -826,39 +791,17 @@ broom::tidy(model_linear) %&gt;%
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>summary(model_linear)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = borough_monthly_cases ~ borough + covid_yn + avg_snow + 
-##     avg_snwd, data = cases_borough_monthly)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -3834.0  -783.9  -226.7   932.6  6254.2 
-## 
-## Coefficients:
-##                       Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)           4591.358    152.022  30.202  &lt; 2e-16 ***
-## boroughBrooklyn       -200.567    206.009  -0.974    0.331    
-## boroughManhattan       234.745    205.537   1.142    0.254    
-## boroughQueens        -2994.362    206.070 -14.531  &lt; 2e-16 ***
-## boroughStaten Island -3855.170    206.047 -18.710  &lt; 2e-16 ***
-## covid_yn1            -1652.726    164.219 -10.064  &lt; 2e-16 ***
-## avg_snow               -47.282     30.625  -1.544    0.123    
-## avg_snwd                -8.338      2.042  -4.084 5.03e-05 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 1592 on 589 degrees of freedom
-## Multiple R-squared:  0.5771, Adjusted R-squared:  0.5721 
-## F-statistic: 114.8 on 7 and 589 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>Stepwise model: borough_monthly_cases ~ borough + covid_yn + avg_snow
-+ avg_snwd</p>
+<pre class="r"><code>#summary(model_linear)</code></pre>
+<p>We eliminated those variables that are not statistically significant
+using stepwise regression: <span
+class="math inline">\(y_\_borough\_monthly\_cases= \beta_0+
+\beta_1(borough) + \beta_2(covid) + \beta_3(snowFall) +
+\beta_4(snowDepth)\)</span></p>
 <pre class="r"><code># full model with log transformation
 model_linear_full_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
-broom::tidy(model_linear_full_log) %&gt;% 
-  knitr::kable()</code></pre>
+ broom::tidy(model_linear_full_log) %&gt;% 
+   knitr::kable()</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -1019,51 +962,15 @@ broom::tidy(model_linear_full_log) %&gt;%
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>summary(model_linear_full_log)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log(borough_monthly_cases) ~ inspection_month + 
-##     borough + covid_yn + avg_prcp + avg_snow + avg_snwd + avg_temp, 
-##     data = cases_borough_monthly)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -6.9049 -0.3207  0.0346  0.3924  1.4965 
-## 
-## Coefficients:
-##                       Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)           7.647711   0.253962  30.114  &lt; 2e-16 ***
-## inspection_monthAug  -0.361582   0.281084  -1.286 0.198825    
-## inspection_monthDec   0.408832   0.185292   2.206 0.027749 *  
-## inspection_monthFeb   0.726622   0.203404   3.572 0.000383 ***
-## inspection_monthJan   0.453160   0.228552   1.983 0.047871 *  
-## inspection_monthJul  -0.559352   0.298104  -1.876 0.061111 .  
-## inspection_monthJun  -0.365239   0.239985  -1.522 0.128576    
-## inspection_monthMar   0.640028   0.165975   3.856 0.000128 ***
-## inspection_monthMay  -0.259134   0.178701  -1.450 0.147576    
-## inspection_monthNov   0.189060   0.153887   1.229 0.219736    
-## inspection_monthOct  -0.211470   0.156674  -1.350 0.177628    
-## inspection_monthSep  -0.343663   0.226520  -1.517 0.129780    
-## boroughBrooklyn      -0.083474   0.089911  -0.928 0.353582    
-## boroughManhattan      0.013122   0.089692   0.146 0.883736    
-## boroughQueens        -1.287583   0.090073 -14.295  &lt; 2e-16 ***
-## boroughStaten Island -2.586633   0.090036 -28.729  &lt; 2e-16 ***
-## covid_yn1            -1.049088   0.073341 -14.304  &lt; 2e-16 ***
-## avg_prcp              0.032063   0.012573   2.550 0.011025 *  
-## avg_snow             -0.020433   0.015369  -1.329 0.184218    
-## avg_snwd             -0.005060   0.001169  -4.329 1.76e-05 ***
-## avg_temp              0.046060   0.018775   2.453 0.014451 *  
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.6947 on 576 degrees of freedom
-## Multiple R-squared:  0.7284, Adjusted R-squared:  0.7189 
-## F-statistic: 77.23 on 20 and 576 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>Full model with transformation: log(borough_monthly_cases) ~
-inspection_month + borough + covid_yn + avg_prcp + avg_snow + avg_snwd +
-avg_temp</p>
+<pre class="r"><code>#summary(model_linear_full_log)</code></pre>
+<p>Log transformation was applied to our model to improve validity,
+additivity, and linearity: <span
+class="math inline">\(log(borough\_monthly\_cases)= \beta_0+
+\beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) +
+\beta_4(precipitaiton) + \\\beta_5(snowFall) + \beta_6(snowDepth) +
+\beta_7(temperature)\)</span></p>
 <pre class="r"><code># stepwise with AIC
-step(model_linear_full_log, direction = &quot;both&quot;)</code></pre>
+model_linear_log = step(model_linear_full_log, direction = &quot;both&quot;)</code></pre>
 <pre><code>## Start:  AIC=-414.36
 ## log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + 
 ##     avg_prcp + avg_snow + avg_snwd + avg_temp
@@ -1091,31 +998,11 @@ step(model_linear_full_log, direction = &quot;both&quot;)</code></pre>
 ## - avg_snwd          1      9.01 287.83 -397.54
 ## - covid_yn          1     98.67 377.49 -235.65
 ## - borough           4    621.21 900.02  277.07</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log(borough_monthly_cases) ~ inspection_month + 
-##     borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly)
-## 
-## Coefficients:
-##          (Intercept)   inspection_monthAug   inspection_monthDec  
-##             7.574500             -0.434376              0.415971  
-##  inspection_monthFeb   inspection_monthJan   inspection_monthJul  
-##             0.753343              0.458721             -0.633112  
-##  inspection_monthJun   inspection_monthMar   inspection_monthMay  
-##            -0.422089              0.630920             -0.289106  
-##  inspection_monthNov   inspection_monthOct   inspection_monthSep  
-##             0.191523             -0.229212             -0.392961  
-##      boroughBrooklyn      boroughManhattan         boroughQueens  
-##            -0.080494              0.014658             -1.282208  
-## boroughStaten Island             covid_yn1              avg_prcp  
-##            -2.581666             -1.048722              0.030293  
-##             avg_snwd              avg_temp  
-##            -0.005051              0.052016</code></pre>
-<pre class="r"><code>model_linear_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly) 
+<pre class="r"><code>#model_linear_log = lm(log(borough_monthly_cases) ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly) 
 
 
-broom::tidy(model_linear_log) %&gt;% 
-  knitr::kable()</code></pre>
+ broom::tidy(model_linear_log) %&gt;% 
+   knitr::kable()</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -1269,133 +1156,29 @@ broom::tidy(model_linear_log) %&gt;%
 </tr>
 </tbody>
 </table>
-<pre class="r"><code>summary(model_linear_log)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log(borough_monthly_cases) ~ inspection_month + 
-##     borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = cases_borough_monthly)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -6.8717 -0.3149  0.0366  0.4010  1.4905 
-## 
-## Coefficients:
-##                       Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)           7.574500   0.248085  30.532  &lt; 2e-16 ***
-## inspection_monthAug  -0.434376   0.275882  -1.574 0.115920    
-## inspection_monthDec   0.415971   0.185338   2.244 0.025185 *  
-## inspection_monthFeb   0.753343   0.202543   3.719 0.000219 ***
-## inspection_monthJan   0.458721   0.228666   2.006 0.045314 *  
-## inspection_monthJul  -0.633112   0.293091  -2.160 0.031174 *  
-## inspection_monthJun  -0.422089   0.236301  -1.786 0.074586 .  
-## inspection_monthMar   0.630920   0.165944   3.802 0.000159 ***
-## inspection_monthMay  -0.289106   0.177391  -1.630 0.103696    
-## inspection_monthNov   0.191523   0.153978   1.244 0.214065    
-## inspection_monthOct  -0.229212   0.156209  -1.467 0.142828    
-## inspection_monthSep  -0.392961   0.223613  -1.757 0.079392 .  
-## boroughBrooklyn      -0.080494   0.089943  -0.895 0.371185    
-## boroughManhattan      0.014658   0.089745   0.163 0.870314    
-## boroughQueens        -1.282208   0.090042 -14.240  &lt; 2e-16 ***
-## boroughStaten Island -2.581666   0.090019 -28.679  &lt; 2e-16 ***
-## covid_yn1            -1.048722   0.073389 -14.290  &lt; 2e-16 ***
-## avg_prcp              0.030293   0.012511   2.421 0.015771 *  
-## avg_snwd             -0.005051   0.001170  -4.319 1.84e-05 ***
-## avg_temp              0.052016   0.018245   2.851 0.004513 ** 
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.6951 on 577 degrees of freedom
-## Multiple R-squared:  0.7275, Adjusted R-squared:  0.7186 
-## F-statistic: 81.09 on 19 and 577 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>Stepwise model with log transformation: log(borough_monthly_cases) ~
-inspection_month + borough + covid_yn + avg_prcp + avg_snwd +
-avg_temp</p>
+<pre class="r"><code>#summary(model_linear_log)</code></pre>
+<p>Same as the original linear model above, we also applied the stepwise
+selection and got the final model: <span
+class="math inline">\(log(borough\_monthly\_cases)= \beta_0+
+\beta_1(inspectionMonth) + \beta_2(borough) + \beta_3(covid) +
+\beta_4(precipitaiton)+ \\ \beta_5(snowDepth) +
+\beta_6(temperature)\)</span></p>
 </div>
 <div id="model-diagnostics" class="section level3">
 <h3>Model Diagnostics</h3>
-<pre class="r"><code>set.seed(100)
-par(mfrow = c(2,2))
-plot(model_linear)</code></pre>
+<pre class="r"><code>performance::check_model(model_linear, check = c(&quot;linearity&quot;, &quot;qq&quot;, &quot;normality&quot;, &quot;outliers&quot;, &quot;homogeneity&quot;, &quot;vif&quot;))</code></pre>
 <p><img src="regression_analysis_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
-<pre class="r"><code>anova(model_linear)</code></pre>
-<pre><code>## Analysis of Variance Table
-## 
-## Response: borough_monthly_cases
-##            Df     Sum Sq   Mean Sq  F value    Pr(&gt;F)    
-## borough     4 1729087485 432271871 170.5573 &lt; 2.2e-16 ***
-## covid_yn    1  252595724 252595724  99.6643 &lt; 2.2e-16 ***
-## avg_snow    1   13473585  13473585   5.3161   0.02148 *  
-## avg_snwd    1   42278134  42278134  16.6813 5.033e-05 ***
-## Residuals 589 1492800808   2534467                       
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code>set.seed(100)
-par(mfrow = c(2,2))
-plot(model_linear_log)</code></pre>
-<p><img src="regression_analysis_files/figure-html/unnamed-chunk-11-2.png" width="672" /></p>
-<pre class="r"><code>anova(model_linear_log)</code></pre>
-<pre><code>## Analysis of Variance Table
-## 
-## Response: log(borough_monthly_cases)
-##                   Df Sum Sq Mean Sq  F value    Pr(&gt;F)    
-## inspection_month  11   8.46   0.769   1.5910  0.097283 .  
-## borough            4 616.80 154.200 319.1120 &lt; 2.2e-16 ***
-## covid_yn           1  91.25  91.248 188.8357 &lt; 2.2e-16 ***
-## avg_prcp           1   3.72   3.718   7.6939  0.005720 ** 
-## avg_snwd           1  20.37  20.367  42.1479 1.826e-10 ***
-## avg_temp           1   3.93   3.928   8.1286  0.004513 ** 
-## Residuals        577 278.82   0.483                       
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code>outlierTest(model_linear)</code></pre>
-<pre><code>##     rstudent unadjusted p-value Bonferroni p
-## 312 3.996286         7.2521e-05     0.043295</code></pre>
-<pre class="r"><code>durbinWatsonTest(model_linear)</code></pre>
-<pre><code>##  lag Autocorrelation D-W Statistic p-value
-##    1       0.3459615      1.303431       0
-##  Alternative hypothesis: rho != 0</code></pre>
-<pre class="r"><code>performance::check_collinearity(model_linear)</code></pre>
-<pre><code>## # Check for Multicollinearity
-## 
-## Low Correlation
-## 
-##      Term  VIF       VIF 95% CI Increased SE Tolerance Tolerance 95% CI
-##   borough 1.00 [1.00,      Inf]         1.00      1.00     [0.00, 1.00]
-##  covid_yn 1.00 [1.00,      Inf]         1.00      1.00     [0.00, 1.00]
-##  avg_snow 1.03 [1.00,     1.39]         1.02      0.97     [0.72, 1.00]
-##  avg_snwd 1.03 [1.00,     1.42]         1.02      0.97     [0.70, 1.00]</code></pre>
-<pre class="r"><code>outlierTest(model_linear_log)</code></pre>
-<pre><code>##       rstudent unadjusted p-value Bonferroni p
-## 511 -11.273391         8.9597e-27   5.3490e-24
-## 512 -10.281643         7.0283e-23   4.1959e-20
-## 516  -4.750129         2.5695e-06   1.5340e-03
-## 517  -4.614038         4.8712e-06   2.9081e-03</code></pre>
-<pre class="r"><code>durbinWatsonTest(model_linear_log)</code></pre>
-<pre><code>##  lag Autocorrelation D-W Statistic p-value
-##    1       0.3899955      1.218201       0
-##  Alternative hypothesis: rho != 0</code></pre>
-<pre class="r"><code>performance::check_collinearity(model_linear_log)</code></pre>
-<pre><code>## # Check for Multicollinearity
-## 
-## Low Correlation
-## 
-##              Term   VIF      VIF 95% CI Increased SE Tolerance Tolerance 95% CI
-##          covid_yn  1.05 [1.01,    1.28]         1.02      0.95     [0.78, 0.99]
-##          avg_prcp  1.19 [1.10,    1.33]         1.09      0.84     [0.75, 0.91]
-##          avg_snwd  1.78 [1.60,    2.00]         1.33      0.56     [0.50, 0.62]
-##  inspection_month 38.48  [33.05, 44.82]         6.20      0.03     [0.02, 0.03]
-## 
-## High Correlation
-## 
-##      Term   VIF      VIF 95% CI Increased SE Tolerance Tolerance 95% CI
-##   borough  1.01 [1.00, 7390.92]         1.00      0.99     [0.00, 1.00]
-##  avg_temp 29.89  [25.69, 34.81]         5.47      0.03     [0.03, 0.04]</code></pre>
-<p> </p>
+<pre class="r"><code>performance::check_model(model_linear_log, check = c(&quot;linearity&quot;, &quot;qq&quot;, &quot;normality&quot;, &quot;outliers&quot;, &quot;homogeneity&quot;, &quot;vif&quot;))</code></pre>
+<p><img src="regression_analysis_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>According to plots above, we can see that linearity, homogeneity, and
+normality of residuals were all improved after the log transformation.
+Residuals were distributed around the 0 horizontal line and the
+reference line was flatter. There was no influential points outside the
+contour lines. Also, the residuals were approximately normally
+distributed.</p>
 </div>
 <div id="cross-validation" class="section level3">
 <h3>Cross-validation</h3>
-<p>The final model is log(borough_monthly_cases) ~ inspection_month +
-borough + covid_yn + avg_prcp + avg_snwd + avg_temp</p>
 <pre class="r"><code># cross-validation 
 set.seed(2022)
 
@@ -1460,7 +1243,22 @@ p_cv_2 = cv_df_2 %&gt;%
 
 p_cv_1 / p_cv_2</code></pre>
 <p><img src="regression_analysis_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>According to the plot, there was no obvious difference on RMSE
+between model 3 and model 4. However, model 2 had a relatively lower
+average value of RMSE compared with model 1, since three variables were
+dropped by stepwise elimination. Therefore model 2 fit better than model
+1.</p>
 </div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>The model diagnostics result shown linearity and normality were
+relatively improved after the log transformation and the stepwise
+regression. Therefore, we concluded that the number of rat inspection
+would be affected by borough, COVID-19, and inspection time, also
+positively correlated with the precipitation and environment
+temperature, negatively related with the snow depth on the inspection
+date.</p>
 </div>
 
 
