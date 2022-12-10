@@ -122,7 +122,7 @@ In order to obtain in-depth sights of the rat inspections across time, we used f
 
 ### Overall Rat Inspections Across Time 
 
-First, a time series plot was used to illustrate data points at successive intervals of time. From 2012, the number of rat inspections continually presented a increasing trend and reached its peak in 2018. After 2020, it appeared a sharp decrease as the outbreak of COVID-19.
+First, a time series plot was used to illustrate data points at successive intervals of time. From 2012, the number of rat inspections generally presented a increasing trend and reached its peak in 2018. After 2020, it appeared a sharp decrease as the outbreak of COVID-19.
 
 ```{r, message=FALSE, warning=FALSE}
 by_date = rat %>% 
@@ -279,7 +279,7 @@ rat %>%
 
 It's not sufficient and solid to only go through the number of rat inspections in each borough without considering their populations and land area. Therefore, we combined these factors in certain borough to evaluate the rat density.  
 
-In 2021, Brooklyn had 26,116 rat inspections, which was the most, followed by Manhattan, Bronx, Queens and Staten Island. 
+In 2021, Brooklyn had 38,256 rat inspections, which was the most, followed by Manhattan, Bronx, Queens and Staten Island. 
 
 ```{r, message=FALSE, warning=FALSE}
 # rat vs. population
@@ -824,7 +824,7 @@ ggplotly(p_weather_o)
 
 ### COVID-19
 
-Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000 per month. In April 2021, only 4 cases of rat inspections were recorded.
+Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000 per month. In April 2021, only 3 cases of rat inspections were recorded.
 
 ```{r, message=FALSE, warning=FALSE}
 # changes before and after Covid-19
