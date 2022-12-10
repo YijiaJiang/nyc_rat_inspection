@@ -116,7 +116,7 @@ ui <- dashboardPage(
             ),
           box(
             title = "Interactive Map", status = "primary", width = 9, height = '100%',
-            leafletOutput('int_map', width = '100%', height = 720)
+            leafletOutput('int_map', width = '100%', height = 540)
           )
         )
       ),
