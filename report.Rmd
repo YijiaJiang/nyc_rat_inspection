@@ -6,6 +6,7 @@ output:
     toc_float:
       toc_collapsed: yes
     toc_depth: 5
+    code_folding: hide
 ---
 
 <h1><strong>REPORT</strong></h1>
@@ -295,7 +296,7 @@ rat_covid = read_csv(url_covid)
 
 rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_2018, rat_2019, rat_2020, rat_2021) %>%
   select(-...1) %>%
-   mutate(inspection_month_n = recode(inspection_month, 
+   mutate(inspection_month_n = dplyr::recode(inspection_month, 
                                    "Jan" = 1,
                                    "Feb" = 2,
                                    "Mar" = 3,
@@ -315,7 +316,7 @@ rat_act = rat %>%
   filter(!result == "Passed")
 
 rat_covid = rat_covid %>%
-  mutate(inspection_month_n = recode(inspection_month, 
+  mutate(inspection_month_n = dplyr::recode(inspection_month, 
                                    "Jan" = 1,
                                    "Feb" = 2,
                                    "Mar" = 3,
