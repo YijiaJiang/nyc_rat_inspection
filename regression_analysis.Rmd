@@ -183,6 +183,7 @@ cases_borough_monthly %>%
 Through the correlation analysis between predictors and outcome, the result above shown that the borough was comparatively related to the outcome.
 
 &nbsp;
+
 &nbsp;
 
 

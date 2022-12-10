@@ -25,6 +25,7 @@ Surprisingly, NYC is setting a record in 2022 for rat sightings, with 16,000 rod
 Therefore, by combining the COVID case count and weather information, we are intended to provide an in-depth look at NYC rat inspection database with an exploratory data analysis, as well as statistical analysis including hypothesis test and regression analysis. Gaining deeper sights into the pattern and characteristics of rat inspections in both the temporal and spatial dimensions will help those in fear of rats minimize exposure as much as possible. Broadly, it is beneficial to identify potential risks of disease-spread and then build a clean and pleasant living environment, which is what we as public health students should be working towards.
 
 &nbsp;
+
 &nbsp;
 
 
