@@ -32,10 +32,10 @@ Therefore, by combining the COVID case count and weather information, we are int
 
 ## Related Work
 
-Our project is inspired by Related work: Anything that inspired you, such as a paper, a web site, or something we discussed in class. Program inspectors perform “rodent indexing,” which is block-by-block inspection of properties in a targeted area to look for active rodent signs, provide education, and enforce rat control measures. 
+Our project is inspired by the interesting gives the public the facts about rats in New York. 
 
-* The video [Why New York Has So Many Rats](https://www.youtube.com/watch?v=6rNvxML07CU) 
-* [NYC Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page) gives the public the facts about rats in New York.
+* <strong>Video</strong>: [Why New York Has So Many Rats](https://www.youtube.com/watch?v=6rNvxML07CU) 
+* <strong>Web-based mapping application</strong>: [NYC Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page)
 
 
 &nbsp;
