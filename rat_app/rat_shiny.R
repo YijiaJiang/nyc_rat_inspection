@@ -8,7 +8,9 @@ library(dplyr)
 library(fresh)
 library(leaflet)
 library(plotly)
-library(vroom)
+library(htmlwidgets)
+library(shinyWidgets)
+library(rgdal)
 
 # Create theme
 rat_theme <- create_theme(
@@ -29,9 +31,7 @@ rat_theme <- create_theme(
 # Data 
 rat_tidy <- read_csv('./www/rat_data.csv')
 rat_binary <- read_csv('./www/rat_binary.csv')
-
-# # Model
-# model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
+nyc_boro = readOGR("./www/geo_export_2204bc6b-9c17-46ed-8a67-7245a1e15877.shp", layer = "geo_export_2204bc6b-9c17-46ed-8a67-7245a1e15877")
 
 # UI
 ui <- dashboardPage(
@@ -101,8 +101,13 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Inputs", status = "warning", width = 3,
-            selectInput("year2", "Choose year:", '')
-          ),
+            selectInput("year2", "Choose year:", 
+                        choices = unique(rat_tidy$inspection_year),
+                        selected = NULL),
+            selectInput("month2", "Choose month:",
+                        choices = unique(rat_tidy$inspection_month),
+                        selected = NULL)
+            ),
           box(
             title = "Interactive Map", status = "primary", width = 9,
             leafletOutput('int_map')
@@ -200,7 +205,39 @@ server <- function(input, output, session) {
     pred3 <- ifelse(pred2 > 0.75, "Oops, Rat!", ifelse(pred2 < 0.25, "Congrat, no rats!", 'Emmm, not sure...'))
     return(pred3)
   })
-
+  
+  output$int_map <- renderLeaflet({
+    
+    real_rat <-  rat_tidy %>% 
+      filter(
+        inspection_year == input$year2,
+        inspection_month == input$month2
+      )
+    
+    real_rat %>% 
+      leaflet() %>% 
+      addTiles() %>% 
+      addProviderTiles("CartoDB.Positron") %>% 
+      addPolygons(data = nyc_boro,
+                  weight = 0.85,
+                  label = ~paste(nyc_boro@data$boro_name, ', Rat population:', real_rat$borough_monthly_cases),
+                  labelOptions = labelOptions(
+                    style = list("font-weight" = "normal", 
+                                 padding = "1px 2px"),
+                    textsize = "11px",  sticky = TRUE,
+                    opacity = 0.55),
+                  fillColor = c('#40BC9C', '#46d4af', '#30d9ad', '#a4edda', '#4c8f7d'),
+                  stroke = FALSE,
+                  opacity = 1,
+                  smoothFactor = .5,
+                  fillOpacity = 0.5,
+                  highlightOptions = highlightOptions(weight = 5, 
+                                                      fillOpacity = 1,
+                                                      color = "black",
+                                                      opacity = 1,
+                                                      bringToFront = TRUE)
+      ) 
+  })
 }
 
 # Run the application 
