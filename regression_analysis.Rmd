@@ -77,7 +77,9 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
                                         inspection_month == "Nov" ~ 11,
                                         inspection_month == "Dec" ~ 12)) %>%
   mutate(date = paste(inspection_year, inspection_month_n, inspection_day, sep = "-")) %>%
-  mutate(date = as.Date(date,format = "%Y-%m-%d")) %>% 
+  mutate(date = as.Date(date,format = "%Y-%m-%d")) 
+
+rat_reg = rat %>%
   mutate(inspection_ym = paste(inspection_year, inspection_month_n, sep = "-")) %>%
   mutate(covid_yn = case_when(date < "2020-02-29" ~ 0,
                               TRUE ~ 1)) %>%
@@ -95,13 +97,13 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
 ### Exploratory Statistical Analyses
 
 ```{r, include = FALSE, message=FALSE, warning=FALSE}
-cases = rat %>% 
+cases = rat_reg %>% 
   select(inspection_ym, borough, inspection_month_n) %>% 
   group_by(inspection_ym, borough) %>% 
   add_count(borough, inspection_ym, name = "borough_monthly_cases") %>%
   distinct()
 
-rat_tidy = rat %>%
+rat_tidy = rat_reg %>%
   dplyr::select(boro_code, borough, inspection_ym, inspection_month, covid_yn, prcp, snow, snwd, tmin, tmax) %>%
   mutate(borough = as.factor(borough),
          inspection_month = as.factor(inspection_month)) %>%
