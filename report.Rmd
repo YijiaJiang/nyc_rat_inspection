@@ -507,7 +507,7 @@ rat %>%
 
 It's not sufficient and solid to only go through the number of rat inspections in each borough without considering their populations and land area. Therefore, we combined these factors in certain borough to evaluate the rat density.  
 
-In 2021, Brooklyn had 26,116 rat inspections, which was the most, followed by Manhattan, Bronx, Queens and Staten Island. 
+In 2021, Brooklyn had 38,256 rat inspections, which was the most, followed by Manhattan, Bronx, Queens and Staten Island. 
 
 ```{r, message=FALSE, warning=FALSE}
 # rat vs. population
@@ -1130,7 +1130,7 @@ In our exploratory analysis, we explored the patterns and characteristics of rat
 
 When looking at the number of rat inspections in different time levels, we first found out that from 2012 to 2019, the count generally presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19 in 2020. The distribution failed to show a obvious pattern that rats preferred which month but reminded us that a nicer weather in spring might be comfortable for their urban-life. To be more specific, rat inspections concentrated at daytime due to people's working schedule and clear vision. 
 
-From the visualization by borough, it's undoubtful that Brooklyn and Manhattan were two rattiest boroughs, one is the first in the number of rat inspections, and the other is the first in the density. We also listed top 5 rat popular streets in each borough to help those feel scared of rats avoid them. But unfortunately, some of them are main road such as Broadway. Moreover, more rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
+From the visualization by borough, it's undoubtful that Brooklyn and Manhattan were two rattiest boroughs, one was the first in the number of rat inspections, and the other was the first in the density. We also listed top 5 rat popular streets in each borough to help those feel scared of rats avoid them. But unfortunately, some of them are main roads such as Broadway. Moreover, more rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
 
 The results of hypothesis test further verified our sights gained from EDA. Rat inspections among boroughs have a significantly different distribution across years. After transforming the numeric temperature to the categorical feeling variable (cold, warm, etc.), we found that the inspections are not equally distributed in different weather in 2021. Not suprisingly, the count difference before and after COVID-19 was proved significant by Wilcoxon Rank-sum test, which was consistent with EDA result.
 
