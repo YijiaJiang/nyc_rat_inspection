@@ -15,15 +15,21 @@ output:
 
 ## Motivation
 
+New York City is one of the largest and most popular cities in the United States. It is popular for its hustle and bustle, Wall Street legends and Broadway shows. It looks like the city never sleeps. Whenever you go outside, you will see people walking here and there and doing some sorts of things. However, like humans, rats are present in the city in a large number, with an estimate number of 2 million.
 
+NYC rats, also known as Norway rats, first came to New York City in the 18th century, and as the city’s population grew, so did the rodent population. New York city harbors one of the largest rat populations in the United States. Therefore, with time, the issue of rats is quite serious and is even getting worse. 
 
-Norway rats first came to New York City in the 18th century, and as the city’s population grew, so did the rodent population. The city harbors one of the largest rat populations in the United States. In New York, rodent control is conducted by the Office of Pest Control of the Bureau of Veterinary and Pest Control Services within the Division of Environmental Health at the New York City Department of Health and Mental Hygiene (NYC DOHMH). Rodent complaints represented about 40% of the complaints directed to NYC DOHMH. T
+Reported rat sightings, health inspections finding evidence of rat activity and cases of a disease spread via rat urine are all up amid the pandemic.
+
+In New York, rodent control is conducted by the Office of Pest Control of the Bureau of Veterinary and Pest Control Services within the Division of Environmental Health at the New York City Department of Health and Mental Hygiene (NYC DOHMH). Rodent complaints represented about 40% of the complaints directed to NYC DOHMH. T
 As part of the program’s rodent control activities, the Office of Pest Control is both a proactive and complaint-based program. 
 
 
 Here we intend to provide an in-depth look at New York City’s crash database with an exploratory data analysis, in addition to visualizations (plots, heatmaps, geolocation mapping) and statistical analysis. At first, we wondered if the incidence of electric moped crashes with injuries increased in 2020, compared to 2019.
 
+Submit a Rodent Complaint Online Through 311: Include a description of the problem and the address of the location. Health Department inspectors can only inspect those parts of the property accessible to them. 
 
+Gaining deeper sights into the pattern of rat inspections in both the temporal and spatial dimensions will help those in fear of rats minimize exposure as much as possible. Broadly, it is beneficial to identify potential risks of disease-spread and then build a clean and pleasant living environment, which is what we as public health students should be working towards.
 
 &nbsp;
 &nbsp;
@@ -35,9 +41,8 @@ Here we intend to provide an in-depth look at New York City’s crash database w
 Our project is inspired by Related work: Anything that inspired you, such as a paper, a web site, or something we discussed in class. Program inspectors perform “rodent indexing,” which is block-by-block inspection of properties in a targeted area to look for active rodent signs, provide education, and enforce rat control measures. 
 
 * The video [Why New York Has So Many Rats](https://www.youtube.com/watch?v=6rNvxML07CU) 
-* [Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page)
+* [NYC Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page) gives the public the facts about rats in New York.
 
-The Rat Information Portal gives the public the facts about rats in New York.
 
 &nbsp;
 
@@ -57,7 +62,7 @@ Evaluate the efficiency in handling rat related complaints among different agenc
 Conduct hypothesis test to compare the rat density in different boroughs and time
 Construct a linear model that predicts the rate of observing a rat from various potential covariates, including climatic and geographical factors
  
-The detailed information concerning our data analysis is 
+The detailed information concerning our data analysis can be found 
 
 
 &nbsp;

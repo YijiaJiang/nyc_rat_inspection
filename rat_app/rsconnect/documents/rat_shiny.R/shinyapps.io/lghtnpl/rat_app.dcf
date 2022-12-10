@@ -5,9 +5,9 @@ account: lghtnpl
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7831815
-bundleId: 6618908
+bundleId: 6619060
 url: https://lghtnpl.shinyapps.io/rat_app/
-when: 1670649784.37012
-lastSyncTime: 1670649784.37013
+when: 1670652367.51007
+lastSyncTime: 1670652367.51008
 asMultiple: FALSE
 asStatic: FALSE

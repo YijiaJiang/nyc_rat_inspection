@@ -91,7 +91,10 @@ ui <- dashboardPage(
                         selected = NULL),
             numericInput("prcp", "Input precipitation (mm):", ' ', min = 0),
             numericInput("snwd", "Input snow depth (mm)", ' ', min = 0),
-            numericInput("tmax", "Input maximum temperature (\u00B0C)", ' ', min = 0)
+            numericInput("temp", "Input average temperature (\u00B0C)", ' ', min = 0),
+            radioButtons("covid", "Still Covid?",
+                         c("Yes" = 1,
+                           "No" = 0)),
           ),
           box(
             title = strong("The rat population will be..."), status = "primary", width = 6,
@@ -113,7 +116,7 @@ ui <- dashboardPage(
             ),
           box(
             title = "Interactive Map", status = "primary", width = 9, height = '100%',
-            leafletOutput('int_map', width = '100%', height = 760)
+            leafletOutput('int_map', width = '100%', height = 540)
           )
         )
       ),
@@ -218,13 +221,13 @@ server <- function(input, output, session) {
   
   output$rat_num <- renderText({
     # Model
-    model_linear_original = lm(log(borough_monthly_cases) ~ month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
+    model_linear_original = lm(log(borough_monthly_cases) ~ month + borough + covid_yn + avg_prcp + avg_snwd + avg_temp, data = rat_tidy) 
     
     req(input$prcp)
     req(input$snwd)
-    req(input$tmax)
+    req(input$temp)
     pred1 = predict(model_linear_original, 
-                    newdata = data.frame(month = input$month, borough = input$borough1, covid_yn = 0, avg_prcp = input$prcp, avg_snwd = input$snwd, avg_tmax = input$tmax))
+                    newdata = data.frame(month = input$month, borough = input$borough1, covid_yn = as.numeric(input$covid), avg_prcp = input$prcp, avg_snwd = input$snwd, avg_temp = input$temp))
     return(round(as.numeric(exp(pred1)), digits = 0))
   })
   
