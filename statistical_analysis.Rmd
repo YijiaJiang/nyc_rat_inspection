@@ -92,7 +92,7 @@ rat = bind_rows(rat_2012, rat_2013, rat_2014, rat_2015, rat_2016, rat_2017, rat_
 
 &nbsp;
 
-In the section of borough visualizations, we find some indepence among different boroughs in New York. To verify this, we plan to usw chi-square test to see homogenity among boroughs in recent years and homogenity among boroughs in 2021.
+In the section of borough visualizations, we find some independence among different boroughs in New York. To verify this, we plan to usw chi-square test to see homogenity among boroughs in recent years and homogeneity among boroughs in 2021.
 
 &nbsp;
 
