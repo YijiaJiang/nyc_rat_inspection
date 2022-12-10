@@ -125,7 +125,7 @@ chisq.test(rat_years[,-1]) %>%
    broom::tidy()
 ```
 
-We can see from the Chi-square test above, we reject the null hypothesis at 99% significant level. This means that the inspections among boroughs have a different distribution across years.
+We can see from the Chi-square test above, we reject the null hypothesis at 1% significant level. This means that the inspections among boroughs have a different distribution across years.
 
 &nbsp;
 
