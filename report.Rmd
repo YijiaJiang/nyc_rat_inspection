@@ -16,22 +16,32 @@ output:
 ## Motivation
 
 
-Motivation: Provide an overview of the project goals and motivation. 
-
 
 Norway rats first came to New York City in the 18th century, and as the city’s population grew, so did the rodent population. The city harbors one of the largest rat populations in the United States. In New York, rodent control is conducted by the Office of Pest Control of the Bureau of Veterinary and Pest Control Services within the Division of Environmental Health at the New York City Department of Health and Mental Hygiene (NYC DOHMH). Rodent complaints represented about 40% of the complaints directed to NYC DOHMH. T
 As part of the program’s rodent control activities, the Office of Pest Control is both a proactive and complaint-based program. 
 
+
+Here we intend to provide an in-depth look at New York City’s crash database with an exploratory data analysis, in addition to visualizations (plots, heatmaps, geolocation mapping) and statistical analysis. At first, we wondered if the incidence of electric moped crashes with injuries increased in 2020, compared to 2019.
+
+
+
 &nbsp;
+&nbsp;
+
+
 
 ## Related Work
 
 Our project is inspired by Related work: Anything that inspired you, such as a paper, a web site, or something we discussed in class. Program inspectors perform “rodent indexing,” which is block-by-block inspection of properties in a targeted area to look for active rodent signs, provide education, and enforce rat control measures. 
 
-* The video [Why New York Has So Many Rats](https://www.youtube.com/watch?v=6rNvxML07CU)
+* The video [Why New York Has So Many Rats](https://www.youtube.com/watch?v=6rNvxML07CU) 
+* [Rat Information Portal](https://www.nyc.gov/site/doh/health/health-topics/rats.page)
 
 The Rat Information Portal gives the public the facts about rats in New York.
 
+&nbsp;
+
+&nbsp;
 
 ## Research Questions
 
@@ -51,6 +61,8 @@ The detailed information concerning our data analysis is
 
 
 &nbsp;
+&nbsp;
+
 
 ## Data
 
@@ -230,6 +242,8 @@ After cleaning the datasets mentioned above, our tidied and aggregated data has 
 * `total_case_count`: total count of patients tested who were confirmed to be COVID-19 cases on date_of_interest in NYC
 
 &nbsp;
+&nbsp;
+
 
 ### Exploratory Data Analysis
 
@@ -1097,14 +1111,6 @@ ggplotly(p_covid)
 
 &nbsp;
 
-#### Summaries
-
-Based on the comprehensive analyses, we mainly found that:  
-
-* From 2012 to 2019, the number of rat inspections presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19 in 2020.
-* Brooklyn had the largest number of rat inspections while Manhattan had the highest density of rat inspections, regardless of count per-person or per-area.
-* More rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
-
 
 
 
@@ -1116,9 +1122,18 @@ Additional analysis: If you undertake formal statistical analyses, describe thes
 
 &nbsp;
 
+&nbsp;
+
+
 ## Discussion
 
 Discussion: What were your findings? Are they what you expect? What insights into the data can you make?
+
+Based on the comprehensive analyses, we mainly found that:  
+
+* From 2012 to 2019, the number of rat inspections presented a continual increasing trend while it appeared a sharp decrease as the outbreak of COVID-19 in 2020.
+* Brooklyn had the largest number of rat inspections while Manhattan had the highest density of rat inspections, regardless of count per-person or per-area.
+* More rat inspections happened when temperatures were between 20 and 30 degrees Celsius but this pattern was not significant.
 
 
 
