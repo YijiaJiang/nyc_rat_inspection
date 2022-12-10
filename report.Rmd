@@ -334,13 +334,7 @@ rat_covid = rat_covid %>%
 
 ```
 
-In this section, we would like to explore the pattern and characteristics of rat inspections through multiple visualization dimensions and analyze the association between inspections and various potential covariates, including climatic, geographical factors.
-
-&nbsp;
-
-&nbsp;
-
-### Time Visualizations
+#### Time Visualizations
 
 &nbsp;
 
@@ -348,7 +342,7 @@ In order to obtain in-depth sights of the rat inspections across time, we used f
 
 &nbsp;
 
-#### Overall Rat Inspections Across Time 
+##### Overall Rat Inspections Across Time 
 
 First, a time series plot was used to illustrate data points at successive intervals of time. From 2012, the number of rat inspections continually presented a increasing trend and reached its peak in 2018. After 2020, it appeared a sharp decrease as the outbreak of COVID-19.
 
@@ -369,7 +363,7 @@ hchart(time_series, name = "Rat Inspections") %>%
 
 &nbsp;
 
-#### Rat Inspections by Year
+##### Rat Inspections by Year
 
 To be more specific, we compared the rat inspections year by year. The number was roughly around 150,000 in 2012-2016. There was a surge of rat inspections in 2017 which had 247,985 cases. After staying at the peak in 2018-2019, the number of inspections rapidly dropped to 71,770 in 2020. Whether this drop was associated with COVID-19 will be analyzed in the following section.
 
@@ -388,7 +382,7 @@ rat %>%
 
 &nbsp;
 
-#### Rat Inspections by Month
+##### Rat Inspections by Month
 
 The average number of rat inspections was 13,997. We plotted the number of inspections every months across years and found that rats were more likely to be inspected in spring compared to winter. This might be due to the nicer weather in spring, suitable for rats to wander outside.
 
@@ -411,14 +405,14 @@ rat %>%
 
 &nbsp;
 
-#### Rat Inspections Througout a Day {.tabset}
+##### Rat Inspections Througout a Day {.tabset}
 
 Most rat inspections happened at daytime regardless of the month, concentrated at 9am-12pm. Contradicted with the common sense that rats prefer nightlife, this finding would be corresponding to inspectors' daily schedule. Additionally, there are a few explanations for observing rat during daylight hours:  
 
 *  The infestation is large  
 *  The older/sub-dominant rats cannot compete with dominant rats for food during the safer night time period
 
-##### Inspection
+###### Inspection
 ```{r, message=FALSE, warning=FALSE}
 rat_2021 %>%
   mutate(inspection_day = as.factor(inspection_day)) %>%
@@ -445,7 +439,7 @@ rat_2021 %>%
 
 &nbsp;
 
-##### Observed
+###### Observed
 ```{r, message=FALSE, warning=FALSE}
 rat_2021 %>%
   filter(!result == "Passed") %>%
@@ -473,7 +467,7 @@ rat_2021 %>%
 
 &nbsp;
 
-### Borough Visualizations
+#### Borough Visualizations
 
 &nbsp;
 
@@ -481,7 +475,7 @@ We explored the demographic characteristics of the rat inspections to find wheth
 
 &nbsp;
 
-#### Overall Rat Inspections by Borough
+##### Overall Rat Inspections by Borough
 
 First, let’s look at the overall rat inspections in each borough across years. Brooklyn, Bronx and Manhattan always ranked top 3 most rat inspections while Queens and Staten Island had quite fewer inspections. 
 
@@ -503,7 +497,7 @@ rat %>%
 
 &nbsp;
 
-#### Rat Inspections VS. Population
+##### Rat Inspections VS. Population
 
 It's not sufficient and solid to only go through the number of rat inspections in each borough without considering their populations and land area. Therefore, we combined these factors in certain borough to evaluate the rat density.  
 
@@ -600,11 +594,11 @@ p_density_p + p_density_a
 
 &nbsp;
 
-#### Rat Inspections by Month in Each Borough {.tabset}
+##### Rat Inspections by Month in Each Borough {.tabset}
 
 In order to obtain more demographic information, we analyzed the rat inspections stratified by borough and month. Generally, for all five boroughs, more rats were inspected in late spring and summer in 2021, especially in July and August. Individually, Bronx, Brooklyn and Manhattan were above the borough average level while Queens and Staten Island were significantly below the average, which was consistent with our previous findings.
 
-##### Bronx
+###### Bronx
 ```{r, message=FALSE, warning=FALSE}
 avg_2021 = rat %>%
   filter(inspection_year == 2021) %>%
@@ -640,7 +634,7 @@ rat %>%
 
 &nbsp;
 
-##### Brooklyn
+###### Brooklyn
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Brooklyn") %>%
@@ -668,7 +662,7 @@ rat %>%
 
 &nbsp;
 
-##### Manhattan
+###### Manhattan
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Manhattan") %>%
@@ -696,7 +690,7 @@ rat %>%
 
 &nbsp;
 
-##### Queens
+###### Queens
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Queens") %>%
@@ -724,7 +718,7 @@ rat %>%
 
 &nbsp;
 
-##### Staten Island
+###### Staten Island
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(borough == "Staten Island") %>%
@@ -752,7 +746,7 @@ rat %>%
 
 &nbsp;
 
-#### Overall Top 15 Rat Popular Streets
+##### Overall Top 15 Rat Popular Streets
 
 To be more detailed, we investigated the fifteen streets with most rat inspections in New York City. Among them, Greene Avenue, Brooklyn with 1366 cases, Broadway, Manhattan with 1154 cases and Hart Street, Brooklyn with 1118 cases ranked the top 3.  
 
@@ -777,11 +771,11 @@ rat %>%
 
 &nbsp;
 
-#### Top 5 Rat Popular Streets {.tabset}
+##### Top 5 Rat Popular Streets {.tabset}
 
 Below are the five streets with most rat inspections in each borough, respectively.
 
-##### Bronx
+###### Bronx
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -803,7 +797,7 @@ rat %>%
 
 &nbsp;
 
-##### Brooklyn
+###### Brooklyn
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -825,7 +819,7 @@ rat %>%
 
 &nbsp;
 
-##### Manhattan
+###### Manhattan
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -847,7 +841,7 @@ rat %>%
 
 &nbsp;
 
-##### Queens
+###### Queens
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -869,7 +863,7 @@ rat %>%
 
 &nbsp;
 
-##### Staten Island
+###### Staten Island
 ```{r, message=FALSE, warning=FALSE}
 rat %>%
   filter(inspection_year == 2021) %>%
@@ -891,7 +885,7 @@ rat %>%
 
 &nbsp;
 
-### Inspection Types and Results
+#### Inspection Types and Results
 
 &nbsp;
 
@@ -899,7 +893,7 @@ Inspection type and result were two important attributes, which reflect the moti
 
 &nbsp;
 
-#### Inspection Types
+##### Inspection Types
 
 We can easily observed that initial inspection was the most frequent inspection, accounted for 70.3%. It represents inspection conducted in response to a 311 complaint, or a proactive inspection conducted through our neighborhood indexing program. Baiting and compliance (follow-up) inspection followed. It's very rare to see clean-up and stoppage in the inspection process.
 
@@ -934,7 +928,7 @@ rat %>%
 
 &nbsp;
 
-#### Inspection Results
+##### Inspection Results
 
 The result of passed had the largest proportion, accounting for 61.6%. Even though in such circumstances, inspector recieved the rat complains but did not observe active signs of rat and mouse activity, or conditions conducive to rodent activity, on the property, we cannot say there was no rats due to their high speed of scurry and wide range of activity. Particularly, 13.6% of results were rat activity. We would like to mention here that active rat signs include any of six different signs below:  
 
@@ -970,7 +964,7 @@ rat %>%
 
 &nbsp;
 
-### Weather and COVID-19
+#### Weather and COVID-19
 
 &nbsp;
 
@@ -979,11 +973,11 @@ In March 2020, countries around the world including the U.S. deployed various me
 
 &nbsp;
 
-#### Weather {.tabset}
+##### Weather {.tabset}
 
 Based on the whole range of temperatures in 2021, we found that more rat inspections happened when temperatures were between 20 and 30 degrees Celsius, indicating that rats preferred a warm environment. However, the pattern was not that obvious and the temperatures were almost above 0 degree Celsius in 2021. We could not immediately determine whether rats seldom wandered outside when the temperatures were extremely low. 
 
-##### Inspection
+###### Inspection
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n = rat %>%
@@ -1016,7 +1010,7 @@ ggplotly(p_weather)
 
 &nbsp;
 
-##### Observed
+###### Observed
 ```{r, message=FALSE, warning=FALSE}
 # association with temperature
 rat_n_o = rat %>%
@@ -1050,7 +1044,7 @@ ggplotly(p_weather_o)
 
 &nbsp;
 
-#### COVID-19
+##### COVID-19
 
 Line charts were utilized to compare the rat inspections before and after COVID-19. It's very obvious that after the outbreak of COVID-19, the number of sightings significantly dropped, approximately from 20,000 to 5,000 per month. In April 2021, only 4 cases of rat inspections were recorded.
 
@@ -1110,16 +1104,175 @@ ggplotly(p_covid)
 
 
 
-
-
-
 ## Statistical Analysis
 
-Additional analysis: If you undertake formal statistical analyses, describe these in detail
+### Homogenity among Boroughs
+
+&nbsp;
+
+In the section of borough visualizations, we find some indepence among different boroughs in New York. To verify this, we plan to usw chi-square test to see homogenity among boroughs in recent years and homogenity among boroughs in 2021.
+
+&nbsp;
+
+
+#### Chi-square testing homogenity among boroughs in recent years
+
+We decide to look at the number of inspections over years to figure out the distribution of inspections varies in different boroughs from year to year.
+
+$H_0$ : The distribution of inspections among boroughs are same over years.
+
+$H_1$ : The distribution of inspections among boroughs aren’t all the same over years.
+
+```{r, message = FALSE, warning = FALSE}
+# create a data frame
+rat_years = rat %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(inspection_year, borough) %>% 
+  group_by(borough, inspection_year) %>%
+  summarize(frequency = n()) %>%
+  mutate(borough = as.factor(borough),
+    borough = fct_reorder(borough, frequency, .desc = TRUE)) %>% 
+  pivot_wider(names_from = "inspection_year", values_from = "frequency")
+
+# print the table
+rat_years %>% t() %>% 
+knitr::kable(caption = "Distribution of inspections across the years")
+
+# Chi-square test
+chisq.test(rat_years[,-1]) %>% 
+   broom::tidy()
+```
+
+We can see from the Chi-square test above, we reject the null hypothesis at 1% significant level. This means that the inspections among boroughs have a different distribution across years.
 
 &nbsp;
 
 &nbsp;
+
+#### Chi-square testing homogenity among boroughs in 2021
+
+Given that the distribution of inspections varies in different boroughs from year to year, we decide to look at inspections among different boroughs in 2021. 
+
+$H_0$ : The distribution of inspections among boroughs are same in 2021.
+
+$H_1$ : The distribution of inspections among boroughs aren’t all the same in 2021.
+
+```{r, message = FALSE, warning = FALSE}
+# import the data
+rat_boro = rat_2021 %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(inspection_year, borough) %>% 
+  group_by(borough, inspection_year) %>% 
+  summarize(frequency = n()) %>%
+  mutate(borough = as.factor(borough),
+    borough = fct_reorder(borough, frequency, .desc = TRUE)) %>% 
+  dplyr::select(borough, frequency)
+
+# print the table
+knitr::kable(rat_boro, caption = "Distribution of inspections in 2021")
+
+# chi-square test
+chisq.test(rat_boro[,-1]) %>% 
+  broom::tidy()
+```
+
+We can see from the chi-square test result we should reject the null hypothesis, the inspections are not equally distributed among boroughs in 2021.
+
+&nbsp;
+
+&nbsp;
+
+### Association with Weather and COVID-19
+
+&nbsp;
+
+In the visualization, we see some difference of rat inspections as the temperature and weather change, as well as the happening of covid-19. 
+
+&nbsp;
+
+#### Chi-sqaure testing association betwwen inspection density and temperature in 2021
+
+$H_0$ : The distribution of inspections in different weather are same in 2021.
+
+$H_1$ : The distribution of inspections in different weather aren’t all the same in 2021.
+
+```{r, message = FALSE, warning = FALSE}
+# create a data frame
+rat_n = rat_2021 %>%
+  group_by(inspection_year, inspection_month, inspection_day)
+
+rat_t = rat %>%
+  mutate(Average_Temperature = (tmin + tmax)/2) %>% 
+  rename(Date = date) %>%
+  mutate(Feeling = as.character(Average_Temperature)) %>% 
+  mutate(Feeling = case_when(
+      Average_Temperature <= 0 ~ 'Frozen',
+      Average_Temperature <= 10 ~ 'Cold',
+      Average_Temperature <= 20 ~ 'Cool',
+      Average_Temperature <= 30 ~ 'Warm',
+      Average_Temperature <= 40 ~ 'Hot')) %>% 
+  distinct(inspection_year, inspection_month, inspection_day, Date, Average_Temperature, tmax, tmin, Feeling)
+
+rat_temp = 
+  left_join(rat_n, rat_t, by = c("inspection_year", "inspection_month", "inspection_day")) %>%
+  dplyr::select(Average_Temperature, Feeling) %>% 
+  group_by(Feeling) %>%
+  summarize(frequency = n()) %>%
+  mutate(Feeling = as.factor(Feeling),
+    Feeling = fct_reorder(Feeling, frequency, .desc = TRUE)) %>% 
+  pivot_wider(names_from = "Feeling", values_from = "frequency") 
+
+# print the table
+knitr::kable(rat_temp, caption = "The association between number of rat inspections and temperature in 2021")
+
+# chi-square test
+chisq.test(rat_temp[,-1]) %>% 
+  broom::tidy()
+```
+
+We can see from the chi-square test result we should reject the null hypothesis, the inspections are not equally distributed in different weather in 2021.
+
+&nbsp;
+
+&nbsp;
+
+#### Wilcoxon Rank-sum testing changes of inspection density caused by COVID-19
+
+For the rodent inspection across time, we compared mean difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
+
+$H_0$ : The distribution of annual inspection before covid and after covid is same.
+
+$H_1$ : The distribution of annual inspection before covid and after covid is different.
+
+```{r, message = FALSE, warning = FALSE}
+# import the data
+rat_covid = rbind(rat_2019, rat_2020) %>% 
+  janitor::clean_names() %>% 
+  dplyr::select(inspection_year, inspection_month) %>% 
+  mutate(Inspection_year = as.factor(inspection_year),
+         Inspection_month = as.factor(inspection_month)) %>%
+  mutate(Inspection_month = inspection_month %>% 
+                       fct_relevel("Jan", "Feb", "Mar","Apr","May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>%
+  group_by(Inspection_year,Inspection_month) %>%
+  summarize(Frequency = n())
+
+# print the table
+rat_covid2 = rat_covid %>%   
+  pivot_wider(names_from = "Inspection_year", values_from = "Frequency")
+knitr::kable(rat_covid2, caption = "Number of rat inspections before and after covid")
+
+# Wilcoxon Rank-sum test
+wilcox.test(Frequency ~ Inspection_year, data = rat_covid,
+                   exact = FALSE)
+```
+
+We can see from the Wilcoxon Rank-sum test result that the true location shift is not equal to 0, which means that the medians of two populations differ. Therefore, we have the evidence to reject the null hypothesis and conclude that there is a difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
+
+&nbsp;
+
+&nbsp;
+
+
 
 
 ## Discussion
@@ -1136,12 +1289,20 @@ The results of hypothesis test further verified our sights gained from EDA. Rat 
 
 In our linear regression model, we considered that the monthly rat inspection count was a linear combination of 6 predictors. We found precipitation and average monthly temperature had a slightly positive association with our outcome while snow depth and the outbreak of COVID-19 would be negatively associated. Besides, inspection month and borough are two important categorical predictors in our final model.
 
+&nbsp;
+
+&nbsp;
+
 
 ### Limitations
 
 It is estimated that 2 million rats living in New York City but no one knows exactly how many rats live here. Considering the attributes of animals and rats' flexible body, high speed of scurry and wide range of activity, it is very hard to conduct rat population census just like human beings. Therefore, we used the number of rat inspections to represent. Chances are that none of the rats were inspected during one inspection or one rat was repeatedly inspected during multiple inspections, which could introduce some biases.
 
 The weakness of multiple linear regression cannot be ignored. For instance, it will not be good at explaining the relationship of the independent variable temperature to the dependent rat inspection count since their relationship are not strictly linear. Rat prefer 30-32 degrees Celsius, but it does not represent higher the temperature, more active are the rats.
+
+&nbsp;
+
+&nbsp;
 
 
 ### Next Steps

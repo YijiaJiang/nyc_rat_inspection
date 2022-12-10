@@ -249,3 +249,14 @@ wilcox.test(Frequency ~ Inspection_year, data = rat_covid,
 ```
 
 We can see from the Wilcoxon Rank-sum test result that the true location shift is not equal to 0, which means that the medians of two populations differ. Therefore, we have the evidence to reject the null hypothesis and conclude that there is a difference between inspection density in 2019 before covid and inspection density in 2020 after covid.
+
+&nbsp;
+
+&nbsp;
+
+## Summaries
+
+Based on the statistical analyses above, we mainly found that:
+
+* There is no homogeneity among boroughs across time and Brooklyn and Manhattan had the largest number of rat inspections and showed a difference with other boroughs.
+* There is association between the number of inspections and other covariates, like weather and COVID-19.
