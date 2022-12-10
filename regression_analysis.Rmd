@@ -175,7 +175,7 @@ cases_borough_monthly %>%
   geom_text(color = "white",size = 4) + 
   scale_x_discrete(labels = c("Borough Monthly cases")) + 
   labs(x = "Outcome Variable", y = "Predictor Variables",
-#    title = "Correlation Matrix between Predictors and Outcome",
+    title = "Correlation Matrix between Predictors and Outcome",
     fill = "Correlation")
 ```
 
@@ -365,7 +365,7 @@ p_cv_1 / p_cv_2
 
 ```
 
-According to the plot, there was no obvious difference on RMSE between model 3 and model 4. However, model 2 had a relatively lower average value of RMSE compared with model 1, since three variables were dropped by stepwise elimination. Therefore model 2 fit better than model 1.
+According to the plot, there was a significant difference on RMSE between models with and without log-transformed outcomes. Model with log-transformation had a substaintially lower average value of RMSE, which means this type of model better fits. After stepwise selection, only one variable was dropped and the RMSE were similar. We preferred the model with less variables to avoid potential over-fit.
 
 &nbsp;
 
