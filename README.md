@@ -10,7 +10,7 @@ We appreciate your queries, if any.
 &nbsp;
 
 
-### Github Link of Team Members
+### Github Link of Our Group Members
 
 * [Jia Ji](https://github.com/jj936)  
 
