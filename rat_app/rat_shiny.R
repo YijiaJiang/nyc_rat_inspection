@@ -29,8 +29,11 @@ rat_theme <- create_theme(
 )
 
 # Data 
-rat_tidy <- read_csv('./www/rat_data.csv')
-rat_binary <- read_csv('./www/rat_binary.csv')
+rat_tidy <- read_csv('./www/rat_linear_1.csv') %>%
+  mutate(inspection_month_n = as.numeric(inspection_month_n)) %>% 
+  mutate(month = factor(month.name[inspection_month_n], levels = month.name)) %>% 
+  arrange(month)
+#rat_binary <- read_csv('./www/rat_logistic.csv')
 nyc_boro = readOGR("./www/geo_export_2204bc6b-9c17-46ed-8a67-7245a1e15877.shp", layer = "geo_export_2204bc6b-9c17-46ed-8a67-7245a1e15877")
 
 # UI
@@ -53,7 +56,7 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("App Description", tabName = "description", icon = icon("chalkboard-user")),
       menuItem("Rat Population Prediction", tabName = "prediction", icon = icon("arrow-trend-up")),
-      menuItem("Whether Rat Prediction", tabName = "log_pred", icon = icon("arrow-trend-down")),
+      #menuItem("Whether Rat Prediction", tabName = "log_pred", icon = icon("arrow-trend-down")),
       menuItem("Interactive Map", tabName = "inter_map", icon = icon("map")),
       menuItem("Reference", tabName = "reference", icon = icon("leanpub"))
     )
@@ -84,7 +87,7 @@ ui <- dashboardPage(
                         selected = NULL
                         ),
             selectInput('month', "Choose month:",
-                        choices = unique(rat_tidy$inspection_month),
+                        choices = unique(rat_tidy$month),
                         selected = NULL),
             numericInput("prcp", "Input precipitation (mm):", ' ', min = 0),
             numericInput("snwd", "Input snow depth (mm)", ' ', min = 0),
@@ -105,38 +108,48 @@ ui <- dashboardPage(
                         choices = unique(rat_tidy$inspection_year),
                         selected = NULL),
             selectInput("month2", "Choose month:",
-                        choices = unique(rat_tidy$inspection_month),
+                        choices = unique(rat_tidy$month),
                         selected = NULL)
             ),
           box(
-            title = "Interactive Map", status = "primary", width = 9,
-            leafletOutput('int_map')
+            title = "Interactive Map", status = "primary", width = 9, height = '100%',
+            leafletOutput('int_map', width = '100%', height = 760)
           )
         )
       ),
-      tabItem(
-        tabName = "log_pred",
-        fluidRow(
-          box(
-            title = strong("Inputs"), status = "warning", width = 6,
-            p('According to our model, the answer of  question (whether there will be a rat?) is related to borough, daytime, precipitation (mm),
-              and snow depth (mm). Now make your choices and input the data you interested in to explore.'),
-            selectInput("borough2", "Choose borough:", 
-                        choices = unique(rat_binary$borough),
-                        selected = NULL
-            ),
-            selectInput('daytime2', "Choose daytime:",
-                        choices = unique(rat_binary$inspection_daytime),
-                        selected = NULL),
-            numericInput("prcp2", "Input precipitation (mm):", ' ', min = 0),
-            numericInput("snwd2", "Input snow depth (mm)", ' ', min = 0)
-          ),
-          box(
-            title = strong("Will there be rats?"), status = "primary", width = 6,
-            h1(strong(htmlOutput("whether_rat")))
-          )
-        )
-      ),
+      # tabItem(
+      #   tabName = "log_pred",
+      #   fluidRow(
+      #     box(
+      #       title = strong("Inputs"), status = "warning", width = 6,
+      #       p('According to our model, the answer of  question (whether there will be a rat?) is related to borough, daytime, precipitation (mm),
+      #         and snow depth (mm). Now make your choices and input the data you interested in to explore.'),
+      #       selectInput("borough2", "Choose borough:", 
+      #                   choices = unique(rat_binary$borough),
+      #                   selected = NULL
+      #       ),
+      #       selectInput('daytime2', "Choose daytime:",
+      #                   choices = unique(rat_binary$inspection_daytime),
+      #                   selected = NULL),
+      #       selectInput('feel2', "How do you feel about the weather?",
+      #                   choices = unique(rat_binary$feeling),
+      #                   selected = NULL),
+      #       radioButtons("prcp2", "Whether there is precipitation:",
+      #                    c("Yes" = 1,
+      #                      "No" = 0)),
+      #       radioButtons("snow2", "Snowing?",
+      #                    c("Yes" = 1,
+      #                      "No" = 0)),
+      #       radioButtons("snwd2", "Whether snow left on the street?",
+      #                    c("Yes" = 1,
+      #                      "No" = 0))
+      #     ),
+      #     box(
+      #       title = strong("Will there be rats?"), status = "primary", width = 6,
+      #       h1(strong(htmlOutput("whether_rat")))
+      #     )
+      #   )
+      # ),
       tabItem(
         tabName = "reference",
         h3(strong('Reference')),
@@ -174,6 +187,26 @@ ui <- dashboardPage(
         p(
           class = "hangingindent",
           "Perrier V, Meyer F (2020). _fresh: Create Custom 'Bootstrap' Themes to Use in 'Shiny'_. R package version 0.2.0, <https://CRAN.R-project.org/package=fresh>."
+        ),
+        p(
+          class = "hangingindent",
+          "Cheng J, Karambelkar B, Xie Y (2022). _leaflet: Create Interactive Web Maps with the JavaScript 'Leaflet' Library_. R package version 2.1.1, <https://CRAN.R-project.org/package=leaflet>."
+        ),
+        p(
+          class = "hangingindent",
+          "C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and shiny. Chapman and Hall/CRC Florida, 2020."
+        ),
+        p(
+          class = "hangingindent",
+          "Vaidyanathan R, Xie Y, Allaire J, Cheng J, Sievert C, Russell K (2021). _htmlwidgets: HTML Widgets for R_. R package version 1.5.4, <https://CRAN.R-project.org/package=htmlwidgets>."
+        ),
+        p(
+          class = "hangingindent",
+          "Perrier V, Meyer F, Granjon D (2022). _shinyWidgets: Custom Inputs Widgets for Shiny_. R package version 0.7.5, <https://CRAN.R-project.org/package=shinyWidgets>."
+        ),
+        p(
+          class = "hangingindent",
+          "Bivand R, Keitt T, Rowlingson B (2022). _rgdal: Bindings for the 'Geospatial' Data Abstraction Library_. R package version 1.6-2, <https://CRAN.R-project.org/package=rgdal>."
         )
       )
     )
@@ -185,33 +218,33 @@ server <- function(input, output, session) {
   
   output$rat_num <- renderText({
     # Model
-    model_linear_original = lm(borough_monthly_cases ~ inspection_month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
+    model_linear_original = lm(log(borough_monthly_cases) ~ month + borough + covid_yn + avg_prcp + avg_snwd + avg_tmax, data = rat_tidy) 
     
     req(input$prcp)
     req(input$snwd)
     req(input$tmax)
     pred1 = predict(model_linear_original, 
-                    newdata = data.frame(inspection_month = input$month, borough = input$borough1, covid_yn = 0, avg_prcp = input$prcp, avg_snwd = input$snwd, avg_tmax = input$tmax))
-    return(round(as.numeric(pred1), digits = 0))
+                    newdata = data.frame(month = input$month, borough = input$borough1, covid_yn = 0, avg_prcp = input$prcp, avg_snwd = input$snwd, avg_tmax = input$tmax))
+    return(round(as.numeric(exp(pred1)), digits = 0))
   })
   
-  output$whether_rat <- renderText({
-    # Model
-    model_logit = glm(inspection_result ~ borough + factor(covid_yn) + inspection_daytime + prcp + snwd , data = rat_binary, family="binomial")
-
-    req(input$prcp2)
-    req(input$snwd2)
-    pred2 = predict(model_logit, newdata = data.frame(borough = input$borough2, covid_yn = 0, inspection_daytime = input$daytime2, prcp = input$prcp2, snwd = input$snwd2), type = "response")
-    pred3 <- ifelse(pred2 > 0.75, "Oops, Rat!", ifelse(pred2 < 0.25, "Congrat, no rats!", 'Emmm, not sure...'))
-    return(pred3)
-  })
+  # output$whether_rat <- renderText({
+  #   # Model
+  #   model_logit = glm(inspection_result ~ borough + covid_yn + inspection_daytime + prcp_yn + snwd_yn + snow_yn + feeling , data = rat_binary, family="binomial")
+  # 
+  #   req(input$prcp2)
+  #   req(input$snwd2)
+  #   pred2 = predict(model_logit, newdata = data.frame(borough = input$borough2, covid_yn = 0, inspection_daytime = input$daytime2, prcp_yn = as.numeric(input$prcp2), snwd_yn = as.numeric(input$snwd2), snow_yn = as.numeric(input$snow2), feeling = input$feel2), type = "response")
+  #   pred3 <- ifelse(pred2 > 0.75, "Oops, Rat!", ifelse(pred2 < 0.25, "Congrat, no rats!", 'Emmm, not sure...'))
+  #   return(pred3)
+  # })
   
   output$int_map <- renderLeaflet({
     
     real_rat <-  rat_tidy %>% 
       filter(
         inspection_year == input$year2,
-        inspection_month == input$month2
+        month == input$month2
       )
     
     real_rat %>% 
@@ -220,13 +253,13 @@ server <- function(input, output, session) {
       addProviderTiles("CartoDB.Positron") %>% 
       addPolygons(data = nyc_boro,
                   weight = 0.85,
-                  label = ~paste(nyc_boro@data$boro_name, ', Rat population:', real_rat$borough_monthly_cases),
+                  label = ~paste(nyc_boro@data$boro_name, ' Rat population:', real_rat$borough_monthly_cases),
                   labelOptions = labelOptions(
                     style = list("font-weight" = "normal", 
                                  padding = "1px 2px"),
                     textsize = "11px",  sticky = TRUE,
                     opacity = 0.55),
-                  fillColor = c('#40BC9C', '#46d4af', '#30d9ad', '#a4edda', '#4c8f7d'),
+                  fillColor = c("#38C5A3", "#F09968", "#8DA0CB", "#EE90BA", "#A8D14F"),
                   stroke = FALSE,
                   opacity = 1,
                   smoothFactor = .5,
