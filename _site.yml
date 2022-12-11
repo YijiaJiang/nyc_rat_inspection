@@ -20,7 +20,7 @@ navbar:
     - text: "Report"
       href: report.html
     - icon: fa-play-circle fa-lg
-      href: https://youtube.com
+      href: https://www.youtube.com/watch?v=cFn-hY5njpI
     - icon: fa-github fa-lg
       href: https://github.com/YijiaJiang/nyc_rat_inspection
 
