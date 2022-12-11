@@ -1489,7 +1489,7 @@ According to plots above, we can see that linearity, homogeneity, and normality 
 &nbsp;
 
 
-#### Cross-validation
+## Cross-validation
 
 
 ```{r, message=FALSE, warning=FALSE, fig.height = 6}
@@ -1519,7 +1519,8 @@ p_cv_1 = cv_df_1 %>%
     names_prefix = "rmse_") %>% 
   mutate(model = fct_inorder(model)) %>% 
   ggplot(aes(x = model, y = rmse)) + 
-  geom_violin() +
+  geom_violin(fill = "grey",alpha = 0.5) +
+  geom_boxplot(alpha = 0.5, color = "white") +
   labs(title = "Comparison of the Cross-Validated Prediction Error", 
        x = "Models", 
        y = "Root Mean Square Error (RMSE)")  +
@@ -1548,7 +1549,8 @@ p_cv_2 = cv_df_2 %>%
     names_prefix = "rmse_") %>% 
   mutate(model = fct_inorder(model)) %>% 
   ggplot(aes(x = model, y = rmse)) + 
-  geom_violin() +
+  geom_violin(fill = "grey",alpha = 0.5) +
+  geom_boxplot(alpha = 0.5, color = "white") +
   labs(title = "Comparison of the Cross-Validated Prediction Error", 
        x = "Models", 
        y = "Root Mean Square Error (RMSE)")  +
@@ -1565,7 +1567,6 @@ According to the plot, there was a significant difference on RMSE between models
 &nbsp;
 
 &nbsp;
-
 
 
 ## Discussion
