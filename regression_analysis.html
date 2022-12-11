@@ -1227,7 +1227,8 @@ p_cv_1 = cv_df_1 %&gt;%
     names_prefix = &quot;rmse_&quot;) %&gt;% 
   mutate(model = fct_inorder(model)) %&gt;% 
   ggplot(aes(x = model, y = rmse)) + 
-  geom_violin() +
+  geom_violin(fill = &quot;grey&quot;,alpha = 0.5) +
+  geom_boxplot(alpha = 0.5, color = &quot;white&quot;) +
   labs(title = &quot;Comparison of the Cross-Validated Prediction Error&quot;, 
        x = &quot;Models&quot;, 
        y = &quot;Root Mean Square Error (RMSE)&quot;)  +
@@ -1256,7 +1257,8 @@ p_cv_2 = cv_df_2 %&gt;%
     names_prefix = &quot;rmse_&quot;) %&gt;% 
   mutate(model = fct_inorder(model)) %&gt;% 
   ggplot(aes(x = model, y = rmse)) + 
-  geom_violin() +
+  geom_violin(fill = &quot;grey&quot;,alpha = 0.5) +
+  geom_boxplot(alpha = 0.5, color = &quot;white&quot;) +
   labs(title = &quot;Comparison of the Cross-Validated Prediction Error&quot;, 
        x = &quot;Models&quot;, 
        y = &quot;Root Mean Square Error (RMSE)&quot;)  +
